@@ -1,17 +1,20 @@
 package com.project.todo.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
 public class User {
     @Id
-    int userId;
-    String firstName;
-    String lastName;
-    String password;
-    String emailId;
-    long phoneNumber;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int userId;
+    private String firstName;
+    private String lastName;
+    private String password;
+    private String emailId;
+    private long phoneNumber;
 
     public User() {
     }
@@ -27,10 +30,6 @@ public class User {
 
     public int getUserId() {
         return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public String getFirstName() {
