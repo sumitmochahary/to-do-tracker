@@ -1,6 +1,6 @@
 package com.project.todo.service;
 
-import com.project.todo.domain.User;
+import com.project.todo.domain.Users;
 import com.project.todo.exception.UserAlreadyExistException;
 import com.project.todo.exception.UserNotFoundException;
 import com.project.todo.repository.UserRepository;
@@ -21,17 +21,17 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void register(User user) throws UserAlreadyExistException {
-        if (userRepository.existsById(user.getUserId())){
+    public void register(Users users) throws UserAlreadyExistException {
+        if (userRepository.existsById(users.getUserId())){
             throw new UserAlreadyExistException();
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        users.setPassword(passwordEncoder.encode(users.getPassword()));
+        userRepository.save(users);
     }
 
     @Override
-    public User login(String emailId, String password) throws UserNotFoundException {
-        User user = userRepository.findByEmailId(emailId);
+    public Users login(String emailId, String password) throws UserNotFoundException {
+        Users user = userRepository.findByEmailId(emailId);
         if (user == null || !passwordEncoder.matches(password, user.getPassword())){
             throw new UserNotFoundException();
         }
