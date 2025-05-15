@@ -22,21 +22,35 @@ public class JwtSecurityTokenGenerator implements SecurityTokenGenerator{
 
     @Override
     public Map<String, String> generateToken(Users users) {
+        // Validate user email
+        String email = users.getEmailId();
+        if (email == null || email.isBlank()){
+            throw new IllegalArgumentException("User email is required for token generation.");
+        }
+        // Decode and validate secret key
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        if(keyBytes.length < 32) {
+            throw new SecurityException("Secret key must be at least 256 bits (32 bytes) after Base64 decoding");
+        }
         SecretKey key = Keys.hmacShaKeyFor(keyBytes);
 
-        Date expiryDate = new Date(System.currentTimeMillis() + expirationMs);
+        // Token expiration
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationMs);
 
+        // Build token
         String jwtToken = Jwts
                 .builder()
-                .subject(users.getEmailId())
-                .issuedAt(new Date())
+                .subject(email)
+                .issuedAt(now)
                 .expiration(expiryDate)
-                .signWith(key)
+                .signWith(key, Jwts.SIG.HS256)
                 .compact();
 
+        // Return token
         Map<String, String> tokenMap = new HashMap<>();
         tokenMap.put("token", jwtToken);
+        tokenMap.put("expireAt", expiryDate.toString());
         return tokenMap;
     }
 }
