@@ -41,4 +41,45 @@ public class TaskServiceImpl implements ITaskService {
     public List<Task> fetchByDueDate(LocalDate tDueDate) {
         return taskRepository.findByTaskDueDate(tDueDate);
     }
+
+    @Override
+    public Task updateTask(Task updatedTask) throws TaskNotFoundException {
+        Task existingTask = taskRepository.findByTaskId(updatedTask.getTaskId())
+                .orElseThrow(() -> new TaskNotFoundException("Task not found for updating"));
+
+        // Update task details and force status to 'In-Progress'
+        existingTask.setTaskTitle(updatedTask.getTaskTitle());
+        existingTask.setTaskDescription(updatedTask.getTaskDescription());
+        existingTask.setTaskCategory(updatedTask.getTaskCategory());
+        existingTask.setTaskDueDate(updatedTask.getTaskDueDate());
+        existingTask.setMedia(updatedTask.getMedia());
+        existingTask.setTaskStatus("In-Progress");  // Force status
+
+        return taskRepository.save(existingTask);
+    }
+
+    @Override
+    public List<Task> fetchTaskByUserId(String userId) throws TaskNotFoundException {
+        return List.of();
+    }
+
+    @Override
+    public void deleteTask(int taskId) throws TaskNotFoundException {
+
+    }
+
+    @Override
+    public Task archiveTask(int taskId) throws TaskNotFoundException {
+        Task task = taskRepository.findByTaskId(taskId)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found for archiving"));
+
+        if (!"Completed".equalsIgnoreCase(task.getTaskStatus())) {
+            throw new TaskNotFoundException("Only tasks with 'Completed' status can be archived.");
+        }
+
+        // Set status to 'Archived'
+        task.setTaskStatus("Archived");
+        return taskRepository.save(task);
+    }
+
 }

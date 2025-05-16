@@ -1,12 +1,14 @@
 package com.project.todo.domain;
 
-import jakarta.persistence.Id;
+
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.print.attribute.standard.Media;
 import java.time.LocalDate;
 @Document
 public class Task {
+
+    private int taskId;
     @Id
     private String taskTitle;
     private String userId;
@@ -16,11 +18,14 @@ public class Task {
     private LocalDate taskDueDate;
     private LocalDate taskCreatedDate;
     private Media media;
+    private boolean isArchived = false;
+
 
     public Task() {
     }
 
-    public Task(String taskTitle, String userId, String taskDescription, String taskCategory, String taskStatus, LocalDate taskDueDate, LocalDate taskCreatedDate, Media media) {
+    public Task(int taskId, String taskTitle, String userId, String taskDescription, String taskCategory, String taskStatus, LocalDate taskDueDate, LocalDate taskCreatedDate, Media media, boolean isArchived) {
+        this.taskId = taskId;
         this.taskTitle = taskTitle;
         this.userId = userId;
         this.taskDescription = taskDescription;
@@ -29,13 +34,22 @@ public class Task {
         this.taskDueDate = taskDueDate;
         this.taskCreatedDate = taskCreatedDate;
         this.media = media;
+        this.isArchived = isArchived;
     }
 
-    public String getTaskId() {
+    public int getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(int taskId) {
+        this.taskId = taskId;
+    }
+
+    public String getTaskTitle() {
         return taskTitle;
     }
 
-    public void setTaskId(String taskTitle) {
+    public void setTaskTitle(String taskTitle) {
         this.taskTitle = taskTitle;
     }
 
@@ -95,10 +109,19 @@ public class Task {
         this.media = media;
     }
 
+    public boolean isArchived() {
+        return isArchived;
+    }
+
+    public void setArchived(boolean archived) {
+        isArchived = archived;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
-                "taskTitle=" + taskTitle +
+                "taskId=" + taskId +
+                ", taskTitle='" + taskTitle + '\'' +
                 ", userId='" + userId + '\'' +
                 ", taskDescription='" + taskDescription + '\'' +
                 ", taskCategory='" + taskCategory + '\'' +
@@ -106,6 +129,7 @@ public class Task {
                 ", taskDueDate=" + taskDueDate +
                 ", taskCreatedDate=" + taskCreatedDate +
                 ", media=" + media +
+                ", isArchived=" + isArchived +
                 '}';
     }
 }

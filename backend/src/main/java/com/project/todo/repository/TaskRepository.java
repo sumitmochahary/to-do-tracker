@@ -7,11 +7,21 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
 @Repository
-public interface TaskRepository extends MongoRepository<Task,String> {
-        List<Task> findByTaskCategory(String tCategory);
-        List<Task> findByTaskStatus(String tStatus);
-        List<Task> findByTaskDueDate(LocalDate tDueDate);
-        List<Task> findByUserId(String userId); // Optional: filter tasks by user
-    }
+public interface TaskRepository extends MongoRepository<Task, Integer> {
+
+        List<Task> findByUserId(String userId);
+
+        List<Task> findByTaskCategory(String taskCategory);
+
+        List<Task> findByTaskStatus(String taskStatus);  // ✅ Already covers fetching 'completed', 'archived', etc.
+
+        List<Task> findByTaskDueDate(LocalDate taskDueDate);
+
+        Optional<Task> findByTaskId(int taskId);
+
+        // Custom query to get tasks that are NOT 'archived' (fetch active tasks only)
+        List<Task> findByTaskStatusNot(String status);
+}
 

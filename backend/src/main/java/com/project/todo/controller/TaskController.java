@@ -23,50 +23,53 @@ public class TaskController {
         this.iTaskService = iTaskService;
     }
 
-    // Save a new task
     @PostMapping("/save")
     public ResponseEntity<Task> insertTask(@RequestBody Task task) {
         Task savedTask = iTaskService.saveTask(task);
         return new ResponseEntity<>(savedTask, HttpStatus.CREATED);
     }
 
-    // Fetch tasks by userId
-    @PostMapping("/fetch")
-    public ResponseEntity<List<Task>> fetchTask(@RequestBody Task task) throws TaskNotFoundException {
-        List<Task> taskList = iTaskService.fetchTask(task);
+    @GetMapping("/fetch/{userId}")
+    public ResponseEntity<List<Task>> fetchTask(@PathVariable String userId) throws TaskNotFoundException {
+        List<Task> taskList = iTaskService.fetchTaskByUserId(userId);
         return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
 
-    // Fetch tasks by category
-    @GetMapping("/category/{category}")
-    public ResponseEntity<List<Task>> fetchByCategory(@PathVariable String category) {
-        return new ResponseEntity<>(iTaskService.fetchByCategory(category), HttpStatus.OK);
+    @GetMapping("/category/{taskCategory}")
+    public ResponseEntity<List<Task>> fetchByCategory(@PathVariable String taskCategory) {
+        return new ResponseEntity<>(iTaskService.fetchByCategory(taskCategory), HttpStatus.OK);
     }
 
-    // Fetch tasks by status
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<Task>> fetchByStatus(@PathVariable String status) {
-        return new ResponseEntity<>(iTaskService.fetchByStatus(status), HttpStatus.OK);
+    @GetMapping("/status/{taskStatus}")
+    public ResponseEntity<List<Task>> fetchByStatus(@PathVariable String taskStatus) {
+        return new ResponseEntity<>(iTaskService.fetchByStatus(taskStatus), HttpStatus.OK);
     }
 
-    // Fetch tasks by due date (format: yyyy-MM-dd)
-    @GetMapping("/due/{date}")
-    public ResponseEntity<List<Task>> fetchByDueDate(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return new ResponseEntity<>(iTaskService.fetchByDueDate(date), HttpStatus.OK);
+    @GetMapping("/due/{taskDueDate}")
+    public ResponseEntity<List<Task>> fetchByDueDate(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate taskDueDate) {
+        return new ResponseEntity<>(iTaskService.fetchByDueDate(taskDueDate), HttpStatus.OK);
     }
 
-    // Update an existing task
+    @DeleteMapping("/delete/{taskId}")
+    public ResponseEntity<String> deleteTask(@PathVariable int taskId) throws TaskNotFoundException {
+        iTaskService.deleteTask(taskId);
+        return new ResponseEntity<>("Task deleted with ID: " + taskId, HttpStatus.OK);
+    }
+
+    @GetMapping("/status/archived")
+    public ResponseEntity<List<Task>> fetchArchivedTasks() {
+        return new ResponseEntity<>(iTaskService.fetchByStatus("archived"), HttpStatus.OK);
+    }
+
     @PutMapping("/update")
-    public ResponseEntity<Task> updateTask(@RequestBody Task task) {
-        Task updatedTask = iTaskService.saveTask(task);
+    public ResponseEntity<Task> updateTask(@RequestBody Task task) throws TaskNotFoundException {
+        Task updatedTask = iTaskService.updateTask(task);
         return new ResponseEntity<>(updatedTask, HttpStatus.OK);
     }
 
-    // Delete a task by taskNo
-    @DeleteMapping("/delete/{taskId}")
-    public ResponseEntity<String> deleteTask(@PathVariable String  taskId) {
-        // You can add this method in service layer too
-        // e.g. iTaskService.deleteTaskById(taskNo);
-        return new ResponseEntity<>("Task deleted with ID: " + taskId, HttpStatus.OK);
+    @PutMapping("/archive/{taskId}")
+    public ResponseEntity<Task> archiveTask(@PathVariable int taskId) throws TaskNotFoundException {
+        Task archivedTask = iTaskService.archiveTask(taskId);
+        return new ResponseEntity<>(archivedTask, HttpStatus.OK);
     }
 }

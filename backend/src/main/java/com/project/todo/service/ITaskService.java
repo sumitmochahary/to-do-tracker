@@ -12,5 +12,10 @@ public interface ITaskService {
     List<Task> fetchByCategory(String tCategory);
     List<Task> fetchByStatus(String tStatus);
     List<Task> fetchByDueDate(LocalDate tDueDate);
+    Task archiveTask(int taskId) throws TaskNotFoundException;
+    Task updateTask(Task updatedTask) throws TaskNotFoundException;
+    List<Task> fetchTaskByUserId(String userId) throws TaskNotFoundException;
+    void deleteTask(int taskId) throws TaskNotFoundException;
+
 }
 
