@@ -19,7 +19,8 @@ public class Users {
     public Users() {
     }
 
-    public Users(String userName, String emailId, String password, long phoneNumber) {
+    public Users(int userId, String userName, String emailId, String password, long phoneNumber) {
+        this.userId = userId;
         this.userName = userName;
         this.emailId = emailId;
         this.password = password;
