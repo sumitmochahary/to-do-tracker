@@ -29,6 +29,12 @@ public class TaskController {
         return new ResponseEntity<>(savedTask, HttpStatus.CREATED);
     }
 
+    @GetMapping("/tasks")
+    public ResponseEntity<List<Task>> fetchAllTasks(){
+        List<Task> tasks = iTaskService.fetchAllTasks();
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
+    }
+
     @GetMapping("/fetch/{userId}")
     public ResponseEntity<List<Task>> fetchTask(@PathVariable String userId) throws TaskNotFoundException {
         List<Task> taskList = iTaskService.fetchTaskByUserId(userId);
@@ -51,14 +57,15 @@ public class TaskController {
     }
 
     @DeleteMapping("/delete/{taskId}")
-    public ResponseEntity<String> deleteTask(@PathVariable int taskId) throws TaskNotFoundException {
+    public ResponseEntity<String> deleteTask(@PathVariable String taskId) throws TaskNotFoundException {  // Changed from int to String
         iTaskService.deleteTask(taskId);
         return new ResponseEntity<>("Task deleted with ID: " + taskId, HttpStatus.OK);
     }
 
     @GetMapping("/status/archived")
     public ResponseEntity<List<Task>> fetchArchivedTasks() {
-        return new ResponseEntity<>(iTaskService.fetchByStatus("archived"), HttpStatus.OK);
+        List<Task> archivedTasks = iTaskService.fetchArchivedTasks();
+        return new ResponseEntity<>(archivedTasks, HttpStatus.OK);
     }
 
     @PutMapping("/update")
@@ -68,7 +75,7 @@ public class TaskController {
     }
 
     @PutMapping("/archive/{taskId}")
-    public ResponseEntity<Task> archiveTask(@PathVariable int taskId) throws TaskNotFoundException {
+    public ResponseEntity<Task> archiveTask(@PathVariable String taskId) throws TaskNotFoundException {  // Changed from int to String
         Task archivedTask = iTaskService.archiveTask(taskId);
         return new ResponseEntity<>(archivedTask, HttpStatus.OK);
     }

@@ -9,13 +9,14 @@ import java.util.List;
 public interface ITaskService {
     Task saveTask(Task task);
     List<Task> fetchTask(Task task) throws TaskNotFoundException;
+    List<Task> fetchAllTasks();
     List<Task> fetchByCategory(String tCategory);
     List<Task> fetchByStatus(String tStatus);
     List<Task> fetchByDueDate(LocalDate tDueDate);
-    Task archiveTask(int taskId) throws TaskNotFoundException;
+    Task archiveTask(String taskId) throws TaskNotFoundException;  // Changed from int to String
     Task updateTask(Task updatedTask) throws TaskNotFoundException;
+    List<Task> fetchArchivedTasks();
     List<Task> fetchTaskByUserId(String userId) throws TaskNotFoundException;
-    void deleteTask(int taskId) throws TaskNotFoundException;
-
+    void deleteTask(String taskId) throws TaskNotFoundException;  // Changed from int to String
 }
 

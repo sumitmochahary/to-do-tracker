@@ -9,19 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TaskRepository extends MongoRepository<Task, Integer> {
+public interface TaskRepository extends MongoRepository<Task, String> {  // Changed Integer to String
 
         List<Task> findByUserId(String userId);
-
         List<Task> findByTaskCategory(String taskCategory);
-
-        List<Task> findByTaskStatus(String taskStatus);  // ✅ Already covers fetching 'completed', 'archived', etc.
-
+        List<Task> findByTaskStatus(String taskStatus);
         List<Task> findByTaskDueDate(LocalDate taskDueDate);
-
-        Optional<Task> findByTaskId(int taskId);
-
-        // Custom query to get tasks that are NOT 'archived' (fetch active tasks only)
-        List<Task> findByTaskStatusNot(String status);
+        Optional<Task> findById(String id);  // Changed from findByTaskId to findById
+        List<Task> findByArchived(boolean archived);
 }
 

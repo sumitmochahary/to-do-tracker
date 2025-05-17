@@ -8,8 +8,8 @@ import java.time.LocalDate;
 @Document
 public class Task {
 
-    private int taskId;
     @Id
+    private String id;
     private String taskTitle;
     private String userId;
     private String taskDescription;
@@ -18,14 +18,13 @@ public class Task {
     private LocalDate taskDueDate;
     private LocalDate taskCreatedDate;
     private Media media;
-    private boolean isArchived = false;
-
+    private boolean archived;
 
     public Task() {
     }
 
-    public Task(int taskId, String taskTitle, String userId, String taskDescription, String taskCategory, String taskStatus, LocalDate taskDueDate, LocalDate taskCreatedDate, Media media, boolean isArchived) {
-        this.taskId = taskId;
+    public Task(String id, String taskTitle, String userId, String taskDescription, String taskCategory, String taskStatus, LocalDate taskDueDate, LocalDate taskCreatedDate, Media media, boolean archived) {
+        this.id = id;
         this.taskTitle = taskTitle;
         this.userId = userId;
         this.taskDescription = taskDescription;
@@ -34,15 +33,15 @@ public class Task {
         this.taskDueDate = taskDueDate;
         this.taskCreatedDate = taskCreatedDate;
         this.media = media;
-        this.isArchived = isArchived;
+        this.archived = archived;
     }
 
-    public int getTaskId() {
-        return taskId;
+    public String getId() {
+        return id;
     }
 
-    public void setTaskId(int taskId) {
-        this.taskId = taskId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getTaskTitle() {
@@ -110,26 +109,10 @@ public class Task {
     }
 
     public boolean isArchived() {
-        return isArchived;
+        return archived;
     }
 
     public void setArchived(boolean archived) {
-        isArchived = archived;
-    }
-
-    @Override
-    public String toString() {
-        return "Task{" +
-                "taskId=" + taskId +
-                ", taskTitle='" + taskTitle + '\'' +
-                ", userId='" + userId + '\'' +
-                ", taskDescription='" + taskDescription + '\'' +
-                ", taskCategory='" + taskCategory + '\'' +
-                ", taskStatus='" + taskStatus + '\'' +
-                ", taskDueDate=" + taskDueDate +
-                ", taskCreatedDate=" + taskCreatedDate +
-                ", media=" + media +
-                ", isArchived=" + isArchived +
-                '}';
+        this.archived = archived;
     }
 }

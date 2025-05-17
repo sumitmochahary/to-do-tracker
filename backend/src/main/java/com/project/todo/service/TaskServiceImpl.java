@@ -28,6 +28,11 @@ public class TaskServiceImpl implements ITaskService {
     }
 
     @Override
+    public List<Task> fetchAllTasks() {
+        return taskRepository.findAll();
+    }
+
+    @Override
     public List<Task> fetchByCategory(String tCategory) {
         return taskRepository.findByTaskCategory(tCategory);
     }
@@ -44,7 +49,7 @@ public class TaskServiceImpl implements ITaskService {
 
     @Override
     public Task updateTask(Task updatedTask) throws TaskNotFoundException {
-        Task existingTask = taskRepository.findByTaskId(updatedTask.getTaskId())
+        Task existingTask = taskRepository.findById(updatedTask.getId())  // Changed from findByTaskId to findById
                 .orElseThrow(() -> new TaskNotFoundException("Task not found for updating"));
 
         // Update task details and force status to 'In-Progress'
@@ -60,26 +65,32 @@ public class TaskServiceImpl implements ITaskService {
 
     @Override
     public List<Task> fetchTaskByUserId(String userId) throws TaskNotFoundException {
-        return List.of();
+        List<Task> tasks = taskRepository.findByUserId(userId);
+        if (tasks.isEmpty()) throw new TaskNotFoundException("No tasks found for user: " + userId);
+        return tasks;
     }
 
     @Override
-    public void deleteTask(int taskId) throws TaskNotFoundException {
-
+    public void deleteTask(String taskId) throws TaskNotFoundException {
+        Task task = taskRepository.findById(taskId)  // Changed from findByTaskId to findById
+                .orElseThrow(() -> new TaskNotFoundException("Task not found"));
+        taskRepository.delete(task);
     }
 
     @Override
-    public Task archiveTask(int taskId) throws TaskNotFoundException {
-        Task task = taskRepository.findByTaskId(taskId)
-                .orElseThrow(() -> new TaskNotFoundException("Task not found for archiving"));
+    public Task archiveTask(String taskId) throws TaskNotFoundException {  // Changed from int to String
+        Task task = taskRepository.findById(taskId)  // Changed from findByTaskId to findById
+                .orElseThrow(() -> new TaskNotFoundException("Task not found"));
 
-        if (!"Completed".equalsIgnoreCase(task.getTaskStatus())) {
-            throw new TaskNotFoundException("Only tasks with 'Completed' status can be archived.");
-        }
-
-        // Set status to 'Archived'
         task.setTaskStatus("Archived");
+        task.setArchived(true);
+
         return taskRepository.save(task);
     }
 
+    @Override
+    public List<Task> fetchArchivedTasks() {
+        return taskRepository.findByArchived(true);
+    }
 }
+
