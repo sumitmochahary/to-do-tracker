@@ -64,6 +64,11 @@ public class TaskServiceImpl implements ITaskService {
     }
 
     @Override
+    public List<Task> fetchArchivedTasks() {
+        return taskRepository.findByArchived(true);
+    }
+
+    @Override
     public List<Task> fetchTaskByUserId(String userId) throws TaskNotFoundException {
         List<Task> tasks = taskRepository.findByUserId(userId);
         if (tasks.isEmpty()) throw new TaskNotFoundException("No tasks found for user: " + userId);
@@ -79,18 +84,17 @@ public class TaskServiceImpl implements ITaskService {
 
     @Override
     public Task archiveTask(String taskId) throws TaskNotFoundException {  // Changed from int to String
-        Task task = taskRepository.findById(taskId)  // Changed from findByTaskId to findById
-                .orElseThrow(() -> new TaskNotFoundException("Task not found"));
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found for archiving"));
 
+        if (!"Completed".equalsIgnoreCase(task.getTaskStatus())) {
+            throw new TaskNotFoundException("Only tasks with 'Completed' status can be archived.");
+        }
+
+        // Set status to 'Archived'
         task.setTaskStatus("Archived");
         task.setArchived(true);
-
         return taskRepository.save(task);
-    }
-
-    @Override
-    public List<Task> fetchArchivedTasks() {
-        return taskRepository.findByArchived(true);
     }
 }
 
