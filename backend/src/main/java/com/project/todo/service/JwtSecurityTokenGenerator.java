@@ -41,7 +41,7 @@ public class JwtSecurityTokenGenerator implements SecurityTokenGenerator{
         // Build token
         String jwtToken = Jwts
                 .builder()
-                .subject(email)
+                .subject(Integer.toString(users.getUserId()))
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(key, Jwts.SIG.HS256)

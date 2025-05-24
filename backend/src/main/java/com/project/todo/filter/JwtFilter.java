@@ -20,10 +20,14 @@ import java.io.IOException;
 
 public class JwtFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
-    private final String secretKey;
+    private final SecretKey key;
 
     public JwtFilter(String secretKey) {
-        this.secretKey = secretKey;
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        if (keyBytes.length < 32) {
+            throw new IllegalArgumentException("Invalid key length. Must be at least 256 bits (32 bytes).");
+        }
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     @Override
@@ -34,49 +38,46 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
-        if(authHeader != null && authHeader.startsWith("Bearer ")){
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
 
-            try{
-                byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-                if(keyBytes.length < 32){
-                    throw new SecurityException("Invalid key length");
-                }
-
-                SecretKey key = Keys.hmacShaKeyFor(keyBytes);
-                // Parse and validate token
+            try {
                 Claims claims = Jwts.parser()
                         .verifyWith(key)
                         .build()
                         .parseSignedClaims(token)
                         .getPayload();
 
-                // Validate subject claim
-                String emailId = claims.getSubject();
-                if(emailId == null || emailId.isBlank()){
+                String userId = claims.getSubject();
+                if (userId == null || userId.isBlank()) {
                     sendError(response, "Authentication failed");
                     return;
                 }
 
-                request.setAttribute("EmailId", emailId);
+                request.setAttribute("userId", userId);
                 filterChain.doFilter(request, response);
             } catch (ExpiredJwtException ex) {
-                logger.warn("Expired JWT: {}", ex.getMessage());
+                logger.warn("Expired JWT token");
                 sendError(response, "Authentication failed");
-            } catch (JwtException | IllegalArgumentException ex){
-                logger.error("Invalid JWT: {}", ex.getMessage());
-                sendError(response, "Authentication failed");
-            } catch (SecurityException ex){
-                logger.error("Key validation failed: {}", ex.getMessage());
+            } catch (JwtException | IllegalArgumentException ex) {
+                logger.error("Invalid JWT token");
                 sendError(response, "Authentication failed");
             }
         } else {
             sendError(response, "Authentication required");
         }
     }
-    private void sendError(HttpServletResponse response, String message) throws IOException{
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/api/auth/login"); // Skip filter for login endpoints
+    }
+
+    private void sendError(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().write(message);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
         response.getWriter().flush();
     }
 }

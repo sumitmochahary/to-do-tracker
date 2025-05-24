@@ -3,6 +3,7 @@ package com.project.todo.controller;
 import com.project.todo.domain.Task;
 import com.project.todo.exception.TaskNotFoundException;
 import com.project.todo.service.ITaskService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,9 @@ public class TaskController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<Task> insertTask(@RequestBody Task task) {
+    public ResponseEntity<Task> insertTask(@RequestBody Task task, HttpServletRequest request) {
+        String userId = (String) request.getAttribute("userId");
+        task.setUserId(userId);
         Task savedTask = iTaskService.saveTask(task);
         return new ResponseEntity<>(savedTask, HttpStatus.CREATED);
     }

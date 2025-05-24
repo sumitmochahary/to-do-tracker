@@ -13,12 +13,4 @@ public class TodoApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(TodoApplication.class, args);
 	}
-
-	@Bean
-	public FilterRegistrationBean<JwtFilter> filterRegistrationBean(@Value("${jwt.secret-key}") String secretKey){
-		FilterRegistrationBean<JwtFilter> registrationBean = new FilterRegistrationBean<>();
-		registrationBean.setFilter(new JwtFilter(secretKey));
-		registrationBean.addUrlPatterns("/api/v1/*");
-		return registrationBean;
-	}
 }

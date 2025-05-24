@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/api/auth")
 public class UserController {
     private final UserService userService;
     private final SecurityTokenGenerator securityToken;
@@ -23,13 +24,13 @@ public class UserController {
         this.securityToken = securityToken;
     }
 
-    @PostMapping("register")
+    @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Users users) throws UserAlreadyExistException{
         userService.register(users);
         return new ResponseEntity<>("Users register successfully", HttpStatus.CREATED);
     }
 
-    @PostMapping("login")
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Users users) throws UserNotFoundException{
 
         Map<String, String> map = null;
