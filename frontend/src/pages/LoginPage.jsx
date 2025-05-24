@@ -1,5 +1,8 @@
-import { Box, Button, Container, TextField, Typography } from "@mui/material"
+import { Box, Button, Container, Paper, TextField, Typography, InputAdornment, IconButton } from "@mui/material"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
+import EmailIcon from "@mui/icons-material/Email"
+import { Visibility, VisibilityOff } from "@mui/icons-material"
 
 function LoginPage({ onSubmit }) {
 
@@ -9,13 +12,19 @@ function LoginPage({ onSubmit }) {
         formState: { errors },
     } = useForm()
 
+    const [showPassword, setShowPassword] = useState(false)
+
+    const togglePasswordVisibility = () => {
+        setShowPassword((prev) => !prev)
+    }
+
     const onFormSubmit = data => {
         onSubmit(data)
     }
 
     return (
         <Container maxWidth="sm">
-            <Box mt={10} p={4} boxShadow={3} borderRadius={2} bgcolor={"#fff"}>
+            <Paper elevation={3} sx={{ padding: 4, marginTop: 6 }}>
                 <Typography variant="h4" align="center" gutterBottom>
                     Login
                 </Typography>
@@ -35,6 +44,15 @@ function LoginPage({ onSubmit }) {
                             })}
                             error={!!errors.email}
                             helperText={errors.email?.message}
+                            slotProps={{
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment>
+                                            <EmailIcon />
+                                        </InputAdornment>
+                                    )
+                                }
+                            }}
                         />
                     </Box>
 
@@ -43,7 +61,7 @@ function LoginPage({ onSubmit }) {
                             fullWidth
                             label="Password"
                             variant="outlined"
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             {...register("password", {
                                 required: "Password is required",
                                 minLength: {
@@ -51,8 +69,22 @@ function LoginPage({ onSubmit }) {
                                     message: "Password must be at least 6 characters."
                                 }
                             })}
-                            errors={!!errors.password}
+                            error={!!errors.password}
                             helperText={errors.password?.message}
+                            slotProps={{
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={togglePasswordVisibility}
+                                                edge="end">
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }
+                            }}
                         />
                     </Box>
                     <Button
@@ -65,7 +97,7 @@ function LoginPage({ onSubmit }) {
                         Sign In
                     </Button>
                 </form>
-            </Box>
+            </Paper>
         </Container>
     )
 }
