@@ -8,7 +8,8 @@ import {
     InputAdornment,
     IconButton,
     CircularProgress,
-    Backdrop
+    Backdrop,
+    Divider
 } from "@mui/material";
 
 import { useState } from "react";
@@ -16,6 +17,9 @@ import { useForm } from "react-hook-form";
 
 import EmailIcon from "@mui/icons-material/Email";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+
+import GoogleIcon from "@mui/icons-material/Google";
+import AppleIcon from "@mui/icons-material/Apple";
 
 function LoginPage() {
 
@@ -72,10 +76,13 @@ function LoginPage() {
                 minHeight: "100vh",
                 width: "100%"
             }}>
-                <Container maxWidth="sm">
+                <Container sx={{ width: "33%" }}>
                     <Paper elevation={3} sx={{ padding: 4, marginTop: 6 }}>
-                        <Typography variant="h4" align="center" gutterBottom>
-                            LOGIN
+                        <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: "bold" }}>
+                            Welcome back!
+                        </Typography>
+                        <Typography align="center" gutterBottom>
+                            Simplify your task with our Todo App. Get started for free
                         </Typography>
 
                         {/* Form starts here */}
@@ -112,7 +119,7 @@ function LoginPage() {
                             </Box>
 
                             {/* Password input field */}
-                            <Box mb={1}>
+                            <Box>
                                 <TextField
                                     fullWidth
                                     label="Password"
@@ -149,7 +156,7 @@ function LoginPage() {
 
                             {/* Forget password link */}
                             <Typography mb={1} align="right" gutterBottom>
-                                Forget Password?
+                                Forgot Password?
                             </Typography>
 
                             {/* Submit button */}
@@ -164,6 +171,21 @@ function LoginPage() {
                                 {loading ? "Signing In..." : "Sign In"}
                             </Button>
                         </form>
+
+                        <Typography mt={5} align="center" gutterBottom>
+                            <Divider>
+                                or continue with
+                            </Divider>
+                        </Typography>
+
+                        <Box mt={3} display="flex" justifyContent="center" gap={2}>
+                            <IconButton aria-label="Google login">
+                                <GoogleIcon />
+                            </IconButton>
+                            <IconButton aria-label="Apple login">
+                                <AppleIcon />
+                            </IconButton>
+                        </Box>
 
                         {/* Sign-up prompt */}
                         <Typography mt={4} align="center" gutterBottom>
