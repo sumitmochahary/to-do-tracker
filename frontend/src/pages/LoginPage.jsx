@@ -7,8 +7,6 @@ import {
     Typography,
     InputAdornment,
     IconButton,
-    CircularProgress,
-    Backdrop,
     Divider
 } from "@mui/material";
 
@@ -19,6 +17,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import GoogleIcon from "@mui/icons-material/Google";
 import AppleIcon from "@mui/icons-material/Apple";
+import LoadingEffect from "../components/LoadingEffect";
 
 function LoginPage() {
     const {
@@ -54,12 +53,7 @@ function LoginPage() {
 
     return (
         <>
-            <Backdrop
-                sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                open={loading}
-            >
-                <CircularProgress color="inherit" />
-            </Backdrop>
+            <LoadingEffect loading={loading} />
 
             <Container
                 maxWidth={false}
@@ -80,7 +74,7 @@ function LoginPage() {
                         display: "flex",
                         flexDirection: { xs: "column", md: "row" },
                         minHeight: "100vh",
-                        gap: { md: 4 }
+                        gap: { md: 4 },
                     }}
                 >
                     {/* Left side: Login Form */}
@@ -188,9 +182,7 @@ function LoginPage() {
                                 </Button>
                             </form>
 
-                            <Typography mt={5} align="center" gutterBottom>
-                                <Divider>or continue with</Divider>
-                            </Typography>
+                            <Divider sx={{ mt: 2 }}>or continue with</Divider>
 
                             <Box mt={3} display="flex" justifyContent="center" gap={2}>
                                 <IconButton aria-label="Google login">
