@@ -91,7 +91,15 @@ function LoginPage() {
                         alignItems="center"
                         p={2}
                     >
-                        <Paper elevation={3} sx={{ padding: 4, width: "100%", maxWidth: 400 }}>
+                        <Paper elevation={3} sx={{
+                            padding: 4,
+
+                            maxWidth: 400,
+                            backgroundColor: "rgba(255, 255, 255, 0.85)", // semi-transparent white
+                            borderRadius: 3,
+                            boxShadow: "0 8px 24px rgba(0,0,0,0.1)",       // subtle shadow
+                            backdropFilter: "blur(6px)",                   // adds a soft blur behind
+                        }}>
                             <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: "bold" }}>
                                 Welcome back!
                             </Typography>
