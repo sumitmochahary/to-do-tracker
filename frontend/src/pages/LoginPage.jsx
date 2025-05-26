@@ -1,11 +1,4 @@
-import {
-    Box,
-    Container,
-    Paper,
-    Typography,
-    IconButton,
-    Divider
-} from "@mui/material";
+import { Box, Container, Paper, Typography, IconButton, Divider } from "@mui/material";
 
 import { useState } from "react";
 
@@ -62,10 +55,10 @@ function LoginPage() {
                             backdropFilter: "blur(6px)",                   // adds a soft blur behind
                         }}>
                             <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: "bold" }}>
-                                Welcome back!
+                                Welcome
                             </Typography>
-                            <Typography align="center" gutterBottom>
-                                Simplify your task with our Todo App. Get started for free
+                            <Typography align="center" mb={2} gutterBottom>
+                                Every great journey begins with a single step — let’s take it together.
                             </Typography>
 
                             <LoginForm onLoadingChange={setLoading} />
@@ -91,12 +84,15 @@ function LoginPage() {
                     <Box
                         sx={{
                             flex: 1,
-                            display: { xs: 'none', sm: "block" },
+                            display: 'block',
+                            '@media (max-width:700px)': {
+                                display: 'none',
+                            },
                             backgroundImage: "url('/assets/work-in-progress-animate.svg')",
                             backgroundSize: 'contain',
                             backgroundPosition: 'center',
                             backgroundRepeat: 'no-repeat',
-                            height: '100vh'
+                            height: '100vh',
                         }}
                     />
                 </Container>

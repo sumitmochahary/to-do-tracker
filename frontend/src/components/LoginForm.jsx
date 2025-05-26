@@ -49,6 +49,7 @@ function LoginForm({ onLoadingChange }) {
                     label="Email"
                     variant="outlined"
                     type="email"
+                    autoComplete="email"
                     value={watch("email")}
                     {...register("email", {
                         required: "Email is required.",
@@ -78,6 +79,7 @@ function LoginForm({ onLoadingChange }) {
                     label="Password"
                     variant="outlined"
                     value={watch("password")}
+                    autoComplete="current-password"
                     type={showPassword ? "text" : "password"}
                     {...register("password", {
                         required: "Password is required",
