@@ -1,55 +1,22 @@
 import {
     Box,
-    Button,
     Container,
     Paper,
-    TextField,
     Typography,
-    InputAdornment,
     IconButton,
     Divider
 } from "@mui/material";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 
-import EmailIcon from "@mui/icons-material/Email";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
 import GoogleIcon from "@mui/icons-material/Google";
 import AppleIcon from "@mui/icons-material/Apple";
 import LoadingEffect from "../components/LoadingEffect";
+import LoginForm from "../components/LoginForm";
 
 function LoginPage() {
-    const {
-        register,
-        handleSubmit,
-        trigger,
-        reset,
-        watch,
-        formState: { errors },
-    } = useForm({
-        defaultValues: {
-            email: "",
-            password: ""
-        }
-    });
 
-    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-
-    const togglePasswordVisibility = () => {
-        setShowPassword((prev) => !prev);
-    };
-
-    const onFormSubmit = async (data) => {
-        setLoading(true);
-
-        setTimeout(() => {
-            console.log("Logged In Successfully with:", data);
-            setLoading(false);
-            reset();
-        }, 2000);
-    };
 
     return (
         <>
@@ -72,7 +39,7 @@ function LoginPage() {
                     disableGutters
                     sx={{
                         display: "flex",
-                        flexDirection: { xs: "column", md: "row" },
+                        flexDirection: { xs: "column", sm: "row" },
                         minHeight: "100vh",
                         gap: { md: 4 },
                     }}
@@ -101,86 +68,7 @@ function LoginPage() {
                                 Simplify your task with our Todo App. Get started for free
                             </Typography>
 
-                            <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
-                                <Box mb={2}>
-                                    <TextField
-                                        fullWidth
-                                        label="Email"
-                                        variant="outlined"
-                                        type="email"
-                                        value={watch("email")}
-                                        {...register("email", {
-                                            required: "Email is required.",
-                                            pattern: {
-                                                value: /^\S+@\S+\.\S+$/,
-                                                message: "Invalid email address."
-                                            }
-                                        })}
-                                        error={!!errors.email}
-                                        helperText={errors.email?.message || " "}
-                                        onBlur={() => trigger("email")}
-                                        slotProps={{
-                                            input: {
-                                                endAdornment: (
-                                                    <InputAdornment>
-                                                        <EmailIcon />
-                                                    </InputAdornment>
-                                                )
-                                            }
-                                        }}
-                                    />
-                                </Box>
-
-                                <Box mb={1}>
-                                    <TextField
-                                        fullWidth
-                                        label="Password"
-                                        variant="outlined"
-                                        value={watch("password")}
-                                        type={showPassword ? "text" : "password"}
-                                        {...register("password", {
-                                            required: "Password is required",
-                                            minLength: {
-                                                value: 6,
-                                                message: "Password must be at least 6 characters."
-                                            }
-                                        })}
-                                        error={!!errors.password}
-                                        helperText={errors.password?.message || " "}
-                                        onBlur={() => trigger("password")}
-                                        slotProps={{
-                                            input: {
-                                                endAdornment: (
-                                                    <InputAdornment position="end">
-                                                        <IconButton
-                                                            aria-label="toggle password visibility"
-                                                            onClick={togglePasswordVisibility}
-                                                            edge="end"
-                                                        >
-                                                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                                                        </IconButton>
-                                                    </InputAdornment>
-                                                )
-                                            }
-                                        }}
-                                    />
-                                </Box>
-
-                                <Typography mb={1} align="right" gutterBottom>
-                                    Forgot Password?
-                                </Typography>
-
-                                <Button
-                                    type="submit"
-                                    variant="contained"
-                                    color="primary"
-                                    fullWidth
-                                    size="large"
-                                    disabled={loading}
-                                >
-                                    {loading ? "Signing In..." : "Sign In"}
-                                </Button>
-                            </form>
+                            <LoginForm onLoadingChange={setLoading} />
 
                             <Divider sx={{ mt: 2 }}>or continue with</Divider>
 
@@ -193,7 +81,7 @@ function LoginPage() {
                                 </IconButton>
                             </Box>
 
-                            <Typography mt={4} align="center" gutterBottom>
+                            <Typography mt={3} align="center" gutterBottom>
                                 Not a member? Register now
                             </Typography>
                         </Paper>
@@ -203,8 +91,8 @@ function LoginPage() {
                     <Box
                         sx={{
                             flex: 1,
-                            display: { xs: 'none', md: "block" },
-                            backgroundImage: "url('/assets/login-image.png')",
+                            display: { xs: 'none', sm: "block" },
+                            backgroundImage: "url('/assets/work-in-progress-animate.svg')",
                             backgroundSize: 'contain',
                             backgroundPosition: 'center',
                             backgroundRepeat: 'no-repeat',
