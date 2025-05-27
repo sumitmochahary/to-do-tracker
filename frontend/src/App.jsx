@@ -4,8 +4,10 @@ import SignUpPage from "./pages/SignUpPage.jsx";
 function App() {
 
   return (
-    // <LoginPage />
-    <SignUpPage />
+    <>
+      <LoginPage />
+      <SignUpPage />
+    </>
   )
 }
 
