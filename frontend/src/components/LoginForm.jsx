@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 
 import EmailIcon from "@mui/icons-material/Email";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { loginUser } from "../services/authService";
 
 function LoginForm({ onLoadingChange }) {
 
@@ -17,7 +18,7 @@ function LoginForm({ onLoadingChange }) {
         formState: { errors },
     } = useForm({
         defaultValues: {
-            email: "",
+            emailId: "",
             password: ""
         }
     });
@@ -30,15 +31,22 @@ function LoginForm({ onLoadingChange }) {
     };
 
     const onFormSubmit = async (data) => {
-        setLoading(true)
-        onLoadingChange?.(true)
+        setLoading(true);
+        onLoadingChange?.(true);
 
-        setTimeout(() => {
-            console.log("Logged In Successfully with:", data)
+        try {
+            const response = await loginUser(data)
+            console.log("Login successful:", response)
+
+            localStorage.setItem("token", response.token)
+            reset()
+        } catch (error) {
+            console.log("Login error:", error)
+            console.log(error)
+        } finally {
             setLoading(false)
             onLoadingChange?.(false)
-            reset();
-        }, 2000);
+        }
     };
 
     return (
@@ -50,17 +58,17 @@ function LoginForm({ onLoadingChange }) {
                     variant="outlined"
                     type="email"
                     autoComplete="email"
-                    value={watch("email")}
-                    {...register("email", {
+                    value={watch("emailId")}
+                    {...register("emailId", {
                         required: "Email is required.",
                         pattern: {
                             value: /^\S+@\S+\.\S+$/,
                             message: "Invalid email address."
                         }
                     })}
-                    error={!!errors.email}
-                    helperText={errors.email?.message || " "}
-                    onBlur={() => trigger("email")}
+                    error={!!errors.emailId}
+                    helperText={errors.emailId?.message || " "}
+                    onBlur={() => trigger("emailId")}
                     slotProps={{
                         input: {
                             endAdornment: (
