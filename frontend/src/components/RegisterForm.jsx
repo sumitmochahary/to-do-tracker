@@ -1,10 +1,12 @@
-import { Box, TextField, InputAdornment, Button, IconButton, Typography } from "@mui/material";
+import { Box, TextField, InputAdornment, Button, IconButton, Typography } from "@mui/material"
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useState } from "react"
+import { useForm } from "react-hook-form"
 
-import EmailIcon from "@mui/icons-material/Email";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import EmailIcon from "@mui/icons-material/Email"
+import PersonIcon from "@mui/icons-material/Person"
+import DialpadIcon from "@mui/icons-material/Dialpad"
+import PasswordIcon from "@mui/icons-material/Password"
 
 function RegisterForm({ onLoadingChange }) {
 
@@ -17,24 +19,22 @@ function RegisterForm({ onLoadingChange }) {
         formState: { errors },
     } = useForm({
         defaultValues: {
+            fullName: "",
             email: "",
-            password: ""
+            phone: "",
+            password: "",
+            confirmPassword: ""
         }
     });
 
-    const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
-
-    const togglePasswordVisibility = () => {
-        setShowPassword((prev) => !prev)
-    };
 
     const onFormSubmit = async (data) => {
         setLoading(true)
         onLoadingChange?.(true)
 
         setTimeout(() => {
-            console.log("Logged In Successfully with:", data)
+            console.log("Registered Successfully with:", data)
             setLoading(false)
             onLoadingChange?.(false)
             reset();
@@ -43,34 +43,32 @@ function RegisterForm({ onLoadingChange }) {
 
     return (
         <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
+            {/* Name field */}
             <Box mb={2}>
-                <Typography>First Name</Typography>
                 <TextField
                     fullWidth
-                    label="First Name"
+                    label="Name"
                     variant="outlined"
-                    {...register("firstName", { required: "First name is required." })}
-                    error={!!errors.firstName}
-                    helperText={errors.firstName?.message || " "}
-                    onBlur={() => trigger("firstName")}
+                    value={watch("fullName")}
+                    {...register("fullName", {
+                        required: "First name is required."
+                    })}
+                    error={!!errors.fullName}
+                    helperText={errors.fullName?.message || " "}
+                    onBlur={() => trigger("fullName")}
+                    slotProps={{
+                        input: {
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <PersonIcon />
+                                </InputAdornment>
+                            ),
+                        }
+                    }}
                 />
             </Box>
-
+            {/* Email field */}
             <Box mb={2}>
-                <Typography>Last Name</Typography>
-                <TextField
-                    fullWidth
-                    label="Last Name"
-                    variant="outlined"
-                    {...register("lastName", { required: "Last name is required." })}
-                    error={!!errors.lastName}
-                    helperText={errors.lastName?.message || " "}
-                    onBlur={() => trigger("lastName")}
-                />
-            </Box>
-
-            <Box mb={2}>
-                <Typography>Email</Typography>
                 <TextField
                     fullWidth
                     label="Email"
@@ -100,12 +98,12 @@ function RegisterForm({ onLoadingChange }) {
             </Box>
 
             <Box mb={2}>
-                <Typography>Phone Number</Typography>
                 <TextField
                     fullWidth
                     label="Phone Number"
                     variant="outlined"
                     autoComplete="tel"
+                    value={watch("phone")}
                     {...register("phone", {
                         required: "Phone number is required.",
                         pattern: {
@@ -116,17 +114,25 @@ function RegisterForm({ onLoadingChange }) {
                     error={!!errors.phone}
                     helperText={errors.phone?.message || " "}
                     onBlur={() => trigger("phone")}
+                    slotProps={{
+                        input: {
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <DialpadIcon />
+                                </InputAdornment>
+                            ),
+                        }
+                    }}
                 />
             </Box>
 
             <Box mb={2}>
-                <Typography>Password</Typography>
                 <TextField
                     fullWidth
                     label="Password"
                     variant="outlined"
                     autoComplete="new-password"
-                    type={showPassword ? "text" : "password"}
+                    type="password"
                     value={watch("password")}
                     {...register("password", {
                         required: "Password is required",
@@ -142,13 +148,7 @@ function RegisterForm({ onLoadingChange }) {
                         input: {
                             endAdornment: (
                                 <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={togglePasswordVisibility}
-                                        edge="end"
-                                    >
-                                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
+                                    <PasswordIcon />
                                 </InputAdornment>
                             ),
                         }
@@ -157,12 +157,12 @@ function RegisterForm({ onLoadingChange }) {
             </Box>
 
             <Box mb={2}>
-                <Typography>Confirm Password</Typography>
                 <TextField
                     fullWidth
                     label="Confirm Password"
                     variant="outlined"
-                    type={showPassword ? "text" : "password"}
+                    value={watch("confirmPassword")}
+                    type="text"
                     {...register("confirmPassword", {
                         required: "Confirm your password.",
                         validate: (value) =>
@@ -175,13 +175,7 @@ function RegisterForm({ onLoadingChange }) {
                         input: {
                             endAdornment: (
                                 <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={togglePasswordVisibility}
-                                        edge="end"
-                                    >
-                                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
+                                    <PasswordIcon />
                                 </InputAdornment>
                             ),
                         }
