@@ -1,0 +1,34 @@
+{
+  "card": [
+    {
+      "id": "a0ef",
+      "taskTitle": "Enahance UI",
+      "taskDescription": "Work on the UI",
+      "taskStatus": "To Do",
+      "taskCreatedDate": "2025-05-27",
+      "taskDueDate": "2025-05-27",
+      "userId": "defaultUser",
+      "taskCategory": "General"
+    },
+    {
+      "id": "bf69",
+      "taskTitle": "Enahance UI with colors",
+      "taskDescription": "make the colors more engaging",
+      "taskStatus": "In Progress",
+      "taskCreatedDate": "2025-05-27",
+      "taskDueDate": "2025-05-27",
+      "userId": "defaultUser",
+      "taskCategory": "General"
+    },
+    {
+      "id": "e323",
+      "taskTitle": "Enahance UI",
+      "taskDescription": "Done with the logic",
+      "taskStatus": "Completed",
+      "taskCreatedDate": "2025-05-27",
+      "taskDueDate": "2025-05-27",
+      "userId": "defaultUser",
+      "taskCategory": "General"
+    }
+  ]
+}
