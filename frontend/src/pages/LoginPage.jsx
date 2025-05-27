@@ -47,7 +47,6 @@ function LoginPage() {
                     >
                         <Paper elevation={3} sx={{
                             padding: 4,
-
                             maxWidth: 400,
                             backgroundColor: "rgba(255, 255, 255, 0.85)", // semi-transparent white
                             borderRadius: 3,
