@@ -1,15 +1,26 @@
-import { Box, Container, Paper, Typography, IconButton, Divider } from "@mui/material";
-
+import { Box, Container, Paper, Typography, Divider } from "@mui/material";
 import { useState } from "react";
+import { motion as Motion } from "framer-motion";
 
-import GoogleIcon from "@mui/icons-material/Google";
-import AppleIcon from "@mui/icons-material/Apple";
 import LoadingEffect from "../components/LoadingEffect";
 import LoginForm from "../components/LoginForm";
 
 function LoginPage() {
-
     const [loading, setLoading] = useState(false);
+
+    const animationVariant = {
+        hidden: { opacity: 0, y: 80 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                type: "spring",
+                stiffness: 80,
+                damping: 12,
+                duration: 0.8
+            }
+        }
+    };
 
     return (
         <>
@@ -22,79 +33,92 @@ function LoginPage() {
                     background: "linear-gradient(to top right, #ffa585, #ffeda0, #a0e7e5)",
                     display: "flex",
                     justifyContent: "center",
+                    alignItems: "center",
                     minHeight: "100vh",
                     width: "100%",
-                    alignItems: "center"
+                    px: 2
                 }}
             >
-                <Container
-                    maxWidth="md"
-                    disableGutters
-                    sx={{
-                        display: "flex",
-                        flexDirection: { xs: "column", sm: "row" },
-                        minHeight: "100vh",
-                        gap: { md: 4 },
-                    }}
+                {/* Animated Wrapper */}
+                <Motion.div
+                    variants={animationVariant}
+                    initial="hidden"
+                    animate="visible"
+                    style={{ width: "100%" }}
                 >
-                    {/* Left side: Login Form */}
-                    <Box
-                        flex={1}
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
-                        p={2}
-                    >
-                        <Paper elevation={3} sx={{
-                            padding: 4,
-                            maxWidth: 400,
-                            backgroundColor: "rgba(255, 255, 255, 0.9)", // semi-transparent white
+                    <Paper
+                        elevation={3}
+                        sx={{
+                            display: "flex",
+                            flexDirection: { xs: "column", sm: "row" },
+                            width: "100%",
+                            maxWidth: { xs: "100%", md: "900px" },
+                            margin: "0 auto",
                             borderRadius: 3,
-                            boxShadow: "0 12px 32px rgba(0,0,0,0.15)",       // subtle shadow
-                            backdropFilter: "blur(6px)",                   // adds a soft blur behind
-                        }}>
-                            <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: "bold" }}>
+                            overflow: "hidden",
+                            backdropFilter: "blur(6px)",
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                            boxShadow: "0 12px 32px rgba(0,0,0,0.15)",
+                            py: 6,
+                            "@media (max-width:699px)": {
+                                maxWidth: "500px"
+                            }
+                        }}
+                    >
+                        {/* Left Side: Login Form */}
+                        <Box
+                            flex={1}
+                            p={{ xs: 3, sm: 4 }}
+                            display="flex"
+                            flexDirection="column"
+                            justifyContent="center"
+                        >
+                            <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: "bold" }} mb={2}>
                                 Welcome
                             </Typography>
-                            <Typography align="center" mb={2} gutterBottom>
+                            <Typography align="center" mb={2}>
                                 Every great journey begins with a single step — let’s take it together.
                             </Typography>
 
                             <LoginForm onLoadingChange={setLoading} />
 
-                            <Divider sx={{ mt: 2 }}>or continue with</Divider>
-
-                            <Box mt={3} display="flex" justifyContent="center" gap={2}>
-                                <IconButton aria-label="Google login">
-                                    <GoogleIcon />
-                                </IconButton>
-                                <IconButton aria-label="Apple login">
-                                    <AppleIcon />
-                                </IconButton>
-                            </Box>
-
-                            <Typography mt={3} align="center" gutterBottom>
-                                Not a member? Register now
+                            <Typography mt={3} align="center">
+                                Not a member?{" "}
+                                <span style={{ color: "#1976d2", cursor: "pointer" }}>
+                                    Register now
+                                </span>
                             </Typography>
-                        </Paper>
-                    </Box>
+                        </Box>
 
-                    {/* Right side: Image */}
-                    <Box
-                        sx={{
-                            flex: 1,
-                            display: 'block',
-                            '@media (max-width:700px)': {
-                                display: 'none',
-                            },
-                            backgroundImage: "url('/assets/work-in-progress-animate.svg')",
-                            backgroundSize: 'contain',
-                            backgroundPosition: 'center',
-                            backgroundRepeat: 'no-repeat',
-                            height: '100vh',
-                        }}
-                    />
-                </Container>
+                        <Divider
+                            orientation="vertical"
+                            flexItem
+                            sx={{
+                                display: { sm: "block" },
+                                mx: 1,
+                                borderColor: "rgba(0, 0, 0, 0.1)",
+                                "@media (max-width:699px)": {
+                                    display: "none"
+                                }
+                            }}
+                        />
+
+                        {/* Right Side: Image */}
+                        <Box
+                            flex={1}
+                            sx={{
+                                backgroundImage: "url('/assets/work-in-progress.svg')",
+                                backgroundSize: "contain",
+                                backgroundPosition: "center",
+                                backgroundRepeat: "no-repeat",
+                                minHeight: 300,
+                                "@media (max-width:699px)": {
+                                    display: "none"
+                                }
+                            }}
+                        />
+                    </Paper>
+                </Motion.div>
             </Container>
         </>
     );
