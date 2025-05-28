@@ -43,8 +43,8 @@ function ForgotPasswordPage() {
                         style={{ width: '100%', display: "flex", justifyContent: "center" }}
                     >
                         <Paper elevation={4} sx={{
-                            padding: { xs: 3, sm: 4, md: 5 },
-                            width: { xs: "90%", sm: "80%", md: "60%" },
+                            padding: { xs: 3, sm: 4, md: 4 },
+                            maxWidth: 550,
                             backgroundColor: "rgba(255, 255, 255, 0.9)",
                             borderRadius: 3,
                             boxShadow: "0 12px 32px rgba(0,0,0,0.15)",
@@ -54,13 +54,13 @@ function ForgotPasswordPage() {
                                 Forgot your password
                             </Typography>
 
-                            <Typography mb={3}>Please enter the email address you'd like your password reset information sent to</Typography>
+                            <Typography mb={3}>Enter the email associated with your account and we'll send you password reset link.</Typography>
 
                             <ForgotPasswordForm onLoadingChange={setLoading} />
 
                             <Typography mt={3} align="center" gutterBottom>
                                 <Link to="/login" className="no-underline">
-                                    Back To Login
+                                    Back to login
                                 </Link>
                             </Typography>
                         </Paper>
