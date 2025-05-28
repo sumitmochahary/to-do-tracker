@@ -3,6 +3,7 @@ import { Box, Container, Paper, Typography, IconButton, Divider } from "@mui/mat
 import { useState } from "react";
 import LoadingEffect from "../components/LoadingEffect";
 import RegisterForm from "../components/RegisterForm";
+import { Link } from "react-router";
 
 function SignUpPage() {
 
@@ -49,7 +50,7 @@ function SignUpPage() {
                         <RegisterForm onLoadingChange={setLoading} />
 
                         <Typography mt={3} align="center" gutterBottom>
-                            Have an account? Sign In
+                            Have an account?{" "}<Link to="/login">Sign In</Link>
                         </Typography>
                     </Paper>
                 </Container>

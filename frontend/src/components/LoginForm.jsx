@@ -37,7 +37,6 @@ function LoginForm({ onLoadingChange }) {
         try {
             const response = await loginUser(data)
             console.log("Login successful:", response)
-
             localStorage.setItem("token", response.token)
             reset()
         } catch (error) {

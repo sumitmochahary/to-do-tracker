@@ -4,6 +4,7 @@ import { motion as Motion } from "framer-motion";
 
 import LoadingEffect from "../components/LoadingEffect";
 import LoginForm from "../components/LoginForm";
+import { Link } from "react-router";
 
 function LoginPage() {
     const [loading, setLoading] = useState(false);
@@ -83,10 +84,7 @@ function LoginPage() {
                             <LoginForm onLoadingChange={setLoading} />
 
                             <Typography mt={3} align="center">
-                                Not a member?{" "}
-                                <span style={{ color: "#1976d2", cursor: "pointer" }}>
-                                    Register now
-                                </span>
+                                Not a member?{" "}<Link to="/register">Register now</Link>
                             </Typography>
                         </Box>
 
