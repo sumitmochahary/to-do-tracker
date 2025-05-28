@@ -1,4 +1,3 @@
-import LoginPage from "./pages/LoginPage.jsx";
 import { BrowserRouter as Router } from "react-router";
 import AppRoutes from "./routes/AppRoutes.jsx";
 

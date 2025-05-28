@@ -1,27 +1,13 @@
-import { Box, Container, Paper, Typography, Divider } from "@mui/material";
-import { useState } from "react";
-import { motion as Motion } from "framer-motion";
-
-import LoadingEffect from "../components/LoadingEffect";
-import LoginForm from "../components/LoginForm";
-import { Link } from "react-router";
+import { Box, Container, Paper, Typography, Divider } from "@mui/material"
+import { useState } from "react"
+import { motion as Motion } from "framer-motion"
+import LoadingEffect from "../components/LoadingEffect"
+import LoginForm from "../components/LoginForm"
+import { Link } from "react-router"
+import { formAnimationVariant } from "../animations/MotionVariants"
 
 function LoginPage() {
-    const [loading, setLoading] = useState(false);
-
-    const animationVariant = {
-        hidden: { opacity: 0, y: 80 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: {
-                type: "spring",
-                stiffness: 80,
-                damping: 12,
-                duration: 0.8
-            }
-        }
-    };
+    const [loading, setLoading] = useState(false)
 
     return (
         <>
@@ -42,7 +28,7 @@ function LoginPage() {
             >
                 {/* Animated Wrapper */}
                 <Motion.div
-                    variants={animationVariant}
+                    variants={formAnimationVariant}
                     initial="hidden"
                     animate="visible"
                     style={{ width: "100%" }}
@@ -84,7 +70,7 @@ function LoginPage() {
                             <LoginForm onLoadingChange={setLoading} />
 
                             <Typography mt={3} align="center">
-                                Not a member?{" "}<Link to="/register">Register now</Link>
+                                Not a member?{" "}<Link to="/register" className="no-underline">Register now</Link>
                             </Typography>
                         </Box>
 
