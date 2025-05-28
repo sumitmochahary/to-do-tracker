@@ -1,11 +1,10 @@
-import { Box, TextField, InputAdornment, Button, Typography, IconButton } from "@mui/material";
-
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-
-import EmailIcon from "@mui/icons-material/Email";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { loginUser } from "../services/authService";
+import { Box, TextField, InputAdornment, Button, Typography, IconButton } from "@mui/material"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import EmailIcon from "@mui/icons-material/Email"
+import { Visibility, VisibilityOff } from "@mui/icons-material"
+import { loginUser } from "../services/authService"
+import { Link } from "react-router"
 
 function LoginForm({ onLoadingChange }) {
 
@@ -117,7 +116,7 @@ function LoginForm({ onLoadingChange }) {
             </Box>
 
             <Typography mb={1} align="right" gutterBottom>
-                Forgot Password?
+                <Link to="/forgot-password" className="no-underline">Forgot Password?</Link>
             </Typography>
 
             <Button

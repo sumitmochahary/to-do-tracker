@@ -1,12 +1,12 @@
 import { Container, Paper, Typography } from "@mui/material"
 import { useState } from "react"
 import LoadingEffect from "../components/LoadingEffect"
-import RegisterForm from "../components/RegisterForm"
+import ForgotPasswordForm from "../components/ForgotPasswordForm"
 import { Link } from "react-router"
 import { motion as Motion } from "framer-motion"
 import { formAnimationVariant } from "../animations/MotionVariants"
 
-function SignUpPage() {
+function ForgotPasswordPage() {
 
     const [loading, setLoading] = useState(false);
 
@@ -50,16 +50,17 @@ function SignUpPage() {
                             boxShadow: "0 12px 32px rgba(0,0,0,0.15)",
                             backdropFilter: "blur(6px)",
                         }}>
-                            <Typography variant="h5" align="center" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
-                                Create an account
+                            <Typography variant="h5" align="center" gutterBottom sx={{ fontWeight: "bold", mb: 2 }}>
+                                Forgot your password
                             </Typography>
 
-                            <RegisterForm onLoadingChange={setLoading} />
+                            <Typography mb={3}>Please enter the email address you'd like your password reset information sent to</Typography>
+
+                            <ForgotPasswordForm onLoadingChange={setLoading} />
 
                             <Typography mt={3} align="center" gutterBottom>
-                                Have an account?{" "}
                                 <Link to="/login" className="no-underline">
-                                    Sign In
+                                    Back To Login
                                 </Link>
                             </Typography>
                         </Paper>
@@ -70,4 +71,4 @@ function SignUpPage() {
     );
 }
 
-export default SignUpPage;
+export default ForgotPasswordPage;

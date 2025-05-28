@@ -1,12 +1,11 @@
-import { Box, TextField, InputAdornment, Button, IconButton, Typography } from "@mui/material"
-
+import { Box, TextField, InputAdornment, Button } from "@mui/material"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
-
 import EmailIcon from "@mui/icons-material/Email"
 import PersonIcon from "@mui/icons-material/Person"
 import DialpadIcon from "@mui/icons-material/Dialpad"
 import PasswordIcon from "@mui/icons-material/Password"
+import { registerUser } from "../services/authService"
 
 function RegisterForm({ onLoadingChange }) {
 
@@ -19,9 +18,9 @@ function RegisterForm({ onLoadingChange }) {
         formState: { errors },
     } = useForm({
         defaultValues: {
-            fullName: "",
-            email: "",
-            phone: "",
+            userName: "",
+            emailId: "",
+            phoneNumber: "",
             password: "",
             confirmPassword: ""
         }
@@ -30,16 +29,26 @@ function RegisterForm({ onLoadingChange }) {
     const [loading, setLoading] = useState(false)
 
     const onFormSubmit = async (data) => {
-        setLoading(true)
-        onLoadingChange?.(true)
+        setLoading(true);
+        onLoadingChange?.(true);
 
-        setTimeout(() => {
-            console.log("Registered Successfully with:", data)
-            setLoading(false)
-            onLoadingChange?.(false)
+        // Remove confirmPassword before submitting
+        const submitData = { ...data };
+        delete submitData.confirmPassword;
+
+        try {
+            const response = await registerUser(submitData);
+            console.log("Login successful:", response);
+            localStorage.setItem("token", response.token);
             reset();
-        }, 2000);
+        } catch (error) {
+            console.log("Login error:", error);
+        } finally {
+            setLoading(false);
+            onLoadingChange?.(false);
+        }
     };
+
 
     return (
         <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
@@ -49,13 +58,13 @@ function RegisterForm({ onLoadingChange }) {
                     fullWidth
                     label="Name"
                     variant="outlined"
-                    value={watch("fullName")}
-                    {...register("fullName", {
+                    value={watch("userName")}
+                    {...register("userName", {
                         required: "First name is required."
                     })}
-                    error={!!errors.fullName}
-                    helperText={errors.fullName?.message || " "}
-                    onBlur={() => trigger("fullName")}
+                    error={!!errors.userName}
+                    helperText={errors.userName?.message || " "}
+                    onBlur={() => trigger("userName")}
                     slotProps={{
                         input: {
                             endAdornment: (
@@ -74,17 +83,17 @@ function RegisterForm({ onLoadingChange }) {
                     label="Email"
                     variant="outlined"
                     autoComplete="email"
-                    value={watch("email")}
-                    {...register("email", {
+                    value={watch("emailId")}
+                    {...register("emailId", {
                         required: "Email is required.",
                         pattern: {
                             value: /^\S+@\S+\.\S+$/,
                             message: "Invalid email address.",
                         },
                     })}
-                    error={!!errors.email}
-                    helperText={errors.email?.message || " "}
-                    onBlur={() => trigger("email")}
+                    error={!!errors.emailId}
+                    helperText={errors.emailId?.message || " "}
+                    onBlur={() => trigger("emailId")}
                     slotProps={{
                         input: {
                             endAdornment: (
@@ -103,17 +112,17 @@ function RegisterForm({ onLoadingChange }) {
                     label="Phone Number"
                     variant="outlined"
                     autoComplete="tel"
-                    value={watch("phone")}
-                    {...register("phone", {
+                    value={watch("phoneNumber")}
+                    {...register("phoneNumber", {
                         required: "Phone number is required.",
                         pattern: {
                             value: /^[0-9]{10}$/,
                             message: "Phone number must be 10 digits.",
                         },
                     })}
-                    error={!!errors.phone}
-                    helperText={errors.phone?.message || " "}
-                    onBlur={() => trigger("phone")}
+                    error={!!errors.phoneNumber}
+                    helperText={errors.phoneNumber?.message || " "}
+                    onBlur={() => trigger("phoneNumber")}
                     slotProps={{
                         input: {
                             endAdornment: (
