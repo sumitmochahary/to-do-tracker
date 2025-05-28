@@ -79,7 +79,7 @@ function LoginForm({ onLoadingChange }) {
                 />
             </Box>
 
-            <Box mb={1}>
+            <Box >
                 <TextField
                     fullWidth
                     label="Password"
@@ -115,7 +115,7 @@ function LoginForm({ onLoadingChange }) {
                 />
             </Box>
 
-            <Typography mb={1} align="right" gutterBottom>
+            <Typography mb={2} align="right" gutterBottom>
                 <Link to="/forgot-password" className="no-underline">Forgot Password?</Link>
             </Typography>
 

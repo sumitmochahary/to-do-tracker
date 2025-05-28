@@ -20,7 +20,9 @@ function ResetPasswordForm({ onLoadingChange }) {
 
     const [loading, setLoading] = useState(false)
 
-    const onFormSubmit = async () => {
+    const onFormSubmit = async (data) => {
+        const submitData = { ...data };
+        delete submitData.confirmPassword;
         setLoading(true)
         onLoadingChange?.(true)
         reset()
