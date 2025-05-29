@@ -71,7 +71,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/api/auth/login"); // Skip filter for login endpoints
+        return path.startsWith("/api/auth/") || path.startsWith("/api/password/"); // Skip filter for login endpoints
     }
 
     private void sendError(HttpServletResponse response, String message) throws IOException {

@@ -2,6 +2,7 @@ import { Box, TextField, InputAdornment, Button } from "@mui/material"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import EmailIcon from "@mui/icons-material/Email"
+import { forgotPassword } from "../services/PasswordService";
 
 function ForgotPasswordForm({ onLoadingChange }) {
 
@@ -20,10 +21,20 @@ function ForgotPasswordForm({ onLoadingChange }) {
 
     const [loading, setLoading] = useState(false)
 
-    const onFormSubmit = async () => {
+    const onFormSubmit = async (data) => {
         setLoading(true)
         onLoadingChange?.(true)
-        reset()
+
+        try {
+            const response = await forgotPassword(data)
+            console.log(response)
+            reset()
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setLoading(false)
+            onLoadingChange?.(false)
+        }
     };
 
     return (

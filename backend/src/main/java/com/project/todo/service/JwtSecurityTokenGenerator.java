@@ -11,7 +11,6 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class JwtSecurityTokenGenerator implements SecurityTokenGenerator{
@@ -22,7 +21,7 @@ public class JwtSecurityTokenGenerator implements SecurityTokenGenerator{
     private long expirationMs;
 
     @Override
-    public Map<String, String> generateToken(Optional<Users> users) {
+    public Map<String, String> generateToken(Users users) {
         // Validate user email
         String email = users.map(Users::getEmailId)
                 .filter(e -> !e.isBlank())

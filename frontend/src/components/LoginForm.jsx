@@ -3,7 +3,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import EmailIcon from "@mui/icons-material/Email"
 import { Visibility, VisibilityOff } from "@mui/icons-material"
-import { loginUser } from "../services/authService"
+import { loginUser } from "../services/AuthService"
 import { Link } from "react-router"
 
 function LoginForm({ onLoadingChange }) {

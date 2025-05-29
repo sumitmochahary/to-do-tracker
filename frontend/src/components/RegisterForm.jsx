@@ -5,7 +5,7 @@ import EmailIcon from "@mui/icons-material/Email"
 import PersonIcon from "@mui/icons-material/Person"
 import DialpadIcon from "@mui/icons-material/Dialpad"
 import PasswordIcon from "@mui/icons-material/Password"
-import { registerUser } from "../services/authService"
+import { registerUser } from "../services/AuthService"
 
 function RegisterForm({ onLoadingChange }) {
 
@@ -42,7 +42,7 @@ function RegisterForm({ onLoadingChange }) {
             localStorage.setItem("token", response.token);
             reset();
         } catch (error) {
-            console.log("Registration error:", error);
+            console.error(error);
         } finally {
             setLoading(false);
             onLoadingChange?.(false);

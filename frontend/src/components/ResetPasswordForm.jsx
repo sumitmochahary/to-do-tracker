@@ -1,7 +1,9 @@
 import { Box, TextField, InputAdornment, Button } from "@mui/material"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import PasswordIcon from "@mui/icons-material/Password"
+import { resetPassword } from "../services/PasswordService";
+import { useLocation } from "react-router";
 
 function ResetPasswordForm({ onLoadingChange }) {
     const {
@@ -19,13 +21,33 @@ function ResetPasswordForm({ onLoadingChange }) {
     });
 
     const [loading, setLoading] = useState(false)
+    const location = useLocation()
+    const [token, setToken] = useState()
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search)
+        const tokenFormUrl = searchParams.get("token")
+        if (tokenFormUrl) {
+            setToken(tokenFormUrl)
+        }
+    }, [location])
 
     const onFormSubmit = async (data) => {
-        const submitData = { ...data };
-        delete submitData.confirmPassword;
         setLoading(true)
         onLoadingChange?.(true)
-        reset()
+
+        const { password } = data
+
+        try {
+            const response = await resetPassword(token, password)
+            console.log(response)
+            reset()
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setLoading(false)
+            onLoadingChange(false)
+        }
     };
 
     return (

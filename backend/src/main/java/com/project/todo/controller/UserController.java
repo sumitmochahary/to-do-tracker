@@ -35,11 +35,14 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Users users) throws UserNotFoundException, InvalidCredentialsException {
+        Optional<Users> userOptional = userService.login(users.getEmailId(), users.getPassword());
 
-        Optional<Users> user = userService.login(users.getEmailId(), users.getPassword());
-
-        Map<String, String> tokenMap = securityToken.generateToken(user);
-
-        return new ResponseEntity<>(tokenMap, HttpStatus.OK);
+        if (userOptional.isPresent()) {
+            Users user = userOptional.get();
+            Map<String, String> tokenMap = securityToken.generateToken(user);
+            return new ResponseEntity<>(tokenMap, HttpStatus.OK);
+        } else {
+            throw new InvalidCredentialsException();
+        }
     }
 }
