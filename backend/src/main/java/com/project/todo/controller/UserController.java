@@ -1,6 +1,7 @@
 package com.project.todo.controller;
 
 import com.project.todo.domain.Users;
+import com.project.todo.exception.InvalidCredentialsException;
 import com.project.todo.exception.UserAlreadyExistException;
 import com.project.todo.exception.UserNotFoundException;
 import com.project.todo.service.SecurityTokenGenerator;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -28,23 +30,16 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Users users) throws UserAlreadyExistException{
         userService.register(users);
-        return new ResponseEntity<>("Users register successfully", HttpStatus.CREATED);
+        return new ResponseEntity<>("User register successfully", HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Users users) throws UserNotFoundException{
+    public ResponseEntity<?> login(@RequestBody Users users) throws UserNotFoundException, InvalidCredentialsException {
 
-        Map<String, String> map = null;
-        ResponseEntity<?> responseEntity;
+        Optional<Users> user = userService.login(users.getEmailId(), users.getPassword());
 
-        Users user = userService.login(users.getEmailId(), users.getPassword());
+        Map<String, String> tokenMap = securityToken.generateToken(user);
 
-        if(user != null) {
-            map = securityToken.generateToken(user);
-            responseEntity = new ResponseEntity<>(map, HttpStatus.OK);
-        } else{
-            responseEntity = new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
-        }
-        return responseEntity;
+        return new ResponseEntity<>(tokenMap, HttpStatus.OK);
     }
 }

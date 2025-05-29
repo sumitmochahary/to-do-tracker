@@ -38,11 +38,11 @@ function RegisterForm({ onLoadingChange }) {
 
         try {
             const response = await registerUser(submitData);
-            console.log("Login successful:", response);
+            console.log(response);
             localStorage.setItem("token", response.token);
             reset();
         } catch (error) {
-            console.log("Login error:", error);
+            console.log("Registration error:", error);
         } finally {
             setLoading(false);
             onLoadingChange?.(false);

@@ -13,7 +13,7 @@ public class Users {
     private String emailId;
     @Column(nullable = false)
     private String password;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private long phoneNumber;
 
     public Users() {

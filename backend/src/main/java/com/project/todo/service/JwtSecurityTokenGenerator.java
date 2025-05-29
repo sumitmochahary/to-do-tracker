@@ -11,6 +11,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class JwtSecurityTokenGenerator implements SecurityTokenGenerator{
@@ -21,12 +22,11 @@ public class JwtSecurityTokenGenerator implements SecurityTokenGenerator{
     private long expirationMs;
 
     @Override
-    public Map<String, String> generateToken(Users users) {
+    public Map<String, String> generateToken(Optional<Users> users) {
         // Validate user email
-        String email = users.getEmailId();
-        if (email == null || email.isBlank()){
-            throw new IllegalArgumentException("User email is required for token generation.");
-        }
+        String email = users.map(Users::getEmailId)
+                .filter(e -> !e.isBlank())
+                .orElseThrow(() -> new IllegalArgumentException("User email is required for token generation."));
         // Decode and validate secret key
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         if(keyBytes.length < 32) {
@@ -41,7 +41,7 @@ public class JwtSecurityTokenGenerator implements SecurityTokenGenerator{
         // Build token
         String jwtToken = Jwts
                 .builder()
-                .subject(Integer.toString(users.getUserId()))
+                .subject(Integer.toString(users.get().getUserId()))
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(key, Jwts.SIG.HS256)

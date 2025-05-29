@@ -40,7 +40,6 @@ function LoginForm({ onLoadingChange }) {
             reset()
         } catch (error) {
             console.log("Login error:", error)
-            console.log(error)
         } finally {
             setLoading(false)
             onLoadingChange?.(false)

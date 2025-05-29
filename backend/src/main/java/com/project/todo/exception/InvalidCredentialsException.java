@@ -3,6 +3,6 @@ package com.project.todo.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(value = HttpStatus.CONFLICT, reason = "User already exist")
-public class UserAlreadyExistException extends Exception {
+@ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason = "Invalid credentials")
+public class InvalidCredentialsException extends Exception {
 }
