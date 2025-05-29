@@ -58,6 +58,7 @@ function RegisterForm({ onLoadingChange }) {
                     fullWidth
                     label="Name"
                     variant="outlined"
+                    autoComplete="name"
                     value={watch("userName")}
                     {...register("userName", {
                         required: "First name is required."
@@ -170,6 +171,7 @@ function RegisterForm({ onLoadingChange }) {
                     fullWidth
                     label="Confirm Password"
                     variant="outlined"
+                    autoComplete="new-password"
                     value={watch("confirmPassword")}
                     type="text"
                     {...register("confirmPassword", {
