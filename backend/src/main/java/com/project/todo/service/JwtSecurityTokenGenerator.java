@@ -23,9 +23,10 @@ public class JwtSecurityTokenGenerator implements SecurityTokenGenerator{
     @Override
     public Map<String, String> generateToken(Users users) {
         // Validate user email
-        String email = users.map(Users::getEmailId)
-                .filter(e -> !e.isBlank())
-                .orElseThrow(() -> new IllegalArgumentException("User email is required for token generation."));
+        String email = users.getEmailId();
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("User email is required for token generation.");
+        }
         // Decode and validate secret key
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         if(keyBytes.length < 32) {
@@ -40,7 +41,7 @@ public class JwtSecurityTokenGenerator implements SecurityTokenGenerator{
         // Build token
         String jwtToken = Jwts
                 .builder()
-                .subject(Integer.toString(users.get().getUserId()))
+                .subject(Integer.toString(users.getUserId()))
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(key, Jwts.SIG.HS256)
