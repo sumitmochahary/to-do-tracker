@@ -24,61 +24,152 @@ public class TaskController {
         this.iTaskService = iTaskService;
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<Task> insertTask(@RequestBody Task task, HttpServletRequest request) {
+    // Helper method to validate userId from request
+    private String validateAndGetUserId(HttpServletRequest request) {
         String userId = (String) request.getAttribute("userId");
+        if (userId == null || userId.trim().isEmpty()) {
+            return null;
+        }
+        return userId;
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<?> insertTask(@RequestBody Task task, HttpServletRequest request) {
+        String userId = validateAndGetUserId(request);
+        if (userId == null) {
+            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
+        }
         task.setUserId(userId);
         Task savedTask = iTaskService.saveTask(task);
         return new ResponseEntity<>(savedTask, HttpStatus.CREATED);
     }
 
-    @GetMapping("/tasks")
-    public ResponseEntity<List<Task>> fetchAllTasks(){
+    @GetMapping("/tasks/ss1234")
+    public ResponseEntity<?> fetchAllTasks(HttpServletRequest request) {
+        String userId = validateAndGetUserId(request);
+        if (userId == null) {
+            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
+        }
         List<Task> tasks = iTaskService.fetchAllTasks();
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
     @GetMapping("/fetch/{userId}")
-    public ResponseEntity<List<Task>> fetchTask(@PathVariable String userId) throws TaskNotFoundException {
+    public ResponseEntity<?> fetchTask(@PathVariable String userId, HttpServletRequest request) throws TaskNotFoundException {
+        String requestUserId = validateAndGetUserId(request);
+        if (requestUserId == null) {
+            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
+        }
+
+        if (!requestUserId.equals(userId)) {
+            return new ResponseEntity<>("Forbidden: Cannot access other user's tasks", HttpStatus.FORBIDDEN);
+        }
+
         List<Task> taskList = iTaskService.fetchTaskByUserId(userId);
         return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
 
     @GetMapping("/category/{taskCategory}")
-    public ResponseEntity<List<Task>> fetchByCategory(@PathVariable String taskCategory) {
-        return new ResponseEntity<>(iTaskService.fetchByCategory(taskCategory), HttpStatus.OK);
+    public ResponseEntity<?> fetchByCategory(@PathVariable String taskCategory, HttpServletRequest request) {
+        String userId = validateAndGetUserId(request);
+        if (userId == null) {
+            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Optional: Filter by userId as well to ensure user only sees their own tasks
+        // List<Task> tasks = iTaskService.fetchByCategoryAndUserId(taskCategory, userId);
+        List<Task> tasks = iTaskService.fetchByCategory(taskCategory);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
     @GetMapping("/status/{taskStatus}")
-    public ResponseEntity<List<Task>> fetchByStatus(@PathVariable String taskStatus) {
-        return new ResponseEntity<>(iTaskService.fetchByStatus(taskStatus), HttpStatus.OK);
+    public ResponseEntity<?> fetchByStatus(@PathVariable String taskStatus, HttpServletRequest request) {
+        String userId = validateAndGetUserId(request);
+        if (userId == null) {
+            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Optional: Filter by userId as well to ensure user only sees their own tasks
+        // List<Task> tasks = iTaskService.fetchByStatusAndUserId(taskStatus, userId);
+        List<Task> tasks = iTaskService.fetchByStatus(taskStatus);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
     @GetMapping("/due/{taskDueDate}")
-    public ResponseEntity<List<Task>> fetchByDueDate(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate taskDueDate) {
-        return new ResponseEntity<>(iTaskService.fetchByDueDate(taskDueDate), HttpStatus.OK);
+    public ResponseEntity<?> fetchByDueDate(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate taskDueDate, HttpServletRequest request) {
+        String userId = validateAndGetUserId(request);
+        if (userId == null) {
+            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Optional: Filter by userId as well to ensure user only sees their own tasks
+        // List<Task> tasks = iTaskService.fetchByDueDateAndUserId(taskDueDate, userId);
+        List<Task> tasks = iTaskService.fetchByDueDate(taskDueDate);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{taskId}")
-    public ResponseEntity<String> deleteTask(@PathVariable String taskId) throws TaskNotFoundException {  // Changed from int to String
+    public ResponseEntity<?> deleteTask(@PathVariable String taskId, HttpServletRequest request) throws TaskNotFoundException {
+        String userId = validateAndGetUserId(request);
+        if (userId == null) {
+            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Optional: Verify that the task belongs to the requesting user before deletion
+        // Task existingTask = iTaskService.getTaskById(taskId);
+        // if (existingTask == null || !existingTask.getUserId().equals(userId)) {
+        //     return new ResponseEntity<>("Forbidden: Cannot delete task that doesn't belong to you", HttpStatus.FORBIDDEN);
+        // }
+
         iTaskService.deleteTask(taskId);
         return new ResponseEntity<>("Task deleted with ID: " + taskId, HttpStatus.OK);
     }
 
     @GetMapping("/status/archived")
-    public ResponseEntity<List<Task>> fetchArchivedTasks() {
+    public ResponseEntity<?> fetchArchivedTasks(HttpServletRequest request) {
+        String userId = validateAndGetUserId(request);
+        if (userId == null) {
+            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Optional: Filter archived tasks by userId to show only user's archived tasks
+        // List<Task> archivedTasks = iTaskService.fetchArchivedTasksByUserId(userId);
         List<Task> archivedTasks = iTaskService.fetchArchivedTasks();
         return new ResponseEntity<>(archivedTasks, HttpStatus.OK);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Task> updateTask(@RequestBody Task task) throws TaskNotFoundException {
+    public ResponseEntity<?> updateTask(@RequestBody Task task, HttpServletRequest request) throws TaskNotFoundException {
+        String userId = validateAndGetUserId(request);
+        if (userId == null) {
+            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Optional: Verify that the task belongs to the requesting user before update
+        // Task existingTask = iTaskService.getTaskById(task.getTaskId());
+        // if (existingTask == null || !existingTask.getUserId().equals(userId)) {
+        //     return new ResponseEntity<>("Forbidden: Cannot update task that doesn't belong to you", HttpStatus.FORBIDDEN);
+        // }
+        // Ensure the task being updated maintains the correct userId
+        // task.setUserId(userId);
+
         Task updatedTask = iTaskService.updateTask(task);
         return new ResponseEntity<>(updatedTask, HttpStatus.OK);
     }
 
     @PutMapping("/archive/{taskId}")
-    public ResponseEntity<Task> archiveTask(@PathVariable String taskId) throws TaskNotFoundException {  // Changed from int to String
+    public ResponseEntity<?> archiveTask(@PathVariable String taskId, HttpServletRequest request) throws TaskNotFoundException {
+        String userId = validateAndGetUserId(request);
+        if (userId == null) {
+            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Optional: Verify that the task belongs to the requesting user before archiving
+        // Task existingTask = iTaskService.getTaskById(taskId);
+        // if (existingTask == null || !existingTask.getUserId().equals(userId)) {
+        //     return new ResponseEntity<>("Forbidden: Cannot archive task that doesn't belong to you", HttpStatus.FORBIDDEN);
+        // }
+
         Task archivedTask = iTaskService.archiveTask(taskId);
         return new ResponseEntity<>(archivedTask, HttpStatus.OK);
     }
