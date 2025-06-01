@@ -6,7 +6,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material"
 import { loginUser } from "../services/AuthService"
 import { Link } from "react-router"
 
-function LoginForm({ onLoadingChange }) {
+function LoginForm({ onLoadingChange, onShowSnackbar }) {
 
     const {
         register,
@@ -35,100 +35,124 @@ function LoginForm({ onLoadingChange }) {
 
         try {
             const response = await loginUser(data)
-            console.log("Login successful:", response)
             localStorage.setItem("token", response.token)
+            onShowSnackbar?.("Login successfull", "success")
             reset()
         } catch (error) {
-            console.log("Login error:", error)
-        } finally {
+            console.error("Login error:", error);
+
+            let message = "Login failed. Please try again.";
+
+            // Network error (server is down or refused connection)
+            if (error.message === "Network Error") {
+                message = "Unable to connect to the server. Please check your internet or server.";
+            }
+
+            // Backend responded with error
+            else if (error.response) {
+                const status = error.response.status;
+                const backendMessage = error.response.data?.message || error.response.data?.error || null;
+
+                if (backendMessage) {
+                    message = backendMessage;
+                } else {
+                    message = `Login failed with status ${status}.`;
+                }
+            }
+
+            onShowSnackbar?.(message, "error");
+        }
+        finally {
             setLoading(false)
             onLoadingChange?.(false)
         }
     };
 
     return (
-        <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
-            <Box mb={2}>
-                <TextField
+        <>
+            <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
+                <Box mb={2}>
+                    <TextField
+                        fullWidth
+                        label="Email"
+                        variant="outlined"
+                        type="email"
+                        autoComplete="email"
+                        value={watch("emailId")}
+                        {...register("emailId", {
+                            required: "Email is required.",
+                            pattern: {
+                                value: /^\S+@\S+\.\S+$/,
+                                message: "Invalid email address."
+                            }
+                        })}
+                        error={!!errors.emailId}
+                        helperText={errors.emailId?.message || " "}
+                        onBlur={() => trigger("emailId")}
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment>
+                                        <EmailIcon />
+                                    </InputAdornment>
+                                )
+                            }
+                        }}
+                    />
+                </Box>
+
+                <Box >
+                    <TextField
+                        fullWidth
+                        label="Password"
+                        variant="outlined"
+                        value={watch("password")}
+                        autoComplete="current-password"
+                        type={showPassword ? "text" : "password"}
+                        {...register("password", {
+                            required: "Password is required",
+                            minLength: {
+                                value: 6,
+                                message: "Password must be at least 6 characters."
+                            }
+                        })}
+                        error={!!errors.password}
+                        helperText={errors.password?.message || " "}
+                        onBlur={() => trigger("password")}
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={togglePasswordVisibility}
+                                            edge="end"
+                                        >
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
+                            }
+                        }}
+                    />
+                </Box>
+
+                <Typography mb={2} align="right" gutterBottom>
+                    <Link to="/forgot-password" className="no-underline">Forgot Password?</Link>
+                </Typography>
+
+                <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
                     fullWidth
-                    label="Email"
-                    variant="outlined"
-                    type="email"
-                    autoComplete="email"
-                    value={watch("emailId")}
-                    {...register("emailId", {
-                        required: "Email is required.",
-                        pattern: {
-                            value: /^\S+@\S+\.\S+$/,
-                            message: "Invalid email address."
-                        }
-                    })}
-                    error={!!errors.emailId}
-                    helperText={errors.emailId?.message || " "}
-                    onBlur={() => trigger("emailId")}
-                    slotProps={{
-                        input: {
-                            endAdornment: (
-                                <InputAdornment>
-                                    <EmailIcon />
-                                </InputAdornment>
-                            )
-                        }
-                    }}
-                />
-            </Box>
-
-            <Box >
-                <TextField
-                    fullWidth
-                    label="Password"
-                    variant="outlined"
-                    value={watch("password")}
-                    autoComplete="current-password"
-                    type={showPassword ? "text" : "password"}
-                    {...register("password", {
-                        required: "Password is required",
-                        minLength: {
-                            value: 6,
-                            message: "Password must be at least 6 characters."
-                        }
-                    })}
-                    error={!!errors.password}
-                    helperText={errors.password?.message || " "}
-                    onBlur={() => trigger("password")}
-                    slotProps={{
-                        input: {
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={togglePasswordVisibility}
-                                        edge="end"
-                                    >
-                                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
-                                </InputAdornment>
-                            )
-                        }
-                    }}
-                />
-            </Box>
-
-            <Typography mb={2} align="right" gutterBottom>
-                <Link to="/forgot-password" className="no-underline">Forgot Password?</Link>
-            </Typography>
-
-            <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                fullWidth
-                size="large"
-                disabled={loading}
-            >
-                {loading ? "Signing In..." : "Sign In"}
-            </Button>
-        </form>
+                    size="large"
+                    disabled={loading}
+                >
+                    {loading ? "Signing In..." : "Sign In"}
+                </Button>
+            </form>
+        </>
     )
 }
 

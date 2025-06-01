@@ -1,4 +1,4 @@
-import { Box, Container, Paper, Typography, Divider } from "@mui/material"
+import { Box, Container, Paper, Typography, Divider, Snackbar, Alert } from "@mui/material"
 import { useState } from "react"
 import { motion as Motion } from "framer-motion"
 import LoadingEffect from "../components/LoadingEffect"
@@ -8,6 +8,24 @@ import { formAnimationVariant } from "../animations/MotionVariants"
 
 function LoginPage() {
     const [loading, setLoading] = useState(false)
+
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "info"
+    })
+
+    const showSnackbar = (message, severity = "info") => {
+        setSnackbar({
+            open: true,
+            message,
+            severity
+        })
+    }
+
+    const handleSnackbarClose = () => {
+        setSnackbar(prev => ({ ...prev, open: false }))
+    }
 
     return (
         <>
@@ -67,7 +85,7 @@ function LoginPage() {
                                 Every great journey begins with a single step — let’s take it together.
                             </Typography>
 
-                            <LoginForm onLoadingChange={setLoading} />
+                            <LoginForm onLoadingChange={setLoading} onShowSnackbar={showSnackbar} />
 
                             <Typography mt={3} align="center">
                                 Not a member?{" "}<Link to="/register" className="no-underline">Register now</Link>
@@ -104,6 +122,16 @@ function LoginPage() {
                     </Paper>
                 </Motion.div>
             </Container>
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={handleSnackbarClose}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+                <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </>
     );
 }
