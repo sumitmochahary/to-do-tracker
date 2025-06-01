@@ -51,7 +51,7 @@ function ToDoLandingPage() {
             <Container sx={{ mt: 8 }}>
                 <Grid container spacing={4} alignItems="center">
                     {/* Left Side Text */}
-                    <Grid item xs={12} md={6}>
+                    <Grid>
                         <Typography variant="h3" fontWeight="bold" gutterBottom>
                             TO DO LIST
                         </Typography>
@@ -65,7 +65,7 @@ function ToDoLandingPage() {
                     </Grid>
 
                     {/* Right Side Image Placeholder */}
-                    <Grid item xs={12} md={6}>
+                    <Grid>
                         <Box
                             component="img"
                             src="https://img.freepik.com/free-vector/tiny-people-analyzing-clipboard-with-checklist_74855-5833.jpg"

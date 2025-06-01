@@ -1,7 +1,6 @@
 import { Container, Paper, Typography } from "@mui/material"
 import { useState } from "react"
 import LoadingEffect from "../components/LoadingEffect"
-import ForgotPasswordForm from "../components/ForgotPasswordForm"
 import { Link } from "react-router"
 import { motion as Motion } from "framer-motion"
 import { formAnimationVariant } from "../animations/MotionVariants"
@@ -57,6 +56,12 @@ function ResetPasswordPage() {
                             <Typography mb={3}>Enter a new password below to change your password</Typography>
 
                             <ResetPasswordForm onLoadingChange={setLoading} />
+
+                            <Typography mt={3} align="center" gutterBottom>
+                                <Link to="/login" className="no-underline">
+                                    Back to login
+                                </Link>
+                            </Typography>
                         </Paper>
                     </Motion.div>
                 </Container>

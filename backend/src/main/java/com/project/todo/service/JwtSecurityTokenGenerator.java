@@ -41,6 +41,7 @@ public class JwtSecurityTokenGenerator implements SecurityTokenGenerator{
         // Build token
         String jwtToken = Jwts
                 .builder()
+                .header().add("typ","JWT").and()
                 .subject(Integer.toString(users.getUserId()))
                 .issuedAt(now)
                 .expiration(expiryDate)
@@ -50,7 +51,6 @@ public class JwtSecurityTokenGenerator implements SecurityTokenGenerator{
         // Return token
         Map<String, String> tokenMap = new HashMap<>();
         tokenMap.put("token", jwtToken);
-        tokenMap.put("expireAt", expiryDate.toString());
         return tokenMap;
     }
 }
