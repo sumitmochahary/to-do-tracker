@@ -1,6 +1,7 @@
 package com.project.todo.controller;
 
 import com.project.todo.domain.Users;
+import com.project.todo.exception.InvalidCredentialsException;
 import com.project.todo.exception.UserAlreadyExistException;
 import com.project.todo.exception.UserNotFoundException;
 import com.project.todo.service.SecurityTokenGenerator;
@@ -11,8 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/auth")
 public class UserController {
     private final UserService userService;
@@ -27,23 +30,19 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Users users) throws UserAlreadyExistException{
         userService.register(users);
-        return new ResponseEntity<>("Users register successfully", HttpStatus.CREATED);
+        return new ResponseEntity<>("User register successfully", HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Users users) throws UserNotFoundException{
+    public ResponseEntity<?> login(@RequestBody Users users) throws UserNotFoundException, InvalidCredentialsException {
+        Optional<Users> userOptional = userService.login(users.getEmailId(), users.getPassword());
 
-        Map<String, String> map = null;
-        ResponseEntity<?> responseEntity;
-
-        Users user = userService.login(users.getEmailId(), users.getPassword());
-
-        if(user != null) {
-            map = securityToken.generateToken(user);
-            responseEntity = new ResponseEntity<>(map, HttpStatus.OK);
-        } else{
-            responseEntity = new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
+        if (userOptional.isPresent()) {
+            Users user = userOptional.get();
+            Map<String, String> tokenMap = securityToken.generateToken(user);
+            return new ResponseEntity<>(tokenMap, HttpStatus.OK);
+        } else {
+            throw new InvalidCredentialsException();
         }
-        return responseEntity;
     }
 }

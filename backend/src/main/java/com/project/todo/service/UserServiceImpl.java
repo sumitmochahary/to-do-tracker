@@ -1,12 +1,15 @@
 package com.project.todo.service;
 
 import com.project.todo.domain.Users;
+import com.project.todo.exception.InvalidCredentialsException;
 import com.project.todo.exception.UserAlreadyExistException;
 import com.project.todo.exception.UserNotFoundException;
 import com.project.todo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -22,18 +25,24 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void register(Users users) throws UserAlreadyExistException {
-        if (userRepository.existsById(users.getUserId())){
+        Optional<Users> existingUser = userRepository.findByEmailId(users.getEmailId());
+        if (existingUser.isPresent()) {
             throw new UserAlreadyExistException();
         }
+
         users.setPassword(passwordEncoder.encode(users.getPassword()));
         userRepository.save(users);
     }
 
     @Override
-    public Users login(String emailId, String password) throws UserNotFoundException {
-        Users user = userRepository.findByEmailId(emailId);
-        if (user == null || !passwordEncoder.matches(password, user.getPassword())){
+    public Optional<Users> login(String emailId, String password) throws UserNotFoundException, InvalidCredentialsException {
+        Optional<Users> user = userRepository.findByEmailId(emailId);
+        if (user.isEmpty()){
             throw new UserNotFoundException();
+        }
+
+        if (!passwordEncoder.matches(password, user.get().getPassword())){
+            throw new InvalidCredentialsException();
         }
         return user;
     }

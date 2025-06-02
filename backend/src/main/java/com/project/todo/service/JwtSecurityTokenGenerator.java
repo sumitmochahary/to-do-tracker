@@ -24,7 +24,7 @@ public class JwtSecurityTokenGenerator implements SecurityTokenGenerator{
     public Map<String, String> generateToken(Users users) {
         // Validate user email
         String email = users.getEmailId();
-        if (email == null || email.isBlank()){
+        if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("User email is required for token generation.");
         }
         // Decode and validate secret key
