@@ -1,18 +1,17 @@
-const fs = require('fs').promises;
-const path = require('path');
-
-// Path to your JSON file - REPLACE THIS LINE when switching to MongoDB
-const COLUMNS_JSON_PATH = path.join(__dirname, '../data/columns.json');
+// This works in React without Node.js backend
 
 const columnService = {
-  // Read columns from JSON file
+  // Read columns from JSON file using fetch
   async getColumns() {
     try {
-      const data = await fs.readFile(COLUMNS_JSON_PATH, 'utf8');
-      const jsonData = JSON.parse(data);
-      return jsonData.columns || [];
+      const response = await fetch('/list.json');
+      if (!response.ok) {
+        throw new Error('Failed to fetch list');
+      }
+      const jsonData = await response.json();
+      return jsonData.list || [];
     } catch (error) {
-      console.error('Error reading columns JSON:', error);
+      console.error('Error reading list JSON:', error);
       // Return default columns if file doesn't exist
       return [
         { id: 1, title: "To Do", position: 0, isDefault: true },
@@ -22,7 +21,8 @@ const columnService = {
     }
   },
 
-  // Add new column to JSON file
+  // Note: Adding/removing columns requires backend or localStorage for persistence
+  // Using localStorage for now - REPLACE with your backend API later
   async addColumn(title) {
     try {
       const columns = await this.getColumns();
@@ -45,8 +45,9 @@ const columnService = {
 
       columns.push(newColumn);
 
-      // Write back to JSON file - REPLACE THIS SECTION for MongoDB
-      await fs.writeFile(COLUMNS_JSON_PATH, JSON.stringify({ columns }, null, 2));
+      // Store in localStorage temporarily - REPLACE with backend API call
+      const updatedData = { list: columns };
+      localStorage.setItem('list', JSON.stringify(updatedData));
       
       return newColumn;
     } catch (error) {
@@ -55,7 +56,7 @@ const columnService = {
     }
   },
 
-  // Remove column from JSON file
+  // Remove column 
   async removeColumn(columnTitle) {
     try {
       const columns = await this.getColumns();
@@ -71,15 +72,34 @@ const columnService = {
 
       columns.splice(columnIndex, 1);
 
-      // Write back to JSON file - REPLACE THIS SECTION for MongoDB
-      await fs.writeFile(COLUMNS_JSON_PATH, JSON.stringify({ columns }, null, 2));
+      // Store in localStorage temporarily - REPLACE with backend API call
+      const updatedData = { list: columns };
+      localStorage.setItem('list', JSON.stringify(updatedData));
       
       return true;
     } catch (error) {
       console.error('Error removing column:', error);
       throw error;
     }
+  },
+
+  // Get columns from localStorage if available, otherwise from JSON file
+  async getColumnsWithLocalStorage() {
+    try {
+      const localData = localStorage.getItem('list');
+      if (localData) {
+        const parsedData = JSON.parse(localData);
+        return parsedData.list || [];
+      }
+      return await this.getColumns();
+    } catch (error) {
+      console.error('Error getting columns:', error);
+      return await this.getColumns();
+    }
   }
 };
 
-module.exports = columnService;
+// Update the getColumns method to check localStorage first
+columnService.getColumns = columnService.getColumnsWithLocalStorage;
+
+export default columnService;

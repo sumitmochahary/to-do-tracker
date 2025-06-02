@@ -1,8 +1,8 @@
-import LandingPage from './pages/LandingPage'
+import Board from './pages/Board'
 
 function App() {
 return(
-  <LandingPage/>
+  <Board/>
 )
 }
 export default App

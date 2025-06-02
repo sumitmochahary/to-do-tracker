@@ -67,70 +67,121 @@ const getDueDateStatus = (dueDate) => {
   }
 };
 
-const TaskCard = ({ task }) => {
-  const dueDateInfo = getDueDateStatus(task.taskDueDate);
+const TaskCard = ({ task, onEdit, onDelete }) => {
+  // Handle different task object structures
+  const taskTitle = task.taskTitle || task.title;
+  const taskDescription = task.taskDescription || task.description;
+  const taskDueDate = task.taskDueDate || task.dueDate;
+  
+  const dueDateInfo = taskDueDate ? getDueDateStatus(taskDueDate) : null;
   
   return (
     <Card 
       sx={{ 
-        mb: 2, 
-        borderRadius: 3,
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-        transition: 'all 0.3s ease',
+        mb: 1.5, 
+        borderRadius: 2,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+        transition: 'all 0.2s ease',
         '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
+          transform: 'translateY(-2px)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
         }
       }}
     >
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
         <Typography 
-          variant="h6" 
+          variant="subtitle2" 
           gutterBottom 
           sx={{ 
             fontWeight: 'bold',
             color: '#2c3e50',
-            lineHeight: 1.3
+            lineHeight: 1.2,
+            fontSize: '0.9rem'
           }}
         >
-          {task.taskTitle}
+          {taskTitle}
         </Typography>
         
-        {task.taskDescription && (
+        {taskDescription && (
           <Typography 
             variant="body2" 
             color="text.secondary"
             sx={{ 
-              mb: 2,
-              lineHeight: 1.5,
-              color: '#7f8c8d'
+              mb: 1.5,
+              lineHeight: 1.4,
+              color: '#7f8c8d',
+              fontSize: '0.8rem'
             }}
           >
-            {task.taskDescription}
+            {taskDescription}
           </Typography>
         )}
         
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <CalendarToday sx={{ fontSize: 16, color: '#95a5a6', mr: 1 }} />
-          <Typography variant="caption" sx={{ color: '#7f8c8d', fontWeight: 500 }}>
-            Due: {new Date(task.taskDueDate).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric'
-            })}
-          </Typography>
-        </Box>
+        {taskDueDate && (
+          <>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <CalendarToday sx={{ fontSize: 12, color: '#95a5a6', mr: 0.5 }} />
+              <Typography variant="caption" sx={{ color: '#7f8c8d', fontWeight: 500, fontSize: '0.7rem' }}>
+                {new Date(taskDueDate).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </Typography>
+            </Box>
 
-        <Chip
-          label={dueDateInfo.text}
-          size="small"
-          sx={{
-            backgroundColor: dueDateInfo.color,
-            color: dueDateInfo.status === 'soon' ? '#333' : 'white',
-            fontWeight: 'bold',
-            fontSize: '11px',
-          }}
-        />
+            <Chip
+              label={dueDateInfo.text}
+              size="small"
+              sx={{
+                backgroundColor: dueDateInfo.color,
+                color: dueDateInfo.status === 'soon' ? '#333' : 'white',
+                fontWeight: 'bold',
+                fontSize: '0.65rem',
+                height: '20px',
+                mb: 1
+              }}
+            />
+          </>
+        )}
+
+        {/* Action Buttons */}
+        {(onEdit || onDelete) && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
+            {onEdit && (
+              <IconButton 
+                size="small" 
+                onClick={() => onEdit(task)}
+                sx={{ 
+                  color: '#3b82f6',
+                  backgroundColor: '#eff6ff',
+                  '&:hover': { backgroundColor: '#dbeafe' },
+                  transition: 'all 0.2s ease',
+                  width: 28,
+                  height: 28
+                }}
+              >
+                <Assignment sx={{ fontSize: 14 }} />
+              </IconButton>
+            )}
+            {onDelete && (
+              <IconButton 
+                size="small" 
+                onClick={() => onDelete(task.id || task.taskId)} 
+                sx={{ 
+                  color: '#ef4444',
+                  backgroundColor: '#fef2f2',
+                  '&:hover': { backgroundColor: '#fee2e2' },
+                  transition: 'all 0.2s ease',
+                  width: 28,
+                  height: 28
+                }}
+              >
+                <Delete sx={{ fontSize: 14 }} />
+              </IconButton>
+            )}
+          </Box>
+        )}
       </CardContent>
     </Card>
   );
@@ -140,36 +191,44 @@ const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, column
   const statusInfo = getStatusColor(title, columnIndex);
   
   return (
-    
     <Paper 
       elevation={0} 
       sx={{ 
-        borderRadius: 4,
+        borderRadius: 3,
         overflow: 'hidden',
         backgroundColor: 'white',
         border: '1px solid #e9ecef',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+        height: 'fit-content',
+        maxHeight: '70vh',
+        width: '280px',
+        minWidth: '280px',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+        }
       }}
     >
       {/* Column Header */}
       <Box
         sx={{
           background: statusInfo.gradient,
-          p: 3,
+          p: 2,
           color: 'white',
           display: 'flex',
           alignItems: 'center',
           position: 'relative',
+          minHeight: '60px'
         }}
       >
-        <Box sx={{ mr: 2, fontSize: '24px' }}>
+        <Box sx={{ mr: 1.5, fontSize: '20px' }}>
           {statusInfo.emoji}
         </Box>
         <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 0.25, fontSize: '1rem' }}>
             {title}
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.9 }}>
+          <Typography variant="caption" sx={{ opacity: 0.9, fontSize: '0.75rem' }}>
             {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
           </Typography>
         </Box>
@@ -201,7 +260,26 @@ const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, column
       </Box>
 
       {/* Column Content */}
-      <Box sx={{ p: 2, minHeight: 400, backgroundColor: '#fafbfc' }}>
+      <Box sx={{ 
+        p: 1.5, 
+        maxHeight: 'calc(70vh - 60px)', 
+        overflowY: 'auto',
+        backgroundColor: '#fafbfc',
+        '&::-webkit-scrollbar': {
+          width: '6px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: '#f1f1f1',
+          borderRadius: '3px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: '#c1c1c1',
+          borderRadius: '3px',
+          '&:hover': {
+            background: '#a8a8a8',
+          },
+        },
+      }}>
         {tasks.length === 0 ? (
           <Box
             sx={{
@@ -209,27 +287,37 @@ const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, column
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              minHeight: 300,
+              minHeight: 200,
               color: '#95a5a6',
-              textAlign: 'center'
+              textAlign: 'center',
+              backgroundColor: 'rgba(255,255,255,0.5)',
+              borderRadius: 2,
+              border: '2px dashed #e9ecef',
+              p: 2
             }}
           >
-            <Box sx={{ fontSize: '48px', mb: 2, opacity: 0.3 }}>
+            <Box sx={{ fontSize: '32px', mb: 1, opacity: 0.3 }}>
               {statusInfo.emoji}
             </Box>
-            <Typography variant="body1" sx={{ fontWeight: 500, opacity: 0.7 }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, opacity: 0.7 }}>
               No tasks yet
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.5, mt: 1 }}>
+            <Typography variant="caption" sx={{ opacity: 0.5, mt: 0.5 }}>
               {title === 'To Do' ? 'Add your first task!' : 
                title === 'In Progress' ? 'Move tasks here when you start working' :
-               'Complete tasks will appear here'}
+               title === 'Completed' ? 'Complete tasks will appear here' :
+               'Add a task to get started'}
             </Typography>
           </Box>
         ) : (
           <Box>
             {tasks.map((task) => (
-              <TaskCard key={task.taskId || task.id} task={task} />
+              <TaskCard 
+                key={task.taskId || task.id} 
+                task={task}
+                onEdit={() => console.log('Edit task:', task)}
+                onDelete={() => console.log('Delete task:', task.id || task.taskId)}
+              />
             ))}
           </Box>
         )}
