@@ -5,6 +5,7 @@ import LandingPage from "../pages/LandingPage"
 import Board from "../pages/Board"
 import ForgotPasswordPage from "../pages/ForgotPasswordPage"
 import ResetPasswordPage from "../pages/ResetPasswordPage"
+import ProtectedRoute from "../components/ProtectedRoute"
 
 function AppRoutes() {
     return (
@@ -14,7 +15,9 @@ function AppRoutes() {
             <Route path="/register" element={<SignUpPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/dashboard" element={<Board />} />
+            <Route path="/dashboard" element={<ProtectedRoute>
+                <Board />
+            </ProtectedRoute>} />
         </Routes>
     )
 }

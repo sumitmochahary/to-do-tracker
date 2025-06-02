@@ -35,21 +35,23 @@ public class JwtSecurityTokenGenerator implements SecurityTokenGenerator{
         SecretKey key = Keys.hmacShaKeyFor(keyBytes);
 
         // Token expiration
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expirationMs);
+        Date issuedAt = new Date(System.currentTimeMillis());
+        Date expireAt = new Date(System.currentTimeMillis() + expirationMs);
 
         // Build token
         String jwtToken = Jwts
                 .builder()
                 .header().add("typ","JWT").and()
                 .subject(Integer.toString(users.getUserId()))
-                .issuedAt(now)
-                .expiration(expiryDate)
+                .issuedAt(issuedAt)
+                .expiration(expireAt)
                 .signWith(key, Jwts.SIG.HS256)
                 .compact();
 
         // Return token
         Map<String, String> tokenMap = new HashMap<>();
+        tokenMap.put("issueAt", issuedAt.toString());
+        tokenMap.put("expireAt", expireAt.toString());
         tokenMap.put("token", jwtToken);
         return tokenMap;
     }
