@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 
 const LandingPage = () => {
   const [email, setEmail] = useState('');
   const [isVisible, setIsVisible] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsVisible(true);
@@ -11,14 +14,17 @@ const LandingPage = () => {
   // Mock navigation functions (replace with actual routing)
   const handleLogin = () => {
     console.log('Navigate to login');
+    navigate("/login")
   };
 
   const handleSignUp = () => {
     console.log('Navigate to signup with email:', email);
+    navigate("/register")
   };
 
   const handleGoToBoard = () => {
     console.log('Navigate to board');
+    navigate("/dashboard")
   };
 
   const styles = {
@@ -331,15 +337,15 @@ const LandingPage = () => {
           To-Do Tracker
         </div>
         <div style={styles.navButtons}>
-          <button 
-            style={{...styles.button, ...styles.secondaryButton}} 
+          <button
+            style={{ ...styles.button, ...styles.secondaryButton }}
             className="button"
             onClick={handleLogin}
           >
             Log in
           </button>
-          <button 
-            style={{...styles.button, ...styles.primaryButton}} 
+          <button
+            style={{ ...styles.button, ...styles.primaryButton }}
             className="button"
             onClick={handleGoToBoard}
           >
@@ -376,7 +382,7 @@ const LandingPage = () => {
                 <span style={{ color: '#FFE066' }}> Beautifully</span>
               </h1>
               <p style={styles.heroSubtitle}>
-                Transform chaos into clarity with our powerful, intuitive task management platform. 
+                Transform chaos into clarity with our powerful, intuitive task management platform.
                 Perfect for individuals and teams who want to get things done.
               </p>
 
@@ -388,9 +394,9 @@ const LandingPage = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   style={styles.emailInput}
                 />
-                <button 
-                  onClick={handleSignUp} 
-                  style={styles.ctaButton} 
+                <button
+                  onClick={handleSignUp}
+                  style={styles.ctaButton}
                   className="cta-button"
                 >
                   Get Started Free →
@@ -406,8 +412,8 @@ const LandingPage = () => {
             <div style={styles.visualSection}>
               <div style={styles.boardContainer} className="board-container">
                 {['To Do', 'In Progress', 'Done'].map((title, index) => (
-                  <div 
-                    key={title} 
+                  <div
+                    key={title}
                     style={{
                       ...styles.boardColumn,
                       animationDelay: `${index * 0.2}s`
@@ -431,8 +437,8 @@ const LandingPage = () => {
           <h2 style={styles.featuresTitle}>Why Choose TrelloBoard?</h2>
           <div style={styles.featuresGrid} className="features-grid">
             {features.map((feature, index) => (
-              <div 
-                key={feature.title} 
+              <div
+                key={feature.title}
                 style={{
                   ...styles.featureCard,
                   animationDelay: `${index * 0.2}s`
@@ -455,8 +461,8 @@ const LandingPage = () => {
           <p style={styles.ctaSubtitle}>
             Join thousands of users who have transformed their productivity
           </p>
-          <button 
-            style={styles.finalCtaButton} 
+          <button
+            style={styles.finalCtaButton}
             className="final-cta-button"
             onClick={handleLogin}
           >
