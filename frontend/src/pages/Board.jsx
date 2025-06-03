@@ -42,6 +42,7 @@ import Header from "../components/Header";
 import Column from "../components/Column";
 import NewTaskForm from "../components/NewTaskForm";
 import TaskCard from "../components/TaskCard";
+import { fetchTask } from "../services/TaskService";
 
 const SIDEBAR_WIDTH = 260;
 
@@ -49,7 +50,7 @@ const SIDEBAR_WIDTH = 260;
 const Board = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
+  // const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // State Management
@@ -64,22 +65,18 @@ const Board = () => {
 
   // Effects
   useEffect(() => {
-    fetchTasks();
+    loadTasks();
   }, []);
 
   // API Functions
-  const fetchTasks = async () => {
+  const loadTasks = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Replace this with your actual API call
-      const response = await fetch('/api/v1/');
-      const tasksData = await response.json();
-      setTasks(tasksData);
+      const response = await fetchTask();
+      setTasks(response);
 
-      // For now, starting with empty tasks array
-      setTasks([]);
     } catch (error) {
       console.error("Failed to fetch tasks", error);
       setError("Failed to load tasks. Please try again.");
@@ -99,7 +96,7 @@ const Board = () => {
   };
 
   const handleTaskUpdate = (updatedTask) => {
-    setTasks(prev => prev.map(task => 
+    setTasks(prev => prev.map(task =>
       task.id === updatedTask.id ? updatedTask : task
     ));
   };
@@ -109,7 +106,7 @@ const Board = () => {
   };
 
   const handleTaskStatusChange = (taskId, newStatus) => {
-    setTasks(prev => prev.map(task => 
+    setTasks(prev => prev.map(task =>
       task.id === taskId ? { ...task, taskStatus: newStatus } : task
     ));
   };
@@ -151,7 +148,7 @@ const Board = () => {
   };
 
   // Utility Functions
-  const getTasksByStatus = (status) => tasks.filter(task => task.taskStatus === status);
+  const getTasksByStatus = (status) => (tasks || []).filter(task => task.taskStatus === status);
 
   // Loading State
   if (loading) {
@@ -166,14 +163,14 @@ const Board = () => {
         backgroundColor: '#f8fafc',
         px: { xs: 1, sm: 2, md: 2 }
       }}>
-        <CircularProgress 
-          size={isSmallMobile ? 60 : 80} 
-          sx={{ color: '#3b82f6' }} 
+        <CircularProgress
+          size={isSmallMobile ? 60 : 80}
+          sx={{ color: '#3b82f6' }}
         />
-        <Typography 
-          variant={isSmallMobile ? "h6" : "h5"} 
-          sx={{ 
-            color: '#1e293b', 
+        <Typography
+          variant={isSmallMobile ? "h6" : "h5"}
+          sx={{
+            color: '#1e293b',
             fontWeight: 'bold',
             textAlign: 'center'
           }}
@@ -198,7 +195,7 @@ const Board = () => {
           <SideBar />
         </Box>
       )}
-      
+
       {/* Mobile Sidebar - Drawer */}
       {isMobile && (
         <Drawer
@@ -256,9 +253,9 @@ const Board = () => {
               px: { xs: 2, sm: 3 },
               py: { xs: 1, sm: 1.5 },
             }}>
-              <Typography 
-                variant="subtitle2" 
-                sx={{ 
+              <Typography
+                variant="subtitle2"
+                sx={{
                   color: '#64748b',
                   textAlign: 'center',
                   fontSize: { xs: '0.75rem', sm: '0.875rem' }
@@ -268,11 +265,11 @@ const Board = () => {
               </Typography>
             </Box>
           )}
-          
+
           {/* Main Content Container */}
-          <Container 
-            maxWidth="xl" 
-            sx={{ 
+          <Container
+            maxWidth="xl"
+            sx={{
               flexGrow: 1,
               px: { xs: 1, sm: 2, md: 3, lg: 4 },
               py: { xs: 2, sm: 3, md: 4 },
@@ -305,13 +302,14 @@ const Board = () => {
                 zIndex: 2
               }
             }}>
-              <Typography 
-                variant={isSmallMobile ? "h4" : isMobile ? "h3" : "h2"} 
-                sx={{ 
-                  fontWeight: 'bold', 
+              <Typography
+                textAlign="center"
+                variant={isSmallMobile ? "h4" : isMobile ? "h3" : "h2"}
+                sx={{
+                  fontWeight: 'bold',
                   mb: { xs: 1, sm: 2 },
-                  fontSize: { 
-                    xs: '1.5rem', 
+                  fontSize: {
+                    xs: '1.5rem',
                     sm: '2rem',
                     md: '2.5rem',
                     lg: '3rem'
@@ -321,12 +319,13 @@ const Board = () => {
               >
                 🎯 Task Management Board
               </Typography>
-              <Typography 
-                variant={isSmallMobile ? "body1" : "h6"} 
-                sx={{ 
+              <Typography
+                textAlign="center"
+                variant={isSmallMobile ? "body1" : "h6"}
+                sx={{
                   opacity: 0.9,
-                  fontSize: { 
-                    xs: '0.9rem', 
+                  fontSize: {
+                    xs: '0.9rem',
                     sm: '1rem',
                     md: '1.1rem',
                     lg: '1.25rem'
@@ -340,10 +339,10 @@ const Board = () => {
 
             {/* Error Alert */}
             {error && (
-              <Alert 
-                severity="error" 
-                sx={{ 
-                  mb: { xs: 2, sm: 3 }, 
+              <Alert
+                severity="error"
+                sx={{
+                  mb: { xs: 2, sm: 3 },
                   borderRadius: { xs: 2, sm: 3 },
                   backgroundColor: '#fef2f2',
                   border: '1px solid #fecaca',
@@ -355,10 +354,10 @@ const Board = () => {
                 <Box sx={{ mb: { xs: 1, sm: 0 } }}>
                   {error}
                 </Box>
-                <Button 
-                  size="small" 
-                  onClick={fetchTasks} 
-                  sx={{ 
+                <Button
+                  size="small"
+                  onClick={loadTasks}
+                  sx={{
                     ml: { xs: 0, sm: 2 },
                     color: '#dc2626',
                     alignSelf: { xs: 'flex-start', sm: 'center' },
@@ -371,9 +370,9 @@ const Board = () => {
             )}
 
             {/* Task Form Toggle Button */}
-            <Box sx={{ 
-              mb: { xs: 2, sm: 3, md: 4 }, 
-              display: 'flex', 
+            <Box sx={{
+              mb: { xs: 2, sm: 3, md: 4 },
+              display: 'flex',
               justifyContent: 'center',
               px: { xs: 1, sm: 0 }
             }}>
@@ -387,21 +386,21 @@ const Board = () => {
                   backgroundColor: showTaskForm ? '#ef4444' : '#3b82f6',
                   color: '#ffffff',
                   borderRadius: { xs: 3, sm: 4 },
-                  padding: { 
-                    xs: '10px 20px', 
-                    sm: '12px 28px', 
+                  padding: {
+                    xs: '10px 20px',
+                    sm: '12px 28px',
                     md: '14px 32px',
                     lg: '16px 40px'
                   },
                   fontWeight: 'bold',
                   fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1rem', lg: '1.1rem' },
-                  boxShadow: showTaskForm 
+                  boxShadow: showTaskForm
                     ? '0 8px 25px rgba(239, 68, 68, 0.3)'
                     : '0 8px 25px rgba(59, 130, 246, 0.3)',
                   '&:hover': {
                     backgroundColor: showTaskForm ? '#dc2626' : '#2563eb',
                     transform: 'translateY(-1px)',
-                    boxShadow: showTaskForm 
+                    boxShadow: showTaskForm
                       ? '0 12px 35px rgba(239, 68, 68, 0.4)'
                       : '0 12px 35px rgba(59, 130, 246, 0.4)',
                   },
@@ -427,12 +426,12 @@ const Board = () => {
             </Box>
 
             {/* Task Columns Grid */}
-            <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
+            <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} sx={{ display: "flex", justifyContent: "center" }}>
               {columns.map((column, index) => (
-                <Grid 
-                  item 
-                  xs={12} 
-                  sm={6} 
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
                   md={columns.length <= 3 ? 4 : 6}
                   lg={columns.length <= 3 ? 4 : columns.length <= 4 ? 3 : 6}
                   xl={columns.length <= 6 ? 2 : 4}
@@ -454,7 +453,7 @@ const Board = () => {
             </Grid>
 
             {/* Empty State Message */}
-            {tasks.length === 0 && !loading && (
+            {tasks && tasks.length === 0 && !loading && (
               <Box sx={{
                 textAlign: 'center',
                 py: 8,
@@ -489,7 +488,7 @@ const Board = () => {
             )}
           </Container>
         </Box>
-        
+
         {/* Footer Component */}
         <Footer />
       </Box>
@@ -521,8 +520,8 @@ const Board = () => {
       </Fab>
 
       {/* Add Column Dialog */}
-      <Dialog 
-        open={showColumnDialog} 
+      <Dialog
+        open={showColumnDialog}
         onClose={() => setShowColumnDialog(false)}
         maxWidth="sm"
         fullWidth
@@ -537,7 +536,7 @@ const Board = () => {
           }
         }}
       >
-        <DialogTitle sx={{ 
+        <DialogTitle sx={{
           backgroundColor: '#f8fafc',
           color: '#1e293b',
           fontWeight: 'bold',
@@ -548,8 +547,8 @@ const Board = () => {
         }}>
           🏗️ Add New List
         </DialogTitle>
-        <DialogContent sx={{ 
-          pt: { xs: 2, sm: 3 }, 
+        <DialogContent sx={{
+          pt: { xs: 2, sm: 3 },
           pb: 2,
           px: { xs: 2, sm: 3 },
           backgroundColor: '#ffffff'
@@ -571,13 +570,13 @@ const Board = () => {
             helperText="Enter a unique name for your new list"
           />
         </DialogContent>
-        <DialogActions sx={{ 
-          p: { xs: 2, sm: 3 }, 
+        <DialogActions sx={{
+          p: { xs: 2, sm: 3 },
           gap: { xs: 1, sm: 2 },
           flexDirection: { xs: 'column', sm: 'row' },
           backgroundColor: '#ffffff'
         }}>
-          <Button 
+          <Button
             onClick={() => setShowColumnDialog(false)}
             fullWidth={isSmallMobile}
             sx={{
@@ -590,7 +589,7 @@ const Board = () => {
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleAddColumn}
             variant="contained"
             fullWidth={isSmallMobile}

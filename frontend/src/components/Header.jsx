@@ -46,8 +46,8 @@ export const Header = ({
     // TODO: Add your logout logic here (e.g., clear token, redirect)
   };
 
-   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
   };
@@ -60,7 +60,7 @@ export const Header = ({
         backgroundColor: '#ffffff',
         borderBottom: '1px solid #e2e8f0',
         boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        zIndex: theme.zIndex.appBar
+        zIndex: theme.zIndex.appBar,
       }}
     >
       <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2 } }}>
@@ -68,30 +68,32 @@ export const Header = ({
           sx={{
             minHeight: { xs: 56, sm: 64, md: 70 },
             px: { xs: 0, sm: 1 },
-            gap: { xs: 1, sm: 2 }
+            gap: { xs: 1, sm: 2 },
+            display: 'flex',
+            justifyContent: 'space-between'
           }}
         >
-          {/* Mobile Menu Button */}
-          <IconButton
-  edge="start"
-  color="inherit"
-  aria-label="menu"
-  onClick={onMenuClick}
-  sx={{
-    mr: { xs: 1, sm: 2 },
-    color: '#1e293b',
-    backgroundColor: '#f8fafc',
-    borderRadius: 2,
-    '&:hover': {
-      backgroundColor: '#e2e8f0'
-    }
-  }}
->
-  <MenuIcon />
-</IconButton>
 
-          {/* Logo/Brand */}
           <Box sx={{ display: 'flex', alignItems: 'center', mr: { xs: 1, sm: 3 } }}>
+            {/* Mobile Menu Button */}
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              onClick={onMenuClick}
+              sx={{
+                mr: { xs: 1, sm: 2 },
+                color: '#1e293b',
+                backgroundColor: '#f8fafc',
+                borderRadius: 2,
+                '&:hover': {
+                  backgroundColor: '#e2e8f0'
+                }
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+            {/* Logo/Brand */}
             <Typography
               variant="h6"
               component="div"
@@ -131,9 +133,9 @@ export const Header = ({
           </Box>
 
           {/* Right side actions */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
             gap: { xs: 0.5, sm: 1 },
             ml: { xs: 1, sm: 2 }
           }}>

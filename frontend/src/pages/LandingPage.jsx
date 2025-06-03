@@ -434,7 +434,7 @@ const LandingPage = () => {
       {/* Features Section */}
       <section style={styles.featuresSection}>
         <div style={styles.container}>
-          <h2 style={styles.featuresTitle}>Why Choose TrelloBoard?</h2>
+          <h2 style={styles.featuresTitle}>Why Choose Todo?</h2>
           <div style={styles.featuresGrid} className="features-grid">
             {features.map((feature, index) => (
               <div
