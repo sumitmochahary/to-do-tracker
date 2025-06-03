@@ -16,7 +16,6 @@ const ProtectedRoute = ({ children }) => {
         // Check if the token is expired
         if (decodedToken.exp * 1000 < Date.now()) {
             console.log("Token expired. Redirecting to login...");
-            console.log(token);
             return <Navigate to="/login" replace />;
         }
 

@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/v1")
 public class TaskController {
 
@@ -45,14 +44,14 @@ public class TaskController {
         return new ResponseEntity<>(savedTask, HttpStatus.CREATED);
     }
 
-    @GetMapping("/tasks/ss1234")
-    public ResponseEntity<?> fetchAllTasks(HttpServletRequest request) {
+    @GetMapping("/fetch")
+    public ResponseEntity<?> fetchAllTasks(HttpServletRequest request) throws TaskNotFoundException {
         String userId = validateAndGetUserId(request);
         if (userId == null) {
             return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
         }
-        List<Task> tasks = iTaskService.fetchAllTasks();
-        return new ResponseEntity<>(tasks, HttpStatus.OK);
+        List<Task> taskList = iTaskService.fetchTaskByUserId(userId);
+        return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
 
     @GetMapping("/fetch/{userId}")
