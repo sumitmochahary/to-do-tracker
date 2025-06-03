@@ -21,13 +21,9 @@ import {
   Container,
   AppBar,
   Toolbar,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Divider
+  Drawer
 } from "@mui/material";
+
 import {
   Add as AddIcon,
   Close as CloseIcon,
@@ -45,6 +41,9 @@ import SideBar from "../components/SideBar";
 import Header from "../components/Header";
 import Column from "../components/Column";
 import NewTaskForm from "../components/NewTaskForm";
+import TaskCard from "../components/TaskCard";
+
+const SIDEBAR_WIDTH = 260;
 
 // Main Board Component
 const Board = () => {
@@ -74,29 +73,13 @@ const Board = () => {
       setLoading(true);
       setError(null);
 
-      const mockTasks = [
-        {
-          id: 1,
-          taskTitle: "Complete project documentation",
-          taskDescription: "Write comprehensive documentation for the new feature including API specs and user guides",
-          taskStatus: "To Do"
-        },
-        {
-          id: 2,
-          taskTitle: "Review code changes",
-          taskDescription: "Review pull requests from team members and provide feedback",
-          taskStatus: "In Progress"
-        },
-        {
-          id: 3,
-          taskTitle: "Deploy to production",
-          taskDescription: "Deploy the latest version to production environment after testing",
-          taskStatus: "Completed"
-        }
-      ];
+      // Replace this with your actual API call
+      const response = await fetch('/api/v1/');
+      const tasksData = await response.json();
+      setTasks(tasksData);
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setTasks(mockTasks);
+      // For now, starting with empty tasks array
+      setTasks([]);
     } catch (error) {
       console.error("Failed to fetch tasks", error);
       setError("Failed to load tasks. Please try again.");
@@ -107,8 +90,28 @@ const Board = () => {
 
   // Event Handlers
   const handleTaskAdded = (newTask) => {
-    setTasks(prev => [...prev, newTask]);
+    const taskWithId = {
+      ...newTask,
+      id: Date.now(),
+    };
+    setTasks(prev => [...prev, taskWithId]);
     setShowTaskForm(false);
+  };
+
+  const handleTaskUpdate = (updatedTask) => {
+    setTasks(prev => prev.map(task => 
+      task.id === updatedTask.id ? updatedTask : task
+    ));
+  };
+
+  const handleTaskDelete = (taskId) => {
+    setTasks(prev => prev.filter(task => task.id !== taskId));
+  };
+
+  const handleTaskStatusChange = (taskId, newStatus) => {
+    setTasks(prev => prev.map(task => 
+      task.id === taskId ? { ...task, taskStatus: newStatus } : task
+    ));
   };
 
   const handleAddColumn = () => {
@@ -132,12 +135,10 @@ const Board = () => {
   };
 
   const handleSearchResults = (results) => {
-    // Handle search results if needed
     console.log("Search results:", results);
   };
 
   const handleTaskSelection = (task) => {
-    // Handle task selection if needed
     console.log("Selected task:", task);
   };
 
@@ -152,52 +153,6 @@ const Board = () => {
   // Utility Functions
   const getTasksByStatus = (status) => tasks.filter(task => task.taskStatus === status);
 
-  // Sidebar Content for Mobile
-  const sidebarContent = (
-    <Box sx={{ width: 280, pt: 2 }}>
-      <Typography
-        variant="h6"
-        sx={{
-          px: 3,
-          pb: 2,
-          fontWeight: 'bold',
-          color: '#1e293b',
-          borderBottom: '1px solid #e2e8f0',
-          mb: 2
-        }}
-      >
-        Menu
-      </Typography>
-      <List>
-        <ListItem button>
-          <ListItemIcon>
-            <DashboardIcon sx={{ color: '#3b82f6' }} />
-          </ListItemIcon>
-          <ListItemText primary="Dashboard" />
-        </ListItem>
-        <ListItem button>
-          <ListItemIcon>
-            <TaskIcon sx={{ color: '#10b981' }} />
-          </ListItemIcon>
-          <ListItemText primary="Tasks" />
-        </ListItem>
-        <Divider sx={{ my: 1 }} />
-        <ListItem button>
-          <ListItemIcon>
-            <SettingsIcon sx={{ color: '#64748b' }} />
-          </ListItemIcon>
-          <ListItemText primary="Settings" />
-        </ListItem>
-        <ListItem button>
-          <ListItemIcon>
-            <InfoIcon sx={{ color: '#64748b' }} />
-          </ListItemIcon>
-          <ListItemText primary="About" />
-        </ListItem>
-      </List>
-    </Box>
-  );
-
   // Loading State
   if (loading) {
     return (
@@ -208,11 +163,7 @@ const Board = () => {
         minHeight: '100vh',
         flexDirection: 'column',
         gap: 3,
-        backgroundColor: {
-          xs: '#f1f5f9',
-          sm: '#f8fafc',
-          md: '#f8fafc'
-        },
+        backgroundColor: '#f8fafc',
         px: { xs: 1, sm: 2, md: 2 }
       }}>
         <CircularProgress 
@@ -235,90 +186,75 @@ const Board = () => {
 
   // Main Render
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      minHeight: '100vh', 
-      backgroundColor: {
-        xs: '#f1f5f9',
-        sm: '#f8fafc',
-        md: '#f8fafc'
-      }
-    }}>
-      {/* Header Component */}
-      <Header
-        tasks={tasks}
-        onSearchResults={handleSearchResults}
-        onTaskSelect={handleTaskSelection}
-        searchPlaceholder="Search your tasks..."
-        showFilters={true}
-        isMobile={isMobile}
-        onMenuClick={toggleSidebar}
-      />
-
-      {/* Main Content Layout */}
-      <Box display="flex" sx={{ 
-        flexGrow: 1,
-        backgroundColor: {
-          xs: '#f1f5f9',
-          sm: '#f8fafc',
-          md: '#f8fafc'
-        }
-      }}>
-        {/* Desktop Sidebar - Always visible on desktop */}
-        {!isMobile && <SideBar />}
-        
-        {/* Mobile Sidebar - Drawer */}
-        {isMobile && (
-          <Drawer
-            variant="temporary"
-            anchor="left"
-            open={sidebarOpen}
-            onClose={handleSidebarClose}
-            ModalProps={{
-              keepMounted: true, // Better mobile performance
-            }}
-            sx={{
-              '& .MuiDrawer-paper': {
-                width: { xs: 260, sm: 280 },
-                boxSizing: 'border-box',
-                backgroundColor: '#ffffff',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-              },
-            }}
-          >
-            <SideBar onClose={handleSidebarClose} />
-          </Drawer>
-        )}
-        
-        {/* Main Content Area */}
-        <Box 
-          flexGrow={1} 
-          sx={{ 
-            display: 'flex', 
-            flexDirection: 'column',
-            backgroundColor: {
-              xs: '#f1f5f9',
-              sm: '#f8fafc',
-              md: '#f8fafc'
-            },
-            minHeight: '100%'
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Desktop Sidebar - Fixed positioning */}
+      {!isMobile && (
+        <Box
+          sx={{
+            width: SIDEBAR_WIDTH,
+            flexShrink: 0,
           }}
         >
+          <SideBar />
+        </Box>
+      )}
+      
+      {/* Mobile Sidebar - Drawer */}
+      {isMobile && (
+        <Drawer
+          variant="temporary"
+          anchor="left"
+          open={sidebarOpen}
+          onClose={handleSidebarClose}
+          ModalProps={{
+            keepMounted: true,
+          }}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: SIDEBAR_WIDTH,
+              boxSizing: 'border-box',
+              backgroundColor: '#1e293b',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+            },
+          }}
+        >
+          <SideBar onClose={handleSidebarClose} />
+        </Drawer>
+      )}
+
+      {/* Main Content Area */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: '#f8fafc',
+          minHeight: '100vh',
+          width: isMobile ? '100%' : `calc(100% - ${SIDEBAR_WIDTH}px)`,
+        }}
+      >
+        {/* Header Component */}
+        <Box sx={{ position: 'sticky', top: 0, zIndex: 1100 }}>
+          <Header
+            tasks={tasks}
+            onSearchResults={handleSearchResults}
+            onTaskSelect={handleTaskSelection}
+            searchPlaceholder="Search your tasks..."
+            showFilters={true}
+            isMobile={isMobile}
+            onMenuClick={toggleSidebar}
+          />
+        </Box>
+
+        {/* Main Content */}
+        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Mobile Header Content */}
           {isMobile && (
             <Box sx={{
-              backgroundColor: {
-                xs: '#ffffff',
-                sm: '#f8fafc'
-              },
-              borderBottom: {
-                xs: '1px solid #e2e8f0',
-                sm: 'none'
-              },
+              backgroundColor: '#ffffff',
+              borderBottom: '1px solid #e2e8f0',
               px: { xs: 2, sm: 3 },
               py: { xs: 1, sm: 1.5 },
-              display: { xs: 'block', md: 'none' }
             }}>
               <Typography 
                 variant="subtitle2" 
@@ -345,20 +281,12 @@ const Board = () => {
           >
             {/* Hero Section */}
             <Box sx={{
-              background: {
-                xs: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)',
-                sm: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1e40af 100%)',
-                md: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
-              },
+              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1e40af 100%)',
               borderRadius: { xs: 2, sm: 3, md: 4 },
               p: { xs: 2, sm: 3, md: 4 },
               mb: { xs: 2, sm: 3, md: 4 },
               color: 'white',
-              boxShadow: {
-                xs: '0 4px 15px rgba(59, 130, 246, 0.2)',
-                sm: '0 8px 20px rgba(59, 130, 246, 0.25)',
-                md: '0 10px 25px rgba(59, 130, 246, 0.3)'
-              },
+              boxShadow: '0 10px 25px rgba(59, 130, 246, 0.3)',
               textAlign: { xs: 'center', md: 'left' },
               position: 'relative',
               overflow: 'hidden',
@@ -369,10 +297,7 @@ const Board = () => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: {
-                  xs: 'radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 50%)',
-                  md: 'radial-gradient(circle at top right, rgba(255,255,255,0.15) 0%, transparent 60%)'
-                },
+                background: 'radial-gradient(circle at top right, rgba(255,255,255,0.15) 0%, transparent 60%)',
                 zIndex: 1
               },
               '& > *': {
@@ -471,30 +396,14 @@ const Board = () => {
                   fontWeight: 'bold',
                   fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1rem', lg: '1.1rem' },
                   boxShadow: showTaskForm 
-                    ? {
-                        xs: '0 4px 15px rgba(239, 68, 68, 0.2)',
-                        sm: '0 6px 20px rgba(239, 68, 68, 0.25)',
-                        md: '0 8px 25px rgba(239, 68, 68, 0.3)'
-                      }
-                    : {
-                        xs: '0 4px 15px rgba(59, 130, 246, 0.2)',
-                        sm: '0 6px 20px rgba(59, 130, 246, 0.25)',
-                        md: '0 8px 25px rgba(59, 130, 246, 0.3)'
-                      },
+                    ? '0 8px 25px rgba(239, 68, 68, 0.3)'
+                    : '0 8px 25px rgba(59, 130, 246, 0.3)',
                   '&:hover': {
                     backgroundColor: showTaskForm ? '#dc2626' : '#2563eb',
                     transform: 'translateY(-1px)',
                     boxShadow: showTaskForm 
-                      ? {
-                          xs: '0 6px 20px rgba(239, 68, 68, 0.3)',
-                          sm: '0 8px 25px rgba(239, 68, 68, 0.35)',
-                          md: '0 12px 35px rgba(239, 68, 68, 0.4)'
-                        }
-                      : {
-                          xs: '0 6px 20px rgba(59, 130, 246, 0.3)',
-                          sm: '0 8px 25px rgba(59, 130, 246, 0.35)',
-                          md: '0 12px 35px rgba(59, 130, 246, 0.4)'
-                        },
+                      ? '0 12px 35px rgba(239, 68, 68, 0.4)'
+                      : '0 12px 35px rgba(59, 130, 246, 0.4)',
                   },
                   transition: 'all 0.2s ease'
                 }}
@@ -507,16 +416,10 @@ const Board = () => {
             <Box mb={{ xs: 2, sm: 3 }}>
               <Collapse in={showTaskForm}>
                 <Box sx={{
-                  backgroundColor: {
-                    xs: '#ffffff',
-                    sm: '#ffffff'
-                  },
+                  backgroundColor: '#ffffff',
                   borderRadius: { xs: 2, sm: 3 },
                   p: { xs: 2, sm: 3 },
-                  boxShadow: {
-                    xs: '0 2px 8px rgba(0,0,0,0.1)',
-                    sm: '0 4px 12px rgba(0,0,0,0.1)'
-                  }
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                 }}>
                   <NewTaskForm onTaskAdded={handleTaskAdded} availableStatuses={columns} />
                 </Box>
@@ -541,15 +444,54 @@ const Board = () => {
                     onRemoveColumn={handleRemoveColumn}
                     isRemovable={!["To Do", "In Progress", "Completed"].includes(column)}
                     columnIndex={index}
+                    onTaskUpdate={handleTaskUpdate}
+                    onTaskDelete={handleTaskDelete}
+                    onTaskStatusChange={handleTaskStatusChange}
+                    TaskCardComponent={TaskCard}
                   />
                 </Grid>
               ))}
             </Grid>
+
+            {/* Empty State Message */}
+            {/* {tasks.length === 0 && !loading && (
+              <Box sx={{
+                textAlign: 'center',
+                py: 8,
+                px: 4,
+                backgroundColor: '#ffffff',
+                borderRadius: 3,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                mt: 4
+              }}>
+                <Typography variant="h5" sx={{ mb: 2, color: '#64748b' }}>
+                  📝 No tasks yet
+                </Typography>
+                <Typography variant="body1" sx={{ color: '#94a3b8', mb: 3 }}>
+                  Get started by creating your first task using the button above
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={() => setShowTaskForm(true)}
+                  startIcon={<AddIcon />}
+                  sx={{
+                    borderColor: '#3b82f6',
+                    color: '#3b82f6',
+                    '&:hover': {
+                      backgroundColor: '#3b82f6',
+                      color: '#ffffff'
+                    }
+                  }}
+                >
+                  Create Your First Task
+                </Button>
+              </Box>
+            )} */}
           </Container>
-          
-          {/* Footer Component */}
-          <Footer />
         </Box>
+        
+        {/* Footer Component */}
+        <Footer />
       </Box>
 
       {/* Floating Action Button - Add Column */}
@@ -571,11 +513,7 @@ const Board = () => {
             transform: 'scale(1.05)',
           },
           transition: 'all 0.2s ease',
-          boxShadow: {
-            xs: '0 4px 15px rgba(16, 185, 129, 0.3)',
-            sm: '0 6px 20px rgba(16, 185, 129, 0.35)',
-            md: '0 8px 25px rgba(16, 185, 129, 0.4)'
-          },
+          boxShadow: '0 8px 25px rgba(16, 185, 129, 0.4)',
           zIndex: 1000
         }}
       >
@@ -593,21 +531,14 @@ const Board = () => {
           sx: {
             borderRadius: isSmallMobile ? 0 : { xs: 3, sm: 4 },
             backgroundColor: '#ffffff',
-            boxShadow: {
-              xs: '0 8px 20px rgba(0,0,0,0.15)',
-              sm: '0 12px 25px rgba(0,0,0,0.12)',
-              md: '0 20px 25px rgba(0,0,0,0.1)'
-            },
+            boxShadow: '0 20px 25px rgba(0,0,0,0.1)',
             margin: { xs: 0, sm: 2 },
             maxHeight: { xs: '100vh', sm: '90vh' }
           }
         }}
       >
         <DialogTitle sx={{ 
-          backgroundColor: {
-            xs: '#f1f5f9',
-            sm: '#f8fafc'
-          },
+          backgroundColor: '#f8fafc',
           color: '#1e293b',
           fontWeight: 'bold',
           fontSize: { xs: '1rem', sm: '1.2rem', md: '1.3rem' },
@@ -633,10 +564,7 @@ const Board = () => {
             variant="outlined"
             sx={{
               '& .MuiOutlinedInput-root': {
-                backgroundColor: {
-                  xs: '#f8fafc',
-                  sm: '#f8fafc'
-                },
+                backgroundColor: '#f8fafc',
                 borderRadius: { xs: 2, sm: 3 }
               }
             }}
