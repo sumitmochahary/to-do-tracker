@@ -6,6 +6,7 @@ import Board from "../pages/Board"
 import ForgotPasswordPage from "../pages/ForgotPasswordPage"
 import ResetPasswordPage from "../pages/ResetPasswordPage"
 import ProtectedRoute from "../components/ProtectedRoute"
+import PageNotFound from "../components/PageNotFound"
 
 function AppRoutes() {
     return (
@@ -18,6 +19,7 @@ function AppRoutes() {
             <Route path="/dashboard" element={<ProtectedRoute>
                 <Board />
             </ProtectedRoute>} />
+            <Route path="*" element={<PageNotFound />} />
         </Routes>
     )
 }
