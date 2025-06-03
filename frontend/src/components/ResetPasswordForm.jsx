@@ -5,7 +5,7 @@ import PasswordIcon from "@mui/icons-material/Password"
 import { resetPassword } from "../services/PasswordService";
 import { useLocation } from "react-router";
 
-function ResetPasswordForm({ onLoadingChange }) {
+function ResetPasswordForm({ onLoadingChange, onShowSnackbar }) {
     const {
         register,
         handleSubmit,
@@ -43,7 +43,28 @@ function ResetPasswordForm({ onLoadingChange }) {
             console.log(response)
             reset()
         } catch (error) {
-            console.error(error)
+            console.error("Login error:", error);
+
+            let message = "Login failed. Please try again.";
+
+            // Network error (server is down or refused connection)
+            if (error.message === "Network Error") {
+                message = "Unable to connect to the server. Please check your internet or server.";
+            }
+
+            // Backend responded with error
+            else if (error.response) {
+                const status = error.response.status;
+                const backendMessage = error.response.data?.message || error.response.data?.error || null;
+
+                if (backendMessage) {
+                    message = backendMessage;
+                } else {
+                    message = `Login failed with status ${status}.`;
+                }
+            }
+
+            onShowSnackbar?.(message, "error");
         } finally {
             setLoading(false)
             onLoadingChange(false)
