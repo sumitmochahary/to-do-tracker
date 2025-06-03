@@ -54,20 +54,20 @@ public class TaskController {
         return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
 
-    @GetMapping("/fetch/{userId}")
-    public ResponseEntity<?> fetchTask(@PathVariable String userId, HttpServletRequest request) throws TaskNotFoundException {
-        String requestUserId = validateAndGetUserId(request);
-        if (requestUserId == null) {
-            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
-        }
-
-        if (!requestUserId.equals(userId)) {
-            return new ResponseEntity<>("Forbidden: Cannot access other user's tasks", HttpStatus.FORBIDDEN);
-        }
-
-        List<Task> taskList = iTaskService.fetchTaskByUserId(userId);
-        return new ResponseEntity<>(taskList, HttpStatus.OK);
-    }
+//    @GetMapping("/fetch/{userId}")
+//    public ResponseEntity<?> fetchTask(@PathVariable String userId, HttpServletRequest request) throws TaskNotFoundException {
+//        String requestUserId = validateAndGetUserId(request);
+//        if (requestUserId == null) {
+//            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
+//        }
+//
+//        if (!requestUserId.equals(userId)) {
+//            return new ResponseEntity<>("Forbidden: Cannot access other user's tasks", HttpStatus.FORBIDDEN);
+//        }
+//
+//        List<Task> taskList = iTaskService.fetchTaskByUserId(userId);
+//        return new ResponseEntity<>(taskList, HttpStatus.OK);
+//    }
 
     @GetMapping("/category/{taskCategory}")
     public ResponseEntity<?> fetchByCategory(@PathVariable String taskCategory, HttpServletRequest request) {
