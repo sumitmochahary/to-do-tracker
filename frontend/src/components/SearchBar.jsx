@@ -1,538 +1,407 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Box,
   TextField,
-  IconButton,
   InputAdornment,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Typography,
+  IconButton,
+  Box,
+  Autocomplete,
   Chip,
-  Fade,
-  Collapse,
-  useMediaQuery,
-  useTheme,
+  Paper,
+  Typography,
   Divider,
-  Button,
-  Tooltip
+  Menu,
+  MenuItem,
+  FormControl,
+  Select,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  Close as CloseIcon,
-  FilterList as FilterIcon,
   Clear as ClearIcon,
-  Assignment as TaskIcon,
+  FilterList as FilterListIcon,
+  Task as TaskIcon,
   Schedule as ScheduleIcon,
-  CheckCircle as CompletedIcon,
-  RadioButtonUnchecked as TodoIcon,
-  PlayCircle as InProgressIcon
+  Flag as FlagIcon
 } from '@mui/icons-material';
 
-const SearchBar = ({ 
-  tasks = [], 
-  onSearchResults, 
+const SearchBar = ({
+  tasks = [],
+  onSearchResults,
   onTaskSelect,
   placeholder = "Search tasks...",
-  showFilters = true 
+  showFilters = true,
+  isMobile = false
 }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
-
-  // State management
+  
+  // State
   const [searchTerm, setSearchTerm] = useState('');
-  const [isExpanded, setIsExpanded] = useState(!isMobile);
-  const [showResults, setShowResults] = useState(false);
-  const [filteredTasks, setFilteredTasks] = useState([]);
-  const [activeFilters, setActiveFilters] = useState([]);
-  const [showFiltersPanel, setShowFiltersPanel] = useState(false);
-  const [recentSearches, setRecentSearches] = useState([]);
+  const [filterAnchorEl, setFilterAnchorEl] = useState(null);
+  const [selectedFilters, setSelectedFilters] = useState({
+    status: 'all',
+    priority: 'all',
+    category: 'all'
+  });
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-  // Refs
-  const searchInputRef = useRef(null);
-  const searchContainerRef = useRef(null);
-
-  // Filter options
-  const filterOptions = [
-    { id: 'todo', label: 'To Do', icon: <TodoIcon />, color: '#3b82f6' },
-    { id: 'inprogress', label: 'In Progress', icon: <InProgressIcon />, color: '#f59e0b' },
-    { id: 'completed', label: 'Completed', icon: <CompletedIcon />, color: '#10b981' },
-  ];
-
-  // Load recent searches from localStorage (if available)
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('taskflow_recent_searches');
-      if (saved) {
-        setRecentSearches(JSON.parse(saved));
-      }
-    } catch (error) {
-      console.warn('Could not load recent searches:', error);
-    }
-  }, []);
-
-  // Handle search functionality
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredTasks([]);
-      setShowResults(false);
-      return;
+  // Memoized filtered results
+  const filteredTasks = useMemo(() => {
+    if (!searchTerm.trim() && Object.values(selectedFilters).every(filter => filter === 'all')) {
+      return tasks;
     }
 
-    const filtered = tasks.filter(task => {
-      const matchesSearch = 
+    return tasks.filter(task => {
+      // Text search
+      const matchesSearch = !searchTerm.trim() || 
         task.taskTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         task.taskDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.taskStatus?.toLowerCase().includes(searchTerm.toLowerCase());
+        task.taskCategory?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesFilters = activeFilters.length === 0 || 
-        activeFilters.some(filter => {
-          switch (filter) {
-            case 'todo':
-              return task.taskStatus === 'To Do';
-            case 'inprogress':
-              return task.taskStatus === 'In Progress';
-            case 'completed':
-              return task.taskStatus === 'Completed';
-            default:
-              return true;
-          }
-        });
+      // Status filter
+      const matchesStatus = selectedFilters.status === 'all' || 
+        task.taskStatus === selectedFilters.status;
 
-      return matchesSearch && matchesFilters;
+      // Priority filter
+      const matchesPriority = selectedFilters.priority === 'all' || 
+        task.taskPriority === selectedFilters.priority;
+
+      // Category filter
+      const matchesCategory = selectedFilters.category === 'all' || 
+        task.taskCategory === selectedFilters.category;
+
+      return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
     });
+  }, [tasks, searchTerm, selectedFilters]);
 
-    setFilteredTasks(filtered);
-    setShowResults(filtered.length > 0 || searchTerm.length > 0);
-    
-    if (onSearchResults) {
-      onSearchResults(filtered);
-    }
-  }, [searchTerm, tasks, activeFilters, onSearchResults]);
+  // Get unique values for filters
+  const uniqueStatuses = [...new Set(tasks.map(task => task.taskStatus).filter(Boolean))];
+  const uniquePriorities = [...new Set(tasks.map(task => task.taskPriority).filter(Boolean))];
+  const uniqueCategories = [...new Set(tasks.map(task => task.taskCategory).filter(Boolean))];
 
-  // Handle click outside to close results
+  // Effects
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
-        setShowResults(false);
-        if (isMobile && searchTerm === '') {
-          setIsExpanded(false);
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isMobile, searchTerm]);
-
-  // Toggle search expansion
-  const toggleSearch = () => {
-    setIsExpanded(!isExpanded);
-    if (!isExpanded) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 300);
-    } else {
-      setSearchTerm('');
-      setShowResults(false);
-      setActiveFilters([]);
+    if (onSearchResults) {
+      onSearchResults(filteredTasks);
     }
+  }, [filteredTasks, onSearchResults]);
+
+  // Event handlers
+  const handleSearchChange = (event, value) => {
+    const newSearchTerm = value || event?.target?.value || '';
+    setSearchTerm(newSearchTerm);
   };
 
-  // Handle search input change
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
-  // Handle task selection
-  const handleTaskSelect = (task) => {
-    if (onTaskSelect) {
+  const handleTaskSelect = (event, task) => {
+    if (task && onTaskSelect) {
       onTaskSelect(task);
-    }
-    
-    // Add to recent searches
-    const newRecentSearches = [searchTerm, ...recentSearches.filter(s => s !== searchTerm)].slice(0, 5);
-    setRecentSearches(newRecentSearches);
-    try {
-      localStorage.setItem('taskflow_recent_searches', JSON.stringify(newRecentSearches));
-    } catch (error) {
-      console.warn('Could not save recent searches:', error);
-    }
-
-    setShowResults(false);
-    if (isMobile) {
-      setIsExpanded(false);
+      setSearchTerm('');
     }
   };
 
-  // Handle filter toggle
-  const toggleFilter = (filterId) => {
-    setActiveFilters(prev => 
-      prev.includes(filterId) 
-        ? prev.filter(f => f !== filterId)
-        : [...prev, filterId]
-    );
-  };
-
-  // Clear search
-  const clearSearch = () => {
+  const handleClearSearch = () => {
     setSearchTerm('');
-    setActiveFilters([]);
-    setShowResults(false);
-    searchInputRef.current?.focus();
+    setSelectedFilters({
+      status: 'all',
+      priority: 'all',
+      category: 'all'
+    });
   };
 
-  // Get status icon
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'To Do':
-        return <TodoIcon sx={{ color: '#3b82f6', fontSize: '1.2rem' }} />;
-      case 'In Progress':
-        return <InProgressIcon sx={{ color: '#f59e0b', fontSize: '1.2rem' }} />;
-      case 'Completed':
-        return <CompletedIcon sx={{ color: '#10b981', fontSize: '1.2rem' }} />;
-      default:
-        return <TaskIcon sx={{ color: '#64748b', fontSize: '1.2rem' }} />;
-    }
+  const handleFilterClick = (event) => {
+    setFilterAnchorEl(event.currentTarget);
   };
+
+  const handleFilterClose = () => {
+    setFilterAnchorEl(null);
+  };
+
+  const handleFilterChange = (filterType, value) => {
+    setSelectedFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
+  const getTaskOptionLabel = (task) => {
+    if (!task || typeof task === 'string') return task || '';
+    return task.taskTitle || '';
+  };
+
+  const hasActiveFilters = Object.values(selectedFilters).some(filter => filter !== 'all');
 
   return (
-    <Box 
-      ref={searchContainerRef}
-      sx={{ 
-        position: 'relative',
-        width: '100%',
-        maxWidth: { xs: '100%', sm: 500, md: 600, lg: 700 },
-        mx: 'auto'
-      }}
-    >
-      {/* Mobile Toggle Button */}
-      {isMobile && !isExpanded && (
-        <Tooltip title="Search tasks" arrow>
-          <IconButton
-            onClick={toggleSearch}
-            sx={{
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              width: { xs: 48, sm: 52 },
-              height: { xs: 48, sm: 52 },
-              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
-              '&:hover': {
-                backgroundColor: '#2563eb',
-                transform: 'scale(1.05)',
-                boxShadow: '0 6px 16px rgba(59, 130, 246, 0.4)',
-              },
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <SearchIcon sx={{ fontSize: { xs: '1.3rem', sm: '1.5rem' } }} />
-          </IconButton>
-        </Tooltip>
-      )}
-
-      {/* Search Input */}
-      <Collapse in={isExpanded} timeout={300}>
-        <Paper
-          elevation={2}
-          sx={{
-            borderRadius: { xs: 2, sm: 3, md: 4 },
-            overflow: 'hidden',
-            backgroundColor: '#ffffff',
-            border: '2px solid',
-            borderColor: showResults ? '#3b82f6' : '#e2e8f0',
-            boxShadow: showResults 
-              ? '0 8px 25px rgba(59, 130, 246, 0.15)' 
-              : '0 4px 12px rgba(0, 0, 0, 0.1)',
-            transition: 'all 0.3s ease'
-          }}
-        >
-          {/* Main Search Input */}
-          <Box sx={{ p: { xs: 1, sm: 1.5 } }}>
-            <TextField
-              ref={searchInputRef}
-              fullWidth
-              variant="outlined"
-              placeholder={placeholder}
-              value={searchTerm}
-              onChange={handleSearchChange}
-              size={isSmallMobile ? "small" : "medium"}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon sx={{ 
-                      color: '#64748b',
-                      fontSize: { xs: '1.2rem', sm: '1.4rem' }
-                    }} />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      {searchTerm && (
-                        <Tooltip title="Clear search" arrow>
-                          <IconButton
-                            size="small"
-                            onClick={clearSearch}
-                            sx={{
-                              color: '#64748b',
-                              '&:hover': { color: '#ef4444' }
-                            }}
-                          >
-                            <ClearIcon sx={{ fontSize: '1.1rem' }} />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                      {showFilters && (
-                        <Tooltip title="Toggle filters" arrow>
-                          <IconButton
-                            size="small"
-                            onClick={() => setShowFiltersPanel(!showFiltersPanel)}
-                            sx={{
-                              color: activeFilters.length > 0 ? '#3b82f6' : '#64748b',
-                              backgroundColor: activeFilters.length > 0 ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                              '&:hover': { 
-                                color: '#3b82f6',
-                                backgroundColor: 'rgba(59, 130, 246, 0.1)'
-                              }
-                            }}
-                          >
-                            <FilterIcon sx={{ fontSize: '1.1rem' }} />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                      {isMobile && (
-                        <Tooltip title="Close search" arrow>
-                          <IconButton
-                            size="small"
-                            onClick={toggleSearch}
-                            sx={{
-                              color: '#64748b',
-                              '&:hover': { color: '#ef4444' }
-                            }}
-                          >
-                            <CloseIcon sx={{ fontSize: '1.1rem' }} />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                    </Box>
-                  </InputAdornment>
-                ),
-                sx: {
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    border: 'none'
-                  },
-                  '& .MuiInputBase-input': {
-                    fontSize: { xs: '0.9rem', sm: '1rem' },
-                    py: { xs: 1, sm: 1.5 }
-                  }
-                }
-              }}
-            />
-          </Box>
-
-          {/* Filters Panel */}
-          {showFilters && (
-            <Collapse in={showFiltersPanel}>
-              <Box sx={{ 
-                px: { xs: 2, sm: 2.5 }, 
-                pb: { xs: 1.5, sm: 2 },
-                borderTop: '1px solid #e2e8f0'
-              }}>
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    color: '#64748b', 
-                    mb: 1, 
-                    display: 'block',
-                    fontWeight: 500
-                  }}
-                >
-                  Filter by status:
-                </Typography>
-                <Box sx={{ 
-                  display: 'flex', 
-                  gap: 1, 
-                  flexWrap: 'wrap',
-                  alignItems: 'center'
-                }}>
-                  {filterOptions.map((filter) => (
-                    <Chip
-                      key={filter.id}
-                      icon={filter.icon}
-                      label={filter.label}
-                      onClick={() => toggleFilter(filter.id)}
-                      variant={activeFilters.includes(filter.id) ? 'filled' : 'outlined'}
-                      size={isSmallMobile ? "small" : "medium"}
-                      sx={{
-                        backgroundColor: activeFilters.includes(filter.id) 
-                          ? filter.color 
-                          : 'transparent',
-                        color: activeFilters.includes(filter.id) 
-                          ? 'white' 
-                          : filter.color,
-                        borderColor: filter.color,
-                        '&:hover': {
-                          backgroundColor: activeFilters.includes(filter.id)
-                            ? filter.color
-                            : `${filter.color}15`,
-                        },
-                        '& .MuiChip-icon': {
-                          color: activeFilters.includes(filter.id) 
-                            ? 'white' 
-                            : filter.color,
-                        },
-                        transition: 'all 0.2s ease'
-                      }}
-                    />
-                  ))}
-                  {activeFilters.length > 0 && (
-                    <Button
+    <Box sx={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: { xs: 1, sm: 2 },
+      width: '100%'
+    }}>
+      {/* Main Search Autocomplete */}
+      <Autocomplete
+        freeSolo
+        fullWidth
+        options={filteredTasks}
+        getOptionLabel={getTaskOptionLabel}
+        value={searchTerm}
+        onInputChange={handleSearchChange}
+        onChange={handleTaskSelect}
+        filterOptions={(options, { inputValue }) => {
+          if (!inputValue.trim()) return options.slice(0, 5);
+          return options
+            .filter(task => 
+              task.taskTitle?.toLowerCase().includes(inputValue.toLowerCase()) ||
+              task.taskDescription?.toLowerCase().includes(inputValue.toLowerCase())
+            )
+            .slice(0, 8);
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            placeholder={placeholder}
+            variant="outlined"
+            size={isSmallMobile ? "small" : "medium"}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setIsSearchFocused(false)}
+            InputProps={{
+              ...params.InputProps,
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ 
+                    color: isSearchFocused ? '#3b82f6' : '#64748b',
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  {(searchTerm || hasActiveFilters) && (
+                    <IconButton
                       size="small"
-                      onClick={() => setActiveFilters([])}
-                      sx={{
-                        ml: 1,
+                      onClick={handleClearSearch}
+                      sx={{ 
                         color: '#64748b',
-                        fontSize: '0.75rem',
-                        textTransform: 'none',
-                        '&:hover': { color: '#ef4444' }
+                        '&:hover': { color: '#ef4444', backgroundColor: '#fef2f2' }
                       }}
                     >
-                      Clear filters
-                    </Button>
+                      <ClearIcon sx={{ fontSize: '1rem' }} />
+                    </IconButton>
                   )}
+                  {params.InputProps.endAdornment}
                 </Box>
-              </Box>
-            </Collapse>
-          )}
-        </Paper>
-      </Collapse>
-
-      {/* Search Results */}
-      <Fade in={showResults && isExpanded}>
-        <Paper
-          elevation={4}
-          sx={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            mt: 1,
-            maxHeight: { xs: '70vh', sm: '60vh', md: '50vh' },
-            overflow: 'auto',
-            zIndex: 1000,
-            borderRadius: { xs: 2, sm: 3 },
-            backgroundColor: '#ffffff',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
-          }}
-        >
-          {filteredTasks.length > 0 ? (
-            <List sx={{ p: 0 }}>
-              {filteredTasks.map((task, index) => (
-                <React.Fragment key={task.id}>
-                  <ListItem
-                    button
-                    onClick={() => handleTaskSelect(task)}
-                    sx={{
-                      py: { xs: 1.5, sm: 2 },
-                      px: { xs: 2, sm: 2.5 },
-                      '&:hover': {
-                        backgroundColor: '#f8fafc',
-                      },
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 40 }}>
-                      {getStatusIcon(task.taskStatus)}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Typography
-                          variant="subtitle1"
-                          sx={{
-                            fontWeight: 500,
-                            fontSize: { xs: '0.9rem', sm: '1rem' },
-                            color: '#1e293b'
-                          }}
-                        >
-                          {task.taskTitle}
-                        </Typography>
-                      }
-                      secondary={
-                        <Box>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: '#64748b',
-                              fontSize: { xs: '0.8rem', sm: '0.875rem' },
-                              mb: 0.5,
-                              display: '-webkit-box',
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden'
-                            }}
-                          >
-                            {task.taskDescription}
-                          </Typography>
-                          <Chip
-                            label={task.taskStatus}
-                            size="small"
-                            sx={{
-                              backgroundColor: task.taskStatus === 'Completed' 
-                                ? '#dcfce7' 
-                                : task.taskStatus === 'In Progress' 
-                                  ? '#fef3c7' 
-                                  : '#dbeafe',
-                              color: task.taskStatus === 'Completed' 
-                                ? '#166534' 
-                                : task.taskStatus === 'In Progress' 
-                                  ? '#92400e' 
-                                  : '#1e40af',
-                              fontSize: '0.7rem',
-                              height: 20
-                            }}
-                          />
-                        </Box>
-                      }
-                    />
-                  </ListItem>
-                  {index < filteredTasks.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-            </List>
-          ) : searchTerm ? (
-            <Box sx={{ 
-              textAlign: 'center', 
-              py: { xs: 3, sm: 4 },
-              px: { xs: 2, sm: 3 }
-            }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  color: '#64748b',
-                  mb: 1,
-                  fontSize: { xs: '1rem', sm: '1.25rem' }
-                }}
-              >
-                No tasks found
-              </Typography>
+              ),
+              sx: {
+                backgroundColor: '#f8fafc',
+                borderRadius: { xs: 2, sm: 3 },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#e2e8f0'
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#cbd5e1'
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#3b82f6',
+                  borderWidth: 2
+                },
+                fontSize: { xs: '0.9rem', sm: '1rem' }
+              }
+            }}
+          />
+        )}
+        renderOption={(props, task) => (
+          <Box
+            component="li"
+            {...props}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              py: 1.5,
+              px: 2,
+              '&:hover': {
+                backgroundColor: '#f1f5f9'
+              }
+            }}
+          >
+            <TaskIcon sx={{ color: '#64748b', fontSize: '1.1rem' }} />
+            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
               <Typography
                 variant="body2"
                 sx={{
-                  color: '#94a3b8',
-                  fontSize: { xs: '0.8rem', sm: '0.875rem' }
+                  fontWeight: 500,
+                  color: '#1e293b',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                Try adjusting your search terms or filters
+                {task.taskTitle}
               </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                <Chip
+                  label={task.taskStatus}
+                  size="small"
+                  sx={{
+                    height: 20,
+                    fontSize: '0.7rem',
+                    backgroundColor: task.taskStatus === 'Completed' ? '#dcfce7' : 
+                                   task.taskStatus === 'In Progress' ? '#fef3c7' : '#f1f5f9',
+                    color: task.taskStatus === 'Completed' ? '#166534' : 
+                           task.taskStatus === 'In Progress' ? '#92400e' : '#64748b'
+                  }}
+                />
+                {task.taskPriority && (
+                  <Chip
+                    label={task.taskPriority}
+                    size="small"
+                    icon={<FlagIcon sx={{ fontSize: '0.7rem' }} />}
+                    sx={{
+                      height: 20,
+                      fontSize: '0.7rem',
+                      backgroundColor: task.taskPriority === 'High' ? '#fecaca' : 
+                                     task.taskPriority === 'Medium' ? '#fed7aa' : '#e0e7ff',
+                      color: task.taskPriority === 'High' ? '#dc2626' : 
+                             task.taskPriority === 'Medium' ? '#ea580c' : '#4338ca'
+                    }}
+                  />
+                )}
+              </Box>
             </Box>
-          ) : null}
-        </Paper>
-      </Fade>
+          </Box>
+        )}
+        PaperComponent={({ children, ...props }) => (
+          <Paper
+            {...props}
+            sx={{
+              mt: 1,
+              borderRadius: 2,
+              boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+              border: '1px solid #e2e8f0',
+              maxHeight: 300,
+              overflow: 'auto'
+            }}
+          >
+            {children}
+          </Paper>
+        )}
+      />
+
+      {/* Filter Button */}
+      {showFilters && !isSmallMobile && (
+        <IconButton
+          onClick={handleFilterClick}
+          sx={{
+            color: hasActiveFilters ? '#3b82f6' : '#64748b',
+            backgroundColor: hasActiveFilters ? '#eff6ff' : '#f8fafc',
+            borderRadius: 2,
+            border: hasActiveFilters ? '1px solid #3b82f6' : '1px solid #e2e8f0',
+            '&:hover': {
+              backgroundColor: hasActiveFilters ? '#dbeafe' : '#e2e8f0',
+              color: '#3b82f6'
+            }
+          }}
+        >
+          <FilterListIcon />
+        </IconButton>
+      )}
+
+      {/* Filter Menu */}
+      <Menu
+        anchorEl={filterAnchorEl}
+        open={Boolean(filterAnchorEl)}
+        onClose={handleFilterClose}
+        PaperProps={{
+          sx: {
+            mt: 1,
+            borderRadius: 2,
+            boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+            border: '1px solid #e2e8f0',
+            minWidth: 200
+          }
+        }}
+      >
+        <Box sx={{ p: 2 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 2, color: '#1e293b' }}>
+            Filter Tasks
+          </Typography>
+
+          {/* Status Filter */}
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="caption" sx={{ color: '#64748b', mb: 1, display: 'block' }}>
+              Status
+            </Typography>
+            <FormControl size="small" fullWidth>
+              <Select
+                value={selectedFilters.status}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
+                sx={{ borderRadius: 1 }}
+              >
+                <MenuItem value="all">All Status</MenuItem>
+                {uniqueStatuses.map(status => (
+                  <MenuItem key={status} value={status}>{status}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          {/* Priority Filter */}
+          {uniquePriorities.length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="caption" sx={{ color: '#64748b', mb: 1, display: 'block' }}>
+                Priority
+              </Typography>
+              <FormControl size="small" fullWidth>
+                <Select
+                  value={selectedFilters.priority}
+                  onChange={(e) => handleFilterChange('priority', e.target.value)}
+                  sx={{ borderRadius: 1 }}
+                >
+                  <MenuItem value="all">All Priorities</MenuItem>
+                  {uniquePriorities.map(priority => (
+                    <MenuItem key={priority} value={priority}>{priority}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          )}
+
+          {/* Category Filter */}
+          {uniqueCategories.length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="caption" sx={{ color: '#64748b', mb: 1, display: 'block' }}>
+                Category
+              </Typography>
+              <FormControl size="small" fullWidth>
+                <Select
+                  value={selectedFilters.category}
+                  onChange={(e) => handleFilterChange('category', e.target.value)}
+                  sx={{ borderRadius: 1 }}
+                >
+                  <MenuItem value="all">All Categories</MenuItem>
+                  {uniqueCategories.map(category => (
+                    <MenuItem key={category} value={category}>{category}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          )}
+
+          <Divider sx={{ my: 1 }} />
+          
+          {/* Clear Filters */}
+          <MenuItem 
+            onClick={handleClearSearch}
+            sx={{ 
+              justifyContent: 'center',
+              color: '#ef4444',
+              '&:hover': { backgroundColor: '#fef2f2' }
+            }}
+          >
+            Clear All Filters
+          </MenuItem>
+        </Box>
+      </Menu>
     </Box>
   );
 };

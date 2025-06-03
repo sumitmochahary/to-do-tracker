@@ -103,7 +103,7 @@ const Footer = () => {
                   justifyContent: { xs: 'center', md: 'flex-start' }
                 }}
               >
-                🎯 TaskFlow Pro
+                🎯 To-Do Tracker 
               </Typography>
               <Typography 
                 variant="body2" 
@@ -299,7 +299,7 @@ const Footer = () => {
               }}>
                 <LocationIcon sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }} />
                 <Typography variant="body2" sx={{ fontSize: 'inherit' }}>
-                  San Francisco, CA
+                  India, Mumbai
                 </Typography>
               </Box>
             </Box>
@@ -371,7 +371,7 @@ const Footer = () => {
               fontSize: { xs: '0.8rem', sm: '0.875rem' }
             }}
           >
-            © {currentYear} TaskFlow Pro. Made with 
+            © {currentYear} To-Do Tracker . Made with 
             <FavoriteIcon sx={{ fontSize: { xs: '0.9rem', sm: '1rem' }, color: '#ff6b6b' }} /> 
             for productivity enthusiasts.
           </Typography>
