@@ -1,4 +1,4 @@
-import { Container, Paper, Typography } from "@mui/material"
+import { Container, Paper, Typography, Snackbar, Alert } from "@mui/material"
 import { useState } from "react"
 import LoadingEffect from "../components/LoadingEffect"
 import { Link } from "react-router"
@@ -8,6 +8,24 @@ import ResetPasswordForm from "../components/ResetPasswordForm"
 
 function ResetPasswordPage() {
     const [loading, setLoading] = useState(false);
+
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "info"
+    })
+
+    const showSnackbar = (message, severity = "info") => {
+        setSnackbar({
+            open: true,
+            message,
+            severity
+        })
+    }
+
+    const handleSnackbarClose = () => {
+        setSnackbar(prev => ({ ...prev, open: false }))
+    }
 
     return (
         <>
@@ -55,7 +73,7 @@ function ResetPasswordPage() {
 
                             <Typography mb={3}>Enter a new password below to change your password</Typography>
 
-                            <ResetPasswordForm onLoadingChange={setLoading} />
+                            <ResetPasswordForm onLoadingChange={setLoading} onShowSnackbar={showSnackbar} />
 
                             <Typography mt={3} align="center" gutterBottom>
                                 <Link to="/login" className="no-underline">
@@ -66,6 +84,17 @@ function ResetPasswordPage() {
                     </Motion.div>
                 </Container>
             </Container>
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={handleSnackbarClose}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+                <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </>
     )
 }

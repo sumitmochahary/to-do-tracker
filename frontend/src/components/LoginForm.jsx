@@ -4,9 +4,11 @@ import { useForm } from "react-hook-form"
 import EmailIcon from "@mui/icons-material/Email"
 import { Visibility, VisibilityOff } from "@mui/icons-material"
 import { loginUser } from "../services/AuthService"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
 
 function LoginForm({ onLoadingChange, onShowSnackbar }) {
+
+    const navigate = useNavigate()
 
     const {
         register,
@@ -36,8 +38,12 @@ function LoginForm({ onLoadingChange, onShowSnackbar }) {
         try {
             const response = await loginUser(data)
             localStorage.setItem("token", response.token)
-            onShowSnackbar?.("Login successfull", "success")
             reset()
+
+            setTimeout(() => {
+                navigate("/dashboard")
+            }, 1000)
+
         } catch (error) {
             console.error("Login error:", error);
 

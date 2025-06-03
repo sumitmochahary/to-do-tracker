@@ -41,8 +41,8 @@ import SideBar from "../components/SideBar";
 import Header from "../components/Header";
 import Column from "../components/Column";
 import NewTaskForm from "../components/NewTaskForm";
+import { fetchTask } from "../services/TaskService";
 import TaskCard from "../components/TaskCard";
-
 const SIDEBAR_WIDTH = 260;
 
 // Main Board Component
@@ -64,15 +64,56 @@ const Board = () => {
 
   // Effects
   useEffect(() => {
-    fetchTasks();
+    const loadTasks = async () => {
+      try {
+        const taskData = await fetchTask()
+        setTasks(taskData)
+      } catch (error) {
+        setError("Failed to fetch tasks", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadTasks()
   }, []);
 
   // API Functions
-  const fetchTasks = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  // const fetchTasks = async () => {
+  //   try {
+  //     setLoading(true);
+  //     setError(null);
 
+  //     const mockTasks = [
+  //       {
+  //         id: 1,
+  //         taskTitle: "Complete project documentation",
+  //         taskDescription: "Write comprehensive documentation for the new feature including API specs and user guides",
+  //         taskStatus: "To Do"
+  //       },
+  //       {
+  //         id: 2,
+  //         taskTitle: "Review code changes",
+  //         taskDescription: "Review pull requests from team members and provide feedback",
+  //         taskStatus: "In Progress"
+  //       },
+  //       {
+  //         id: 3,
+  //         taskTitle: "Deploy to production",
+  //         taskDescription: "Deploy the latest version to production environment after testing",
+  //         taskStatus: "Completed"
+  //       }
+  //     ];
+
+  //     await new Promise(resolve => setTimeout(resolve, 1000));
+  //     setTasks(mockTasks);
+  //   } catch (error) {
+  //     console.error("Failed to fetch tasks", error);
+  //     setError("Failed to load tasks. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
       // Replace this with your actual API call
       const response = await fetch('/api/v1/');
       const tasksData = await response.json();
@@ -166,14 +207,14 @@ const Board = () => {
         backgroundColor: '#f8fafc',
         px: { xs: 1, sm: 2, md: 2 }
       }}>
-        <CircularProgress 
-          size={isSmallMobile ? 60 : 80} 
-          sx={{ color: '#3b82f6' }} 
+        <CircularProgress
+          size={isSmallMobile ? 60 : 80}
+          sx={{ color: '#3b82f6' }}
         />
-        <Typography 
-          variant={isSmallMobile ? "h6" : "h5"} 
-          sx={{ 
-            color: '#1e293b', 
+        <Typography
+          variant={isSmallMobile ? "h6" : "h5"}
+          sx={{
+            color: '#1e293b',
             fontWeight: 'bold',
             textAlign: 'center'
           }}
@@ -186,6 +227,74 @@ const Board = () => {
 
   // Main Render
   return (
+
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      backgroundColor: {
+        xs: '#f1f5f9',
+        sm: '#f8fafc',
+        md: '#f8fafc'
+      }
+    }}>
+      {/* Header Component */}
+      <Header
+        tasks={tasks}
+        onSearchResults={handleSearchResults}
+        onTaskSelect={handleTaskSelection}
+        searchPlaceholder="Search your tasks..."
+        showFilters={true}
+        isMobile={isMobile}
+        onMenuClick={toggleSidebar}
+      />
+
+      {/* Main Content Layout */}
+      <Box display="flex" sx={{
+        flexGrow: 1,
+        backgroundColor: {
+          xs: '#f1f5f9',
+          sm: '#f8fafc',
+          md: '#f8fafc'
+        }
+      }}>
+        {/* Desktop Sidebar - Always visible on desktop */}
+        {!isMobile && <SideBar />}
+
+        {/* Mobile Sidebar - Drawer */}
+        {isMobile && (
+          <Drawer
+            variant="temporary"
+            anchor="left"
+            open={sidebarOpen}
+            onClose={handleSidebarClose}
+            ModalProps={{
+              keepMounted: true, // Better mobile performance
+            }}
+            sx={{
+              '& .MuiDrawer-paper': {
+                width: { xs: 260, sm: 280 },
+                boxSizing: 'border-box',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+              },
+            }}
+          >
+            <SideBar onClose={handleSidebarClose} />
+          </Drawer>
+        )}
+
+        {/* Main Content Area */}
+        <Box
+          flexGrow={1}
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: {
+              xs: '#f1f5f9',
+              sm: '#f8fafc',
+              md: '#f8fafc'
+
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       {/* Desktop Sidebar - Fixed positioning */}
       {!isMobile && (
@@ -215,6 +324,7 @@ const Board = () => {
               boxSizing: 'border-box',
               backgroundColor: '#1e293b',
               boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+
             },
           }}
         >
@@ -256,9 +366,9 @@ const Board = () => {
               px: { xs: 2, sm: 3 },
               py: { xs: 1, sm: 1.5 },
             }}>
-              <Typography 
-                variant="subtitle2" 
-                sx={{ 
+              <Typography
+                variant="subtitle2"
+                sx={{
                   color: '#64748b',
                   textAlign: 'center',
                   fontSize: { xs: '0.75rem', sm: '0.875rem' }
@@ -268,11 +378,11 @@ const Board = () => {
               </Typography>
             </Box>
           )}
-          
+
           {/* Main Content Container */}
-          <Container 
-            maxWidth="xl" 
-            sx={{ 
+          <Container
+            maxWidth="xl"
+            sx={{
               flexGrow: 1,
               px: { xs: 1, sm: 2, md: 3, lg: 4 },
               py: { xs: 2, sm: 3, md: 4 },
@@ -305,13 +415,13 @@ const Board = () => {
                 zIndex: 2
               }
             }}>
-              <Typography 
-                variant={isSmallMobile ? "h4" : isMobile ? "h3" : "h2"} 
-                sx={{ 
-                  fontWeight: 'bold', 
+              <Typography
+                variant={isSmallMobile ? "h4" : isMobile ? "h3" : "h2"}
+                sx={{
+                  fontWeight: 'bold',
                   mb: { xs: 1, sm: 2 },
-                  fontSize: { 
-                    xs: '1.5rem', 
+                  fontSize: {
+                    xs: '1.5rem',
                     sm: '2rem',
                     md: '2.5rem',
                     lg: '3rem'
@@ -321,12 +431,12 @@ const Board = () => {
               >
                 🎯 Task Management Board
               </Typography>
-              <Typography 
-                variant={isSmallMobile ? "body1" : "h6"} 
-                sx={{ 
+              <Typography
+                variant={isSmallMobile ? "body1" : "h6"}
+                sx={{
                   opacity: 0.9,
-                  fontSize: { 
-                    xs: '0.9rem', 
+                  fontSize: {
+                    xs: '0.9rem',
                     sm: '1rem',
                     md: '1.1rem',
                     lg: '1.25rem'
@@ -340,10 +450,10 @@ const Board = () => {
 
             {/* Error Alert */}
             {error && (
-              <Alert 
-                severity="error" 
-                sx={{ 
-                  mb: { xs: 2, sm: 3 }, 
+              <Alert
+                severity="error"
+                sx={{
+                  mb: { xs: 2, sm: 3 },
                   borderRadius: { xs: 2, sm: 3 },
                   backgroundColor: '#fef2f2',
                   border: '1px solid #fecaca',
@@ -355,10 +465,10 @@ const Board = () => {
                 <Box sx={{ mb: { xs: 1, sm: 0 } }}>
                   {error}
                 </Box>
-                <Button 
-                  size="small" 
-                  onClick={fetchTasks} 
-                  sx={{ 
+                <Button
+                  size="small"
+                  onClick={fetchTasks}
+                  sx={{
                     ml: { xs: 0, sm: 2 },
                     color: '#dc2626',
                     alignSelf: { xs: 'flex-start', sm: 'center' },
@@ -371,9 +481,9 @@ const Board = () => {
             )}
 
             {/* Task Form Toggle Button */}
-            <Box sx={{ 
-              mb: { xs: 2, sm: 3, md: 4 }, 
-              display: 'flex', 
+            <Box sx={{
+              mb: { xs: 2, sm: 3, md: 4 },
+              display: 'flex',
               justifyContent: 'center',
               px: { xs: 1, sm: 0 }
             }}>
@@ -387,14 +497,40 @@ const Board = () => {
                   backgroundColor: showTaskForm ? '#ef4444' : '#3b82f6',
                   color: '#ffffff',
                   borderRadius: { xs: 3, sm: 4 },
-                  padding: { 
-                    xs: '10px 20px', 
-                    sm: '12px 28px', 
+                  padding: {
+                    xs: '10px 20px',
+                    sm: '12px 28px',
                     md: '14px 32px',
                     lg: '16px 40px'
                   },
                   fontWeight: 'bold',
                   fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1rem', lg: '1.1rem' },
+
+                  boxShadow: showTaskForm
+                    ? {
+                      xs: '0 4px 15px rgba(239, 68, 68, 0.2)',
+                      sm: '0 6px 20px rgba(239, 68, 68, 0.25)',
+                      md: '0 8px 25px rgba(239, 68, 68, 0.3)'
+                    }
+                    : {
+                      xs: '0 4px 15px rgba(59, 130, 246, 0.2)',
+                      sm: '0 6px 20px rgba(59, 130, 246, 0.25)',
+                      md: '0 8px 25px rgba(59, 130, 246, 0.3)'
+                    },
+                  '&:hover': {
+                    backgroundColor: showTaskForm ? '#dc2626' : '#2563eb',
+                    transform: 'translateY(-1px)',
+                    boxShadow: showTaskForm
+                      ? {
+                        xs: '0 6px 20px rgba(239, 68, 68, 0.3)',
+                        sm: '0 8px 25px rgba(239, 68, 68, 0.35)',
+                        md: '0 12px 35px rgba(239, 68, 68, 0.4)'
+                      }
+                      : {
+                        xs: '0 6px 20px rgba(59, 130, 246, 0.3)',
+                        sm: '0 8px 25px rgba(59, 130, 246, 0.35)',
+                        md: '0 12px 35px rgba(59, 130, 246, 0.4)'
+                      },
                   boxShadow: showTaskForm 
                     ? '0 8px 25px rgba(239, 68, 68, 0.3)'
                     : '0 8px 25px rgba(59, 130, 246, 0.3)',
@@ -429,10 +565,10 @@ const Board = () => {
             {/* Task Columns Grid */}
             <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
               {columns.map((column, index) => (
-                <Grid 
-                  item 
-                  xs={12} 
-                  sm={6} 
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
                   md={columns.length <= 3 ? 4 : 6}
                   lg={columns.length <= 3 ? 4 : columns.length <= 4 ? 3 : 6}
                   xl={columns.length <= 6 ? 2 : 4}
@@ -488,6 +624,10 @@ const Board = () => {
               </Box>
             )} */}
           </Container>
+
+          {/* Footer Component */}
+          <Footer />
+
         </Box>
         
         {/* Footer Component */}
@@ -521,8 +661,8 @@ const Board = () => {
       </Fab>
 
       {/* Add Column Dialog */}
-      <Dialog 
-        open={showColumnDialog} 
+      <Dialog
+        open={showColumnDialog}
         onClose={() => setShowColumnDialog(false)}
         maxWidth="sm"
         fullWidth
@@ -537,8 +677,16 @@ const Board = () => {
           }
         }}
       >
+
+        <DialogTitle sx={{
+          backgroundColor: {
+            xs: '#f1f5f9',
+            sm: '#f8fafc'
+          },
+
         <DialogTitle sx={{ 
           backgroundColor: '#f8fafc',
+
           color: '#1e293b',
           fontWeight: 'bold',
           fontSize: { xs: '1rem', sm: '1.2rem', md: '1.3rem' },
@@ -548,8 +696,8 @@ const Board = () => {
         }}>
           🏗️ Add New List
         </DialogTitle>
-        <DialogContent sx={{ 
-          pt: { xs: 2, sm: 3 }, 
+        <DialogContent sx={{
+          pt: { xs: 2, sm: 3 },
           pb: 2,
           px: { xs: 2, sm: 3 },
           backgroundColor: '#ffffff'
@@ -571,13 +719,13 @@ const Board = () => {
             helperText="Enter a unique name for your new list"
           />
         </DialogContent>
-        <DialogActions sx={{ 
-          p: { xs: 2, sm: 3 }, 
+        <DialogActions sx={{
+          p: { xs: 2, sm: 3 },
           gap: { xs: 1, sm: 2 },
           flexDirection: { xs: 'column', sm: 'row' },
           backgroundColor: '#ffffff'
         }}>
-          <Button 
+          <Button
             onClick={() => setShowColumnDialog(false)}
             fullWidth={isSmallMobile}
             sx={{
@@ -590,7 +738,7 @@ const Board = () => {
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleAddColumn}
             variant="contained"
             fullWidth={isSmallMobile}

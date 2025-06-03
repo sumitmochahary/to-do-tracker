@@ -1,4 +1,4 @@
-import { Container, Paper, Typography } from "@mui/material"
+import { Container, Paper, Typography, Snackbar, Alert } from "@mui/material"
 import { useState } from "react"
 import LoadingEffect from "../components/LoadingEffect"
 import ForgotPasswordForm from "../components/ForgotPasswordForm"
@@ -9,6 +9,24 @@ import { formAnimationVariant } from "../animations/MotionVariants"
 function ForgotPasswordPage() {
 
     const [loading, setLoading] = useState(false);
+
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "info"
+    })
+
+    const showSnackbar = (message, severity = "info") => {
+        setSnackbar({
+            open: true,
+            message,
+            severity
+        })
+    }
+
+    const handleSnackbarClose = () => {
+        setSnackbar(prev => ({ ...prev, open: false }))
+    }
 
     return (
         <>
@@ -56,7 +74,7 @@ function ForgotPasswordPage() {
 
                             <Typography mb={3}>Enter the email associated with your account and we'll send you password reset link.</Typography>
 
-                            <ForgotPasswordForm onLoadingChange={setLoading} />
+                            <ForgotPasswordForm onLoadingChange={setLoading} onShowSnackbar={showSnackbar} />
 
                             <Typography mt={3} align="center" gutterBottom>
                                 <Link to="/login" className="no-underline">
@@ -67,6 +85,17 @@ function ForgotPasswordPage() {
                     </Motion.div>
                 </Container>
             </Container>
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={handleSnackbarClose}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+                <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </>
     );
 }

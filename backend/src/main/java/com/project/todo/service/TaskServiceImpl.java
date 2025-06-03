@@ -69,10 +69,8 @@ public class TaskServiceImpl implements ITaskService {
     }
 
     @Override
-    public List<Task> fetchTaskByUserId(String userId) throws TaskNotFoundException {
-        List<Task> tasks = taskRepository.findByUserId(userId);
-        if (tasks.isEmpty()) throw new TaskNotFoundException("No tasks found for user: " + userId);
-        return tasks;
+    public List<Task> fetchTaskByUserId(String userId) {
+        return taskRepository.findByUserId(userId);
     }
 
     @Override

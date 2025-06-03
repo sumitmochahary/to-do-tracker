@@ -44,30 +44,30 @@ public class TaskController {
         return new ResponseEntity<>(savedTask, HttpStatus.CREATED);
     }
 
-    @GetMapping("/tasks/ss1234")
-    public ResponseEntity<?> fetchAllTasks(HttpServletRequest request) {
+    @GetMapping("/fetch")
+    public ResponseEntity<?> fetchAllTasks(HttpServletRequest request) throws TaskNotFoundException {
         String userId = validateAndGetUserId(request);
         if (userId == null) {
             return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
         }
-        List<Task> tasks = iTaskService.fetchAllTasks();
-        return new ResponseEntity<>(tasks, HttpStatus.OK);
-    }
-
-    @GetMapping("/fetch/{userId}")
-    public ResponseEntity<?> fetchTask(@PathVariable String userId, HttpServletRequest request) throws TaskNotFoundException {
-        String requestUserId = validateAndGetUserId(request);
-        if (requestUserId == null) {
-            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
-        }
-
-        if (!requestUserId.equals(userId)) {
-            return new ResponseEntity<>("Forbidden: Cannot access other user's tasks", HttpStatus.FORBIDDEN);
-        }
-
         List<Task> taskList = iTaskService.fetchTaskByUserId(userId);
         return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
+
+//    @GetMapping("/fetch/{userId}")
+//    public ResponseEntity<?> fetchTask(@PathVariable String userId, HttpServletRequest request) throws TaskNotFoundException {
+//        String requestUserId = validateAndGetUserId(request);
+//        if (requestUserId == null) {
+//            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
+//        }
+//
+//        if (!requestUserId.equals(userId)) {
+//            return new ResponseEntity<>("Forbidden: Cannot access other user's tasks", HttpStatus.FORBIDDEN);
+//        }
+//
+//        List<Task> taskList = iTaskService.fetchTaskByUserId(userId);
+//        return new ResponseEntity<>(taskList, HttpStatus.OK);
+//    }
 
     @GetMapping("/category/{taskCategory}")
     public ResponseEntity<?> fetchByCategory(@PathVariable String taskCategory, HttpServletRequest request) {
