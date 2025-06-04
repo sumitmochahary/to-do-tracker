@@ -1,494 +1,439 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import { 
   Card, 
   CardContent, 
+  CardActions, 
   Typography, 
-  Box, 
-  IconButton,
+  Button, 
+  TextField, 
+  MenuItem, 
+  Chip,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Chip,
-  Alert,
-  CircularProgress,
-  useMediaQuery,
-  useTheme
-} from "@mui/material";
+  IconButton,
+  Tooltip,
+  Box
+} from '@mui/material';
 import { 
-  Edit as EditIcon, 
+  Edit as EditIcon,
   Delete as DeleteIcon,
-  Close as CloseIcon,
-  Save as SaveIcon,
-  Warning as WarningIcon,
-  CalendarToday as CalendarIcon,
-  Flag as PriorityIcon
-} from "@mui/icons-material";
+  Archive as ArchiveIcon,
+  CheckCircle as CheckCircleIcon,
+  Visibility as VisibilityIcon
+} from '@mui/icons-material';
+import axios from 'axios';
 
 const TaskCard = ({ 
   task, 
-  onEdit, 
-  onDelete, 
+  onTaskUpdated, 
+  onTaskDeleted, 
+  onTaskArchived,
   onStatusChange, 
-  availableStatuses = ["To Do", "In Progress", "Completed"],
-  isLoading = false 
+  availableStatuses 
 }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
-  // State Management
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTask, setEditedTask] = useState(task);
+  const [loading, setLoading] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editedTask, setEditedTask] = useState({});
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState(null);
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
-  // Initialize edited task when dialog opens
-  const handleEditClick = () => {
-    setEditedTask({
-      id: task.id,
-      title: task.title || task.taskTitle || '',
-      description: task.description || task.taskDescription || '',
-      status: task.status || task.taskStatus || 'To Do',
-      priority: task.priority || 'Medium',
-      dueDate: task.dueDate || '',
-      tags: task.tags || []
-    });
-    setEditDialogOpen(true);
-    setError(null);
-  };
-
-  // Handle task update
-  const handleSaveTask = async () => {
+  // Function to handle task updates
+  const handleSave = async () => {
     try {
-      setIsUpdating(true);
-      setError(null);
-
-      // Validate required fields
-      if (!editedTask.title?.trim()) {
-        setError("Task title is required");
-        return;
-      }
-
-      // API Call - Replace with your actual endpoint
-      const updatedTaskData = {
-        ...editedTask,
-        title: editedTask.title.trim(),
-        description: editedTask.description?.trim() || '',
-        updatedAt: new Date().toISOString()
-      };
-
-      // Uncomment and modify this section for your actual API
-      /*
-      const response = await fetch(`/api/tasks/${task.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add authorization headers if needed
-          // 'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(updatedTaskData)
+      setLoading(true);
+      const response = await axios.put(`http://localhost:3000/card/${task.id}`, {
+        taskTitle: editedTask.taskTitle,
+        taskDescription: editedTask.taskDescription,
+        taskStatus: editedTask.taskStatus,
+        taskDueDate: editedTask.taskDueDate
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to update task: ${response.statusText}`);
-      }
-
-      const updatedTask = await response.json();
-      */
-
-      // For now, simulate API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Call parent component's update handler
-      if (onEdit) {
-        onEdit(updatedTaskData);
-      }
-
-      setEditDialogOpen(false);
-      setEditedTask({});
+      onTaskUpdated(response.data);
+      setIsEditing(false);
     } catch (error) {
-      console.error("Error updating task:", error);
-      setError(error.message || "Failed to update task. Please try again.");
+      console.error('Error updating task:', error);
     } finally {
-      setIsUpdating(false);
+      setLoading(false);
     }
   };
 
-  // Handle task deletion
-  const handleDeleteTask = async () => {
+  // Function to handle task deletion
+  const handleDelete = async () => {
     try {
-      setIsDeleting(true);
-      setError(null);
-
-      // API Call - Replace with your actual endpoint
-      /*
-      const response = await fetch(`/api/tasks/${task.id}`, {
-        method: 'DELETE',
-        headers: {
-          // Add authorization headers if needed
-          // 'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to delete task: ${response.statusText}`);
-      }
-      */
-
-      // For now, simulate API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Call parent component's delete handler
-      if (onDelete) {
-        onDelete(task.id);
-      }
-
+      setLoading(true);
+      await axios.delete(`http://localhost:3000/card/${task.id}`);
+      onTaskDeleted(task.id);
       setDeleteDialogOpen(false);
     } catch (error) {
-      console.error("Error deleting task:", error);
-      setError(error.message || "Failed to delete task. Please try again.");
+      console.error('Error deleting task:', error);
     } finally {
-      setIsDeleting(false);
+      setLoading(false);
     }
   };
 
-  // Handle status change from dropdown
-  const handleStatusChange = async (newStatus) => {
+  // Function to handle task archiving
+  const handleArchive = async () => {
     try {
-      setIsUpdating(true);
-      
-      // API Call for status update
-      /*
-      const response = await fetch(`/api/tasks/${task.id}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ status: newStatus })
+      setLoading(true);
+      await axios.put(`http://localhost:3000/card/${task.id}/archive`, {
+        archivedDate: new Date().toISOString().split('T')[0]
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to update task status: ${response.statusText}`);
-      }
-      */
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
       
-      if (onStatusChange) {
-        onStatusChange(task.id, newStatus);
-      }
+      onTaskArchived(task.id);
+      setArchiveDialogOpen(false);
     } catch (error) {
-      console.error("Error updating task status:", error);
-      setError(error.message || "Failed to update task status.");
+      console.error('Error archiving task:', error);
     } finally {
-      setIsUpdating(false);
+      setLoading(false);
     }
   };
 
-  // Get priority color
-  const getPriorityColor = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case 'high': return '#ef4444';
-      case 'medium': return '#f59e0b';
-      case 'low': return '#10b981';
-      default: return '#64748b';
+  // Get status color and icon
+  const getStatusInfo = (status) => {
+    switch (status) {
+      case 'To Do':
+        return { color: '#ff9800', icon: '📋' };
+      case 'In Progress':
+        return { color: '#2196f3', icon: '⚡' };
+      case 'Completed':
+        return { color: '#4caf50', icon: '✅' };
+      default:
+        return { color: '#757575', icon: '🔖' };
     }
   };
+
+  // Check if task is overdue
+  const isOverdue = () => {
+    const today = new Date();
+    const dueDate = new Date(task.taskDueDate);
+    return dueDate < today && task.taskStatus !== 'Completed';
+  };
+
+  // Calculate days until due
+  const getDaysUntilDue = () => {
+    const today = new Date();
+    const dueDate = new Date(task.taskDueDate);
+    const diffTime = dueDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const statusInfo = getStatusInfo(task.taskStatus);
+  const overdue = isOverdue();
+  const daysUntilDue = getDaysUntilDue();
 
   return (
     <>
-      <Card sx={{
-        mb: 2,
-        backgroundColor: '#ffffff',
-        border: '1px solid #e2e8f0',
+      <Card sx={{ 
+        height: '100%', 
+        display: 'flex', 
+        flexDirection: 'column',
+        boxShadow: overdue ? '0 4px 12px rgba(244, 67, 54, 0.3)' : '0 4px 12px rgba(0,0,0,0.1)',
         borderRadius: 3,
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-        opacity: isLoading ? 0.6 : 1,
-        '&:hover': {
-          boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-          transform: 'translateY(-2px)',
-          borderColor: '#3b82f6'
-        },
         transition: 'all 0.3s ease',
-        position: 'relative'
+        border: overdue ? '2px solid #f44336' : '2px solid transparent',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: overdue ? '0 8px 24px rgba(244, 67, 54, 0.4)' : '0 8px 24px rgba(0,0,0,0.15)',
+          border: overdue ? '2px solid #f44336' : '2px solid #667eea'
+        }
       }}>
-        {isUpdating && (
-          <Box sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(255,255,255,0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2,
-            borderRadius: 3
-          }}>
-            <CircularProgress size={24} />
-          </Box>
-        )}
-        
-        <CardContent sx={{ p: 2.5 }}>
-          {/* Task Header */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-            <Typography variant="h6" sx={{ 
-              color: '#1e293b', 
-              fontWeight: 'bold',
-              flex: 1,
-              pr: 1
-            }}>
-              {task.title || task.taskTitle}
-            </Typography>
-            
-            {/* Priority Indicator */}
-            {task.priority && (
+        <CardContent sx={{ flexGrow: 1 }}>
+          {/* Status Badge and Due Date Warning */}
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Chip
+              icon={<span>{statusInfo.icon}</span>}
+              label={task.taskStatus}
+              sx={{
+                backgroundColor: statusInfo.color,
+                color: 'white',
+                fontWeight: 'bold'
+              }}
+            />
+            {overdue && (
               <Chip
-                icon={<PriorityIcon sx={{ fontSize: '14px !important' }} />}
-                label={task.priority}
+                label={`Overdue by ${Math.abs(daysUntilDue)} day${Math.abs(daysUntilDue) !== 1 ? 's' : ''}`}
                 size="small"
-                sx={{
-                  backgroundColor: `${getPriorityColor(task.priority)}20`,
-                  color: getPriorityColor(task.priority),
-                  fontWeight: 'bold',
-                  fontSize: '0.7rem'
+                sx={{ 
+                  backgroundColor: '#f44336',
+                  color: 'white',
+                  fontWeight: 'bold'
+                }}
+              />
+            )}
+            {!overdue && daysUntilDue <= 3 && task.taskStatus !== 'Completed' && (
+              <Chip
+                label={daysUntilDue === 0 ? 'Due Today' : `${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''} left`}
+                size="small"
+                sx={{ 
+                  backgroundColor: daysUntilDue === 0 ? '#ff9800' : '#2196f3',
+                  color: 'white',
+                  fontWeight: 'bold'
                 }}
               />
             )}
           </Box>
 
+          {/* Task Title */}
+          {isEditing ? (
+            <TextField
+              fullWidth
+              value={editedTask.taskTitle}
+              onChange={(e) => setEditedTask({...editedTask, taskTitle: e.target.value})}
+              variant="outlined"
+              size="small"
+              sx={{ mb: 2 }}
+            />
+          ) : (
+            <Typography 
+              variant="h6" 
+              component="h3" 
+              sx={{ 
+                mb: 2, 
+                fontWeight: 'bold',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden'
+              }}
+            >
+              {task.taskTitle}
+            </Typography>
+          )}
+
           {/* Task Description */}
-          <Typography variant="body2" sx={{ 
-            color: '#64748b',
-            mb: 2,
-            lineHeight: 1.6
-          }}>
-            {task.description || task.taskDescription}
-          </Typography>
+          {isEditing ? (
+            <TextField
+              fullWidth
+              multiline
+              rows={3}
+              value={editedTask.taskDescription}
+              onChange={(e) => setEditedTask({...editedTask, taskDescription: e.target.value})}
+              variant="outlined"
+              size="small"
+              sx={{ mb: 2 }}
+            />
+          ) : (
+            <Typography 
+              variant="body2" 
+              color="text.secondary" 
+              sx={{ 
+                mb: 2,
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden'
+              }}
+            >
+              {task.taskDescription || 'No description provided'}
+            </Typography>
+          )}
 
           {/* Due Date */}
-          {task.dueDate && (
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, color: '#64748b' }}>
-              <CalendarIcon sx={{ fontSize: 16, mr: 0.5 }} />
-              <Typography variant="caption">
-                Due: {new Date(task.dueDate).toLocaleDateString()}
-              </Typography>
-            </Box>
+          {isEditing ? (
+            <TextField
+              fullWidth
+              label="Due Date"
+              type="date"
+              value={editedTask.taskDueDate}
+              onChange={(e) => setEditedTask({...editedTask, taskDueDate: e.target.value})}
+              InputLabelProps={{ shrink: true }}
+              sx={{ mb: 2 }}
+            />
+          ) : (
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              <strong>Due:</strong> {new Date(task.taskDueDate).toLocaleDateString()}
+            </Typography>
           )}
 
-          {/* Tags */}
-          {task.tags && task.tags.length > 0 && (
-            <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {task.tags.map((tag, index) => (
-                <Chip
-                  key={index}
-                  label={tag}
-                  size="small"
-                  variant="outlined"
-                  sx={{ fontSize: '0.7rem' }}
-                />
-              ))}
-            </Box>
-          )}
-
-          {/* Status Selector and Action Buttons */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? 1 : 0
-          }}>
-            {/* Status Dropdown */}
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <Select
-                value={task.status || task.taskStatus || 'To Do'}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                disabled={isUpdating}
-                sx={{ 
-                  fontSize: '0.8rem',
-                  '& .MuiSelect-select': {
-                    py: 0.5
-                  }
-                }}
-              >
-                {availableStatuses.map((status) => (
-                  <MenuItem key={status} value={status} sx={{ fontSize: '0.8rem' }}>
-                    {status}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Action Buttons */}
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <IconButton 
-                size="small" 
-                onClick={handleEditClick}
-                disabled={isUpdating}
-                sx={{ 
-                  color: '#3b82f6',
-                  backgroundColor: '#eff6ff',
-                  '&:hover': { backgroundColor: '#dbeafe' },
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <EditIcon fontSize="small" />
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={() => setDeleteDialogOpen(true)}
-                disabled={isUpdating}
-                sx={{ 
-                  color: '#ef4444',
-                  backgroundColor: '#fef2f2',
-                  '&:hover': { backgroundColor: '#fee2e2' },
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Box>
-          </Box>
-
-          {/* Error Display */}
-          {error && (
-            <Alert 
-              severity="error" 
-              sx={{ mt: 2 }}
-              onClose={() => setError(null)}
-            >
-              {error}
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Edit Task Dialog */}
-      <Dialog 
-        open={editDialogOpen} 
-        onClose={() => !isUpdating && setEditDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-        fullScreen={isMobile}
-      >
-        <DialogTitle sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          backgroundColor: '#f8fafc',
-          borderBottom: '1px solid #e2e8f0'
-        }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            ✏️ Edit Task
+          {/* Created Date */}
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <strong>Created:</strong> {new Date(task.taskCreatedDate).toLocaleDateString()}
           </Typography>
-          {!isUpdating && (
-            <IconButton onClick={() => setEditDialogOpen(false)}>
-              <CloseIcon />
-            </IconButton>
-          )}
-        </DialogTitle>
-        
-        <DialogContent sx={{ pt: 3 }}>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-          
-          <TextField
-            fullWidth
-            label="Task Title"
-            value={editedTask.title || ''}
-            onChange={(e) => setEditedTask(prev => ({ ...prev, title: e.target.value }))}
-            margin="normal"
-            required
-            disabled={isUpdating}
-          />
-          
-          <TextField
-            fullWidth
-            label="Description"
-            value={editedTask.description || ''}
-            onChange={(e) => setEditedTask(prev => ({ ...prev, description: e.target.value }))}
-            margin="normal"
-            multiline
-            rows={3}
-            disabled={isUpdating}
-          />
-          
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={editedTask.status || 'To Do'}
-              onChange={(e) => setEditedTask(prev => ({ ...prev, status: e.target.value }))}
+
+          {/* Status Dropdown (if editing) */}
+          {isEditing && (
+            <TextField
+              select
+              fullWidth
               label="Status"
-              disabled={isUpdating}
+              value={editedTask.taskStatus}
+              onChange={(e) => setEditedTask({...editedTask, taskStatus: e.target.value})}
+              sx={{ mb: 2 }}
             >
               {availableStatuses.map((status) => (
                 <MenuItem key={status} value={status}>
-                  {status}
+                  {getStatusInfo(status).icon} {status}
                 </MenuItem>
               ))}
-            </Select>
-          </FormControl>
+            </TextField>
+          )}
+        </CardContent>
+
+        {/* Action Buttons */}
+        <CardActions sx={{ p: 2, justifyContent: 'space-between' }}>
+          {isEditing ? (
+            <Box>
+              <Button 
+                size="small" 
+                onClick={handleSave} 
+                color="primary"
+                disabled={loading}
+              >
+                {loading ? 'Saving...' : 'Save'}
+              </Button>
+              <Button 
+                size="small" 
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditedTask(task);
+                }}
+                sx={{ ml: 1 }}
+              >
+                Cancel
+              </Button>
+            </Box>
+          ) : (
+            <>
+              <Box>
+                <Tooltip title="View Details">
+                  <IconButton 
+                    size="small" 
+                    onClick={() => setViewDialogOpen(true)}
+                    color="primary"
+                  >
+                    <VisibilityIcon />
+                  </IconButton>
+                </Tooltip>
+                
+                <Tooltip title="Edit Task">
+                  <IconButton 
+                    size="small" 
+                    onClick={() => setIsEditing(true)}
+                    color="primary"
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+
+              <Box>
+                {task.taskStatus !== 'Completed' && (
+                  <Tooltip title="Mark Complete">
+                    <IconButton 
+                      size="small" 
+                      onClick={() => onStatusChange(task.id, 'Completed')}
+                      color="success"
+                    >
+                      <CheckCircleIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
+                
+                <Tooltip title="Archive Task">
+                  <IconButton 
+                    size="small" 
+                    onClick={() => setArchiveDialogOpen(true)}
+                    color="warning"
+                  >
+                    <ArchiveIcon />
+                  </IconButton>
+                </Tooltip>
+                
+                <Tooltip title="Delete Task">
+                  <IconButton 
+                    size="small" 
+                    onClick={() => setDeleteDialogOpen(true)}
+                    color="error"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </>
+          )}
+        </CardActions>
+      </Card>
+
+      {/* View Task Dialog */}
+      <Dialog 
+        open={viewDialogOpen} 
+        onClose={() => setViewDialogOpen(false)}
+        maxWidth="sm" 
+        fullWidth
+      >
+        <DialogTitle sx={{ 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          fontWeight: 'bold'
+        }}>
+          📋 Task Details
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
+          <Box mb={2}>
+            <Chip
+              icon={<span>{statusInfo.icon}</span>}
+              label={task.taskStatus}
+              sx={{
+                backgroundColor: statusInfo.color,
+                color: 'white',
+                fontWeight: 'bold',
+                mb: 2
+              }}
+            />
+            {overdue && (
+              <Chip
+                label="OVERDUE"
+                sx={{ 
+                  backgroundColor: '#f44336',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  ml: 1
+                }}
+              />
+            )}
+          </Box>
           
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Priority</InputLabel>
-            <Select
-              value={editedTask.priority || 'Medium'}
-              onChange={(e) => setEditedTask(prev => ({ ...prev, priority: e.target.value }))}
-              label="Priority"
-              disabled={isUpdating}
-            >
-              <MenuItem value="Low">Low</MenuItem>
-              <MenuItem value="Medium">Medium</MenuItem>
-              <MenuItem value="High">High</MenuItem>
-            </Select>
-          </FormControl>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+            {task.taskTitle}
+          </Typography>
           
-          <TextField
-            fullWidth
-            label="Due Date"
-            type="date"
-            value={editedTask.dueDate || ''}
-            onChange={(e) => setEditedTask(prev => ({ ...prev, dueDate: e.target.value }))}
-            margin="normal"
-            InputLabelProps={{ shrink: true }}
-            disabled={isUpdating}
-          />
+          <Typography variant="body1" sx={{ mb: 3 }}>
+            {task.taskDescription || 'No description provided'}
+          </Typography>
+          
+          <Box display="flex" flexDirection="column" gap={1}>
+            <Typography variant="body2">
+              <strong>Created:</strong> {new Date(task.taskCreatedDate).toLocaleDateString()}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Due Date:</strong> {new Date(task.taskDueDate).toLocaleDateString()}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Category:</strong> {task.taskCategory}
+            </Typography>
+            <Typography variant="body2">
+              <strong>User:</strong> {task.userId}
+            </Typography>
+          </Box>
         </DialogContent>
-        
-        <DialogActions sx={{ p: 3, gap: 1 }}>
-          <Button 
-            onClick={() => setEditDialogOpen(false)}
-            disabled={isUpdating}
-            sx={{ color: '#64748b' }}
-          >
-            Cancel
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setViewDialogOpen(false)}>
+            Close
           </Button>
           <Button 
-            onClick={handleSaveTask}
-            variant="contained"
-            disabled={isUpdating || !editedTask.title?.trim()}
-            startIcon={isUpdating ? <CircularProgress size={16} /> : <SaveIcon />}
-            sx={{ 
-              backgroundColor: '#3b82f6',
-              '&:hover': { backgroundColor: '#2563eb' }
+            onClick={() => {
+              setViewDialogOpen(false);
+              setIsEditing(true);
             }}
+            startIcon={<EditIcon />}
+            color="primary"
+            variant="contained"
           >
-            {isUpdating ? 'Saving...' : 'Save Changes'}
+            Edit Task
           </Button>
         </DialogActions>
       </Dialog>
@@ -496,53 +441,63 @@ const TaskCard = ({
       {/* Delete Confirmation Dialog */}
       <Dialog 
         open={deleteDialogOpen} 
-        onClose={() => !isDeleting && setDeleteDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
+        onClose={() => setDeleteDialogOpen(false)}
       >
-        <DialogTitle sx={{ 
-          backgroundColor: '#fef2f2',
-          color: '#dc2626',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1
-        }}>
-          <WarningIcon />
-          Confirm Deletion
+        <DialogTitle sx={{ color: 'error.main' }}>
+          ⚠️ Confirm Deletion
         </DialogTitle>
-        
-        <DialogContent sx={{ pt: 3 }}>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-          
+        <DialogContent>
           <Typography>
-            Are you sure you want to delete "<strong>{task.title || task.taskTitle}</strong>"? 
-            This action cannot be undone.
+            Are you sure you want to delete "{task.taskTitle}"?
+          </Typography>
+          <Typography color="text.secondary" sx={{ mt: 1 }}>
+            This will move the task to trash. You can restore it later if needed.
           </Typography>
         </DialogContent>
-        
-        <DialogActions sx={{ p: 3, gap: 1 }}>
-          <Button 
-            onClick={() => setDeleteDialogOpen(false)}
-            disabled={isDeleting}
-            sx={{ color: '#64748b' }}
-          >
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>
             Cancel
           </Button>
           <Button 
-            onClick={handleDeleteTask}
+            onClick={handleDelete}
+            color="error"
             variant="contained"
-            disabled={isDeleting}
-            startIcon={isDeleting ? <CircularProgress size={16} /> : <DeleteIcon />}
-            sx={{ 
-              backgroundColor: '#ef4444',
-              '&:hover': { backgroundColor: '#dc2626' }
-            }}
+            startIcon={<DeleteIcon />}
+            disabled={loading}
           >
-            {isDeleting ? 'Deleting...' : 'Delete Task'}
+            {loading ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Archive Confirmation Dialog */}
+      <Dialog 
+        open={archiveDialogOpen} 
+        onClose={() => setArchiveDialogOpen(false)}
+      >
+        <DialogTitle sx={{ color: 'warning.main' }}>
+          📦 Archive Task
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to archive "{task.taskTitle}"?
+          </Typography>
+          <Typography color="text.secondary" sx={{ mt: 1 }}>
+            Archived tasks can be viewed and restored from the Archive section.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setArchiveDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleArchive}
+            color="warning"
+            variant="contained"
+            startIcon={<ArchiveIcon />}
+            disabled={loading}
+          >
+            {loading ? 'Archiving...' : 'Archive'}
           </Button>
         </DialogActions>
       </Dialog>

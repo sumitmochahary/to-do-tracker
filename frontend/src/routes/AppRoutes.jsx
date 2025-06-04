@@ -7,6 +7,8 @@ import ForgotPasswordPage from "../pages/ForgotPasswordPage"
 import ResetPasswordPage from "../pages/ResetPasswordPage"
 import ProtectedRoute from "../components/ProtectedRoute"
 import PageNotFound from "../components/PageNotFound"
+import Archived from "../components/Archived";
+import Sidebar from "../components/SideBar";
 
 function AppRoutes() {
     return (
@@ -20,6 +22,7 @@ function AppRoutes() {
                 <Board />
             </ProtectedRoute>} />
             <Route path="*" element={<PageNotFound />} />
+            <Route path="/archived" element={<Archived/>} />
         </Routes>
     )
 }
