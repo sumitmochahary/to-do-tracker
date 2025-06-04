@@ -29,6 +29,8 @@ function ForgotPasswordForm({ onLoadingChange, onShowSnackbar }) {
             const response = await forgotPassword(data)
             console.log(response)
             reset()
+
+            onShowSnackbar?.("Reset link is send successfully", "success")
         } catch (error) {
             console.error("Login error:", error);
 

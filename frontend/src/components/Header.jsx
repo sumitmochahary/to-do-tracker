@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -6,7 +6,7 @@ import {
   Box,
   IconButton,
   useTheme,
-  useMediaQuery,
+  // useMediaQuery,
   Container,
   Menu,
   MenuItem
@@ -17,7 +17,8 @@ import {
   AccountCircle as AccountCircleIcon
 } from '@mui/icons-material';
 import SearchBar from './SearchBar';
-import Sidebar from './SideBar';
+// import Sidebar from './SideBar';
+import { useNavigate } from 'react-router';
 
 export const Header = ({
   tasks = [],
@@ -29,7 +30,7 @@ export const Header = ({
   onMenuClick
 }) => {
   const theme = useTheme();
-  const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  // const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleProfileClick = (event) => {
@@ -40,17 +41,21 @@ export const Header = ({
     setAnchorEl(null);
   };
 
+  const navigate = useNavigate();
+
   const handleLogout = () => {
     handleMenuClose();
     console.log("Logged out");
+    localStorage.removeItem("token");
+    navigate("/");
     // TODO: Add your logout logic here (e.g., clear token, redirect)
   };
 
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  // const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const toggleDrawer = () => {
-    setIsDrawerOpen(!isDrawerOpen);
-  };
+  // const toggleDrawer = () => {
+  //   setIsDrawerOpen(!isDrawerOpen);
+  // };
 
   return (
     <AppBar
@@ -104,7 +109,7 @@ export const Header = ({
                 display: { xs: 'none', sm: 'block' }
               }}
             >
-              📋 TaskBoard
+              Dashboard
             </Typography>
             <Typography
               variant="h6"

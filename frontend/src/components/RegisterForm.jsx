@@ -40,6 +40,8 @@ function RegisterForm({ onLoadingChange, onShowSnackbar }) {
             const response = await registerUser(submitData);
             console.log(response);
             reset();
+
+            onShowSnackbar?.("Registration successful!", "success")
         } catch (error) {
             console.error("Login error:", error);
 
