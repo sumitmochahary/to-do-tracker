@@ -105,13 +105,18 @@ export const saveTask = async (data) => {
 // Update existing task
 export const updateTask = async (data) => {
   try {
-    const response = await axios.put(`${BASE_URL}/update`, data, {
-      headers: jsonHeaders(),
-      withCredentials: true,
-    });
+    const response = await axios.patch(
+      `${BASE_URL}/update/${data.taskId}`,
+      data,
+      {
+        headers: jsonHeaders(),
+        withCredentials: true,
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error updating task:", error);
+    console.log("Task data sent:", data);
     throw error;
   }
 };

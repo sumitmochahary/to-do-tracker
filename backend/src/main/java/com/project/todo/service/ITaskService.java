@@ -18,5 +18,6 @@ public interface ITaskService {
     List<Task> fetchArchivedTasks();
     List<Task> fetchTaskByUserId(String userId) throws TaskNotFoundException;
     void deleteTask(String taskId) throws TaskNotFoundException;  // Changed from int to String
+    Task getTaskById(String taskId) throws TaskNotFoundException;
 }
 
