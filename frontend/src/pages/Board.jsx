@@ -42,6 +42,7 @@ import Header from "../components/Header";
 import Column from "../components/Column";
 import NewTaskForm from "../components/NewTaskForm";
 import TaskCard from "../components/TaskCard";
+import { fetchTask } from "../services/TaskService";
 
 const SIDEBAR_WIDTH = 260;
 
@@ -64,22 +65,22 @@ const Board = () => {
 
   // Effects
   useEffect(() => {
-    fetchTasks();
+    loadTasks();
   }, []);
 
   // API Functions
-  const fetchTasks = async () => {
+  const loadTasks = async () => {
     try {
       setLoading(true);
       setError(null);
 
       // Replace this with your actual API call
-      const response = await fetch('/api/v1/');
-      const tasksData = await response.json();
-      setTasks(tasksData);
+      const response = await fetchTask()
+      // const tasksData = await response.json();
+      setTasks(response);
 
       // For now, starting with empty tasks array
-      setTasks([]);
+      // setTasks([]);
     } catch (error) {
       console.error("Failed to fetch tasks", error);
       setError("Failed to load tasks. Please try again.");
@@ -187,28 +188,35 @@ const Board = () => {
   // Main Render
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Desktop Sidebar - Fixed positioning */}
       {!isMobile && (
-        <Box
+        <Drawer
+          variant="temporary"
+          open={sidebarOpen}
+          onClose={handleSidebarClose}
+          ModalProps={{ keepMounted: true }}
           sx={{
             width: SIDEBAR_WIDTH,
             flexShrink: 0,
+            [`& .MuiDrawer-paper`]: {
+              width: SIDEBAR_WIDTH,
+              boxSizing: 'border-box',
+              backgroundColor: '#1e293b',
+              borderRight: '1px solid #334155',
+            },
           }}
         >
           <SideBar />
-        </Box>
+        </Drawer>
       )}
-      
-      {/* Mobile Sidebar - Drawer */}
+
+      {/* Mobile Sidebar - Temporary Drawer */}
       {isMobile && (
         <Drawer
           variant="temporary"
           anchor="left"
           open={sidebarOpen}
           onClose={handleSidebarClose}
-          ModalProps={{
-            keepMounted: true,
-          }}
+          ModalProps={{ keepMounted: true }}
           sx={{
             '& .MuiDrawer-paper': {
               width: SIDEBAR_WIDTH,
@@ -452,41 +460,6 @@ const Board = () => {
                 </Grid>
               ))}
             </Grid>
-
-            {/* Empty State Message */}
-            {tasks.length === 0 && !loading && (
-              <Box sx={{
-                textAlign: 'center',
-                py: 8,
-                px: 4,
-                backgroundColor: '#ffffff',
-                borderRadius: 3,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                mt: 4
-              }}>
-                <Typography variant="h5" sx={{ mb: 2, color: '#64748b' }}>
-                  📝 No tasks yet
-                </Typography>
-                <Typography variant="body1" sx={{ color: '#94a3b8', mb: 3 }}>
-                  Get started by creating your first task using the button above
-                </Typography>
-                <Button
-                  variant="outlined"
-                  onClick={() => setShowTaskForm(true)}
-                  startIcon={<AddIcon />}
-                  sx={{
-                    borderColor: '#3b82f6',
-                    color: '#3b82f6',
-                    '&:hover': {
-                      backgroundColor: '#3b82f6',
-                      color: '#ffffff'
-                    }
-                  }}
-                >
-                  Create Your First Task
-                </Button>
-              </Box>
-            )}
           </Container>
         </Box>
         
