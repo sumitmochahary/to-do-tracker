@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TextField, Button, MenuItem, Card, CardContent, Typography, Alert } from '@mui/material';
-import axios from 'axios';
+import { saveTask } from '../services/TaskService';
 
 const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress", "Completed"] }) => {
   const [taskTitle, setTaskTitle] = useState('');
@@ -25,7 +25,7 @@ const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress",
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Basic validation
     if (!taskTitle.trim()) {
       setError('Task title is required');
@@ -41,31 +41,28 @@ const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress",
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:3000/card', {
+      const taskData = {
         taskTitle: taskTitle.trim(),
         taskDescription: taskDescription.trim(),
         taskStatus,
         taskCreatedDate: new Date().toISOString().split('T')[0],
-        taskDueDate: taskDueDate,
-        userId: 'defaultUser',
-        taskCategory: 'General'
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
+        taskDueDate,
+        userId: 'defaultUser', // or get it dynamically if needed
+        taskCategory: 'General',
+      };
+
+      const newTask = await saveTask(taskData);
 
       // Call the parent component's callback with the new task
-      onTaskAdded(response.data);
-      
+      onTaskAdded(newTask);
+
       // Reset the form
       resetForm();
-      
-      console.log('Task added successfully:', response.data);
+
+      console.log('Task added successfully:', newTask);
     } catch (error) {
       console.error('Error adding task:', error);
-      
-      // Handle different types of errors
+
       if (error.response) {
         if (error.response.status === 401) {
           setError('Unauthorized: Please log in again');
@@ -82,13 +79,12 @@ const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress",
     } finally {
       setLoading(false);
     }
-  };
-
+  }
   return (
-    <Card 
-      sx={{ 
-        p: 2, 
-        mt: 2, 
+    <Card
+      sx={{
+        p: 2,
+        mt: 2,
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         color: 'white',
         boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
@@ -99,7 +95,7 @@ const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress",
         <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
           ✨ Add New Task
         </Typography>
-        
+
         {error && (
           <Alert severity="error" sx={{ mt: 1, mb: 2 }}>
             {error}
@@ -154,9 +150,9 @@ const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress",
           >
             {availableStatuses.map((status) => (
               <MenuItem key={status} value={status}>
-                {status === 'To Do' ? '📋' : 
-                 status === 'In Progress' ? '⚡' : 
-                 status === 'Completed' ? '✅' : '🔖'} {status}
+                {status === 'To Do' ? '📋' :
+                  status === 'In Progress' ? '⚡' :
+                    status === 'Completed' ? '✅' : '🔖'} {status}
               </MenuItem>
             ))}
           </TextField>
@@ -183,10 +179,10 @@ const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress",
               }
             }}
           />
-          <Button 
-            type="submit" 
-            variant="contained" 
-            sx={{ 
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{
               mt: 2,
               background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
               borderRadius: 3,
@@ -199,7 +195,7 @@ const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress",
                 boxShadow: '0 6px 10px 4px rgba(255, 105, 135, .3)',
               },
               transition: 'all 0.3s ease'
-            }} 
+            }}
             disabled={loading}
           >
             {loading ? '⏳ Adding Task...' : '🚀 Add Task'}
@@ -209,7 +205,4 @@ const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress",
     </Card>
   );
 };
-
 export default NewTaskForm;
-
-// const response = await axios.post('http://localhost:8080/api/v1/save', {
