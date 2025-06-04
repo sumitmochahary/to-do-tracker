@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import Footer from '../components/Footer';
 
 const LandingPage = () => {
-  const [email, setEmail] = useState('');
+  // const [email, setEmail] = useState('');
   const [isVisible, setIsVisible] = useState(false);
 
   const navigate = useNavigate();
@@ -11,14 +12,13 @@ const LandingPage = () => {
     setIsVisible(true);
   }, []);
 
-  // Mock navigation functions (replace with actual routing)
   const handleLogin = () => {
     console.log('Navigate to login');
     navigate("/login")
   };
 
   const handleSignUp = () => {
-    console.log('Navigate to signup with email:', email);
+    console.log('Navigate to signup with email:');
     navigate("/register")
   };
 
@@ -387,13 +387,6 @@ const LandingPage = () => {
               </p>
 
               <div style={styles.emailForm} className="email-form">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={styles.emailInput}
-                />
                 <button
                   onClick={handleSignUp}
                   style={styles.ctaButton}
@@ -455,7 +448,7 @@ const LandingPage = () => {
       </section>
 
       {/* Final CTA Section */}
-      <section style={styles.ctaSection}>
+      {/* <section style={styles.ctaSection}>
         <div style={styles.container}>
           <h2 style={styles.ctaTitle}>Ready to Get Organized?</h2>
           <p style={styles.ctaSubtitle}>
@@ -469,7 +462,8 @@ const LandingPage = () => {
             Start Your Journey Today
           </button>
         </div>
-      </section>
+      </section> */}
+      <Footer />
     </>
   );
 };

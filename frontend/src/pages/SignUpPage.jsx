@@ -1,10 +1,11 @@
-import { Container, Paper, Typography, Snackbar, Alert } from "@mui/material"
+import { Container, Paper, Typography, Snackbar, Alert, Box } from "@mui/material"
 import { useState } from "react"
 import LoadingEffect from "../components/LoadingEffect"
 import RegisterForm from "../components/RegisterForm"
 import { Link } from "react-router"
 import { motion as Motion } from "framer-motion"
 import { formAnimationVariant } from "../animations/MotionVariants"
+import CommonHeader from "../components/CommonHeader"
 
 function SignUpPage() {
 
@@ -29,19 +30,24 @@ function SignUpPage() {
     }
 
     return (
-        <>
+        <Box
+            sx={{
+                background: "linear-gradient(to top right, #ffa585, #ffeda0, #a0e7e5)",
+                minHeight: "100vh",
+                width: "100%",
+            }}>
             <LoadingEffect loading={loading} />
+
+            <CommonHeader />
 
             <Container
                 maxWidth={false}
                 disableGutters
                 sx={{
-                    background: "linear-gradient(to top right, #ffa585, #ffeda0, #a0e7e5)",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                     minHeight: "100vh",
-                    width: "100%",
                     px: 2
                 }}
             >
@@ -90,7 +96,7 @@ function SignUpPage() {
                     {snackbar.message}
                 </Alert>
             </Snackbar>
-        </>
+        </Box>
     );
 }
 

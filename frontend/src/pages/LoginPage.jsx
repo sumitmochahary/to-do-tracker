@@ -5,6 +5,7 @@ import LoadingEffect from "../components/LoadingEffect"
 import LoginForm from "../components/LoginForm"
 import { Link } from "react-router"
 import { formAnimationVariant } from "../animations/MotionVariants"
+import CommonHeader from "../components/CommonHeader"
 
 function LoginPage() {
     const [loading, setLoading] = useState(false)
@@ -28,19 +29,25 @@ function LoginPage() {
     }
 
     return (
-        <>
+
+        <Box
+            sx={{
+                background: "linear-gradient(to top right, #ffa585, #ffeda0, #a0e7e5)",
+                minHeight: "100vh",
+                width: "100%",
+            }}
+        >
             <LoadingEffect loading={loading} />
+            <CommonHeader />
 
             <Container
                 maxWidth={false}
                 disableGutters
                 sx={{
-                    background: "linear-gradient(to top right, #ffa585, #ffeda0, #a0e7e5)",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                     minHeight: "100vh",
-                    width: "100%",
                     px: 2
                 }}
             >
@@ -132,7 +139,7 @@ function LoginPage() {
                     {snackbar.message}
                 </Alert>
             </Snackbar>
-        </>
+        </Box>
     );
 }
 

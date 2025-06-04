@@ -436,7 +436,7 @@ const Board = () => {
             </Box>
 
             {/* Task Columns Grid */}
-            <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} sx={{ display: "flex", justifyContent: "center" }}>
+            <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} sx={{ display: "flex", justifyContent: { md: "space-around", sm: "center", xs: "center" } }}>
               {columns.map((column, index) => (
                 <Grid
                   item
@@ -501,7 +501,7 @@ const Board = () => {
         </Box>
 
         {/* Footer Component */}
-        <Footer />
+        {/* <Footer /> */}
       </Box>
 
       {/* Floating Action Button - Add Column */}

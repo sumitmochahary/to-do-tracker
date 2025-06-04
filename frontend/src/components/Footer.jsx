@@ -1,10 +1,9 @@
-import React from 'react';
-import { 
-  Box, 
-  Typography, 
-  Container, 
-  Grid, 
-  Link, 
+import {
+  Box,
+  Typography,
+  Container,
+  Grid,
+  Link,
   IconButton,
   Divider,
   useMediaQuery,
@@ -22,7 +21,7 @@ import {
 
 const Footer = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  // const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const currentYear = new Date().getFullYear();
 
@@ -76,10 +75,10 @@ const Footer = () => {
         }
       }}
     >
-      <Container 
-        maxWidth="xl" 
-        sx={{ 
-          position: 'relative', 
+      <Container
+        maxWidth="xl"
+        sx={{
+          position: 'relative',
           zIndex: 1,
           px: { xs: 2, sm: 3, md: 4 }
         }}
@@ -88,10 +87,10 @@ const Footer = () => {
           {/* Brand Section */}
           <Grid item xs={12} md={4}>
             <Box sx={{ mb: { xs: 2, md: 3 } }}>
-              <Typography 
+              <Typography
                 variant={isSmallMobile ? "h6" : "h5"}
-                sx={{ 
-                  fontWeight: 'bold', 
+                sx={{
+                  fontWeight: 'bold',
                   mb: 2,
                   background: 'linear-gradient(45deg, #ffffff 30%, #f8f9fa 90%)',
                   backgroundClip: 'text',
@@ -103,25 +102,25 @@ const Footer = () => {
                   justifyContent: { xs: 'center', md: 'flex-start' }
                 }}
               >
-                🎯 To-Do Tracker 
+                🎯 To-Do Tracker
               </Typography>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  opacity: 0.9, 
+              <Typography
+                variant="body2"
+                sx={{
+                  opacity: 0.9,
                   lineHeight: 1.6,
                   mb: 3,
                   textAlign: { xs: 'center', md: 'left' },
                   fontSize: { xs: '0.85rem', sm: '0.875rem' }
                 }}
               >
-                Streamline your productivity with our intuitive task management system. 
+                Streamline your productivity with our intuitive task management system.
                 Organize, prioritize, and achieve your goals with ease.
               </Typography>
-              
+
               {/* Social Links */}
-              <Box sx={{ 
-                display: 'flex', 
+              <Box sx={{
+                display: 'flex',
                 gap: 1,
                 justifyContent: { xs: 'center', md: 'flex-start' },
                 flexWrap: 'wrap'
@@ -156,10 +155,10 @@ const Footer = () => {
 
           {/* Quick Links */}
           <Grid item xs={12} sm={6} md={2}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 'bold', 
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 'bold',
                 mb: 2,
                 opacity: 0.95,
                 textAlign: { xs: 'center', sm: 'left' },
@@ -168,8 +167,8 @@ const Footer = () => {
             >
               Quick Links
             </Typography>
-            <Box sx={{ 
-              display: 'flex', 
+            <Box sx={{
+              display: 'flex',
               flexDirection: { xs: 'row', sm: 'column' },
               flexWrap: { xs: 'wrap', sm: 'nowrap' },
               gap: { xs: 2, sm: 1 },
@@ -202,10 +201,10 @@ const Footer = () => {
 
           {/* Support Links */}
           <Grid item xs={12} sm={6} md={2}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 'bold', 
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 'bold',
                 mb: 2,
                 opacity: 0.95,
                 textAlign: { xs: 'center', sm: 'left' },
@@ -214,8 +213,8 @@ const Footer = () => {
             >
               Support
             </Typography>
-            <Box sx={{ 
-              display: 'flex', 
+            <Box sx={{
+              display: 'flex',
               flexDirection: { xs: 'row', sm: 'column' },
               flexWrap: { xs: 'wrap', sm: 'nowrap' },
               gap: { xs: 2, sm: 1 },
@@ -248,10 +247,10 @@ const Footer = () => {
 
           {/* Contact Info */}
           <Grid item xs={12} md={4}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 'bold', 
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 'bold',
                 mb: 2,
                 opacity: 0.95,
                 textAlign: { xs: 'center', md: 'left' },
@@ -260,16 +259,16 @@ const Footer = () => {
             >
               Get In Touch
             </Typography>
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
+            <Box sx={{
+              display: 'flex',
+              flexDirection: 'column',
               gap: 2,
               alignItems: { xs: 'center', md: 'flex-start' }
             }}>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 1, 
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
                 opacity: 0.9,
                 fontSize: { xs: '0.85rem', sm: '0.875rem' }
               }}>
@@ -278,10 +277,10 @@ const Footer = () => {
                   contact@taskflowpro.com
                 </Typography>
               </Box>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 1, 
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
                 opacity: 0.9,
                 fontSize: { xs: '0.85rem', sm: '0.875rem' }
               }}>
@@ -290,10 +289,10 @@ const Footer = () => {
                   +1 (555) 123-4567
                 </Typography>
               </Box>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 1, 
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
                 opacity: 0.9,
                 fontSize: { xs: '0.85rem', sm: '0.875rem' }
               }}>
@@ -305,10 +304,10 @@ const Footer = () => {
             </Box>
 
             {/* Newsletter Signup */}
-            <Box 
-              sx={{ 
-                mt: 3, 
-                p: { xs: 1.5, sm: 2 }, 
+            <Box
+              sx={{
+                mt: 3,
+                p: { xs: 1.5, sm: 2 },
                 background: 'rgba(255, 255, 255, 0.1)',
                 borderRadius: 2,
                 backdropFilter: 'blur(10px)',
@@ -316,19 +315,19 @@ const Footer = () => {
                 textAlign: { xs: 'center', md: 'left' }
               }}
             >
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  mb: 1, 
+              <Typography
+                variant="body2"
+                sx={{
+                  mb: 1,
                   fontWeight: 'medium',
                   fontSize: { xs: '0.85rem', sm: '0.875rem' }
                 }}
               >
                 📬 Stay Updated
               </Typography>
-              <Typography 
-                variant="caption" 
-                sx={{ 
+              <Typography
+                variant="caption"
+                sx={{
                   opacity: 0.8,
                   fontSize: { xs: '0.75rem', sm: '0.8rem' }
                 }}
@@ -340,18 +339,18 @@ const Footer = () => {
         </Grid>
 
         {/* Divider */}
-        <Divider 
-          sx={{ 
-            my: { xs: 3, sm: 4 }, 
+        <Divider
+          sx={{
+            my: { xs: 3, sm: 4 },
             borderColor: 'rgba(255, 255, 255, 0.2)',
             opacity: 0.6
-          }} 
+          }}
         />
 
         {/* Bottom Section */}
-        <Box 
-          sx={{ 
-            display: 'flex', 
+        <Box
+          sx={{
+            display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -359,9 +358,9 @@ const Footer = () => {
             textAlign: 'center'
           }}
         >
-          <Typography 
-            variant="body2" 
-            sx={{ 
+          <Typography
+            variant="body2"
+            sx={{
               opacity: 0.8,
               display: 'flex',
               alignItems: 'center',
@@ -371,14 +370,14 @@ const Footer = () => {
               fontSize: { xs: '0.8rem', sm: '0.875rem' }
             }}
           >
-            © {currentYear} To-Do Tracker . Made with 
-            <FavoriteIcon sx={{ fontSize: { xs: '0.9rem', sm: '1rem' }, color: '#ff6b6b' }} /> 
+            © {currentYear} To-Do Tracker . Made with
+            <FavoriteIcon sx={{ fontSize: { xs: '0.9rem', sm: '1rem' }, color: '#ff6b6b' }} />
             for productivity enthusiasts.
           </Typography>
-          
-          <Typography 
-            variant="body2" 
-            sx={{ 
+
+          <Typography
+            variant="body2"
+            sx={{
               opacity: 0.7,
               fontSize: { xs: '0.75rem', sm: '0.8rem' }
             }}
