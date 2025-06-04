@@ -1,6 +1,8 @@
 import React from "react";
-import { Box, Paper, Typography, Card, CardContent, Chip, IconButton } from "@mui/material";
-import { CalendarToday, Assignment, CheckCircle, Schedule, Delete } from "@mui/icons-material";
+import { Box, Paper, Typography, IconButton } from "@mui/material";
+import { Assignment, CheckCircle, Schedule, Delete } from "@mui/icons-material";
+import { useState } from "react";
+import TaskCard from "./TaskCard"; 
 
 const getStatusColor = (status, index = 0) => {
   // Predefined gradients for default columns
@@ -50,145 +52,10 @@ const getStatusColor = (status, index = 0) => {
   };
 };
 
-const getDueDateStatus = (dueDate) => {
-  const today = new Date();
-  const due = new Date(dueDate);
-  const diffTime = due - today;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 0) {
-    return { status: 'overdue', color: '#ff6b6b', text: `${Math.abs(diffDays)} days overdue` };
-  } else if (diffDays === 0) {
-    return { status: 'today', color: '#ffa726', text: 'Due today' };
-  } else if (diffDays <= 3) {
-    return { status: 'soon', color: '#ffeb3b', text: `${diffDays} days left` };
-  } else {
-    return { status: 'normal', color: '#66bb6a', text: `${diffDays} days left` };
-  }
-};
-
-const TaskCard = ({ task, onEdit, onDelete }) => {
-  // Handle different task object structures
-  const taskTitle = task.taskTitle || task.title;
-  const taskDescription = task.taskDescription || task.description;
-  const taskDueDate = task.taskDueDate || task.dueDate;
-  
-  const dueDateInfo = taskDueDate ? getDueDateStatus(taskDueDate) : null;
-  
-  return (
-    <Card 
-      sx={{ 
-        mb: 1.5, 
-        borderRadius: 2,
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-        transition: 'all 0.2s ease',
-        '&:hover': {
-          transform: 'translateY(-2px)',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
-        }
-      }}
-    >
-      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-        <Typography 
-          variant="subtitle2" 
-          gutterBottom 
-          sx={{ 
-            fontWeight: 'bold',
-            color: '#2c3e50',
-            lineHeight: 1.2,
-            fontSize: '0.9rem'
-          }}
-        >
-          {taskTitle}
-        </Typography>
-        
-        {taskDescription && (
-          <Typography 
-            variant="body2" 
-            color="text.secondary"
-            sx={{ 
-              mb: 1.5,
-              lineHeight: 1.4,
-              color: '#7f8c8d',
-              fontSize: '0.8rem'
-            }}
-          >
-            {taskDescription}
-          </Typography>
-        )}
-        
-        {taskDueDate && (
-          <>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <CalendarToday sx={{ fontSize: 12, color: '#95a5a6', mr: 0.5 }} />
-              <Typography variant="caption" sx={{ color: '#7f8c8d', fontWeight: 500, fontSize: '0.7rem' }}>
-                {new Date(taskDueDate).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
-              </Typography>
-            </Box>
-
-            <Chip
-              label={dueDateInfo.text}
-              size="small"
-              sx={{
-                backgroundColor: dueDateInfo.color,
-                color: dueDateInfo.status === 'soon' ? '#333' : 'white',
-                fontWeight: 'bold',
-                fontSize: '0.65rem',
-                height: '20px',
-                mb: 1
-              }}
-            />
-          </>
-        )}
-
-        {/* Action Buttons */}
-        {(onEdit || onDelete) && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
-            {onEdit && (
-              <IconButton 
-                size="small" 
-                onClick={() => onEdit(task)}
-                sx={{ 
-                  color: '#3b82f6',
-                  backgroundColor: '#eff6ff',
-                  '&:hover': { backgroundColor: '#dbeafe' },
-                  transition: 'all 0.2s ease',
-                  width: 28,
-                  height: 28
-                }}
-              >
-                <Assignment sx={{ fontSize: 14 }} />
-              </IconButton>
-            )}
-            {onDelete && (
-              <IconButton 
-                size="small" 
-                onClick={() => onDelete(task.id || task.taskId)} 
-                sx={{ 
-                  color: '#ef4444',
-                  backgroundColor: '#fef2f2',
-                  '&:hover': { backgroundColor: '#fee2e2' },
-                  transition: 'all 0.2s ease',
-                  width: 28,
-                  height: 28
-                }}
-              >
-                <Delete sx={{ fontSize: 14 }} />
-              </IconButton>
-            )}
-          </Box>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
-
-const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, columnIndex = 0 }) => {
+const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, columnIndex = 0, onEditTask, onDeleteTask }) => {
   const statusInfo = getStatusColor(title, columnIndex);
+   const [archivedTasks, setArchivedTasks] = useState([]);
+  
   
   return (
     <Paper 
@@ -315,8 +182,9 @@ const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, column
               <TaskCard 
                 key={task.taskId || task.id} 
                 task={task}
-                onEdit={() => console.log('Edit task:', task)}
-                onDelete={() => console.log('Delete task:', task.id || task.taskId)}
+                onEdit={onEditTask}
+                // onTaskArchived={onTaskArchive} 
+                onDelete={onDeleteTask}
               />
             ))}
           </Box>

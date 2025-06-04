@@ -26,6 +26,7 @@ import {
   Archive as ArchiveIcon 
 } from '@mui/icons-material';
 import axios from 'axios';
+import { useNavigate } from 'react-router';
 
 const Archived = () => {
   const [archivedTasks, setArchivedTasks] = useState([]);
@@ -36,6 +37,7 @@ const Archived = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const navigate = useNavigate();
 
   // Fetch archived tasks on component mount
   useEffect(() => {
@@ -143,15 +145,16 @@ const Archived = () => {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
       <Paper 
-        elevation={3}
-        sx={{ 
-          p: 3, 
-          mb: 4, 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          borderRadius: 3
-        }}
-      >
+      elevation={3}
+      sx={{ 
+        p: 3, 
+        mb: 4, 
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        borderRadius: 3
+      }}
+    >
+      <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
         <Box display="flex" alignItems="center" gap={2}>
           <ArchiveIcon sx={{ fontSize: 40 }} />
           <Box>
@@ -163,7 +166,24 @@ const Archived = () => {
             </Typography>
           </Box>
         </Box>
-      </Paper>
+
+        {/* Board Button */}
+        <Button
+          variant="outlined"
+          color="inherit"
+          onClick={() => navigate('/dashboard')} 
+          sx={{
+            borderColor: 'white',
+            color: 'white',
+            '&:hover': {
+              backgroundColor: 'rgba(255,255,255,0.2)'
+            }
+          }}
+        >
+          Go to Board
+        </Button>
+      </Box>
+    </Paper>
 
       {/* Success/Error Messages */}
       {successMessage && (
