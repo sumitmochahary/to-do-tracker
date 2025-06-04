@@ -75,11 +75,6 @@ function ResetPasswordPage() {
 
                             <ResetPasswordForm onLoadingChange={setLoading} onShowSnackbar={showSnackbar} />
 
-                            <Typography mt={3} align="center" gutterBottom>
-                                <Link to="/login" className="no-underline">
-                                    Back to login
-                                </Link>
-                            </Typography>
                         </Paper>
                     </Motion.div>
                 </Container>

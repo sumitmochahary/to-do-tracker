@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import PasswordIcon from "@mui/icons-material/Password"
 import { resetPassword } from "../services/PasswordService";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 function ResetPasswordForm({ onLoadingChange, onShowSnackbar }) {
     const {
@@ -23,6 +23,7 @@ function ResetPasswordForm({ onLoadingChange, onShowSnackbar }) {
     const [loading, setLoading] = useState(false)
     const location = useLocation()
     const [token, setToken] = useState()
+    const navigate = useNavigate()
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search)
@@ -42,6 +43,11 @@ function ResetPasswordForm({ onLoadingChange, onShowSnackbar }) {
             const response = await resetPassword(token, password)
             console.log(response)
             reset()
+
+            onShowSnackbar?.("Password changed successfully. Redirecting to login page...", "success")
+            setTimeout(() => {
+                navigate("/login")
+            }, 3000);
         } catch (error) {
             console.error("Login error:", error);
 

@@ -207,8 +207,6 @@ const Board = () => {
         </Drawer>
       )}
 
-      {/* Mobile Sidebar - Drawer */}
-      {/* Mobile Sidebar - Temporary Drawer */}
       {isMobile && (
         <Drawer
           variant="temporary"

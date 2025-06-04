@@ -109,7 +109,7 @@ export const Header = ({
                 display: { xs: 'none', sm: 'block' }
               }}
             >
-              📋 TaskBoard
+              Dashboard
             </Typography>
             <Typography
               variant="h6"

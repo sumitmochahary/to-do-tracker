@@ -83,9 +83,9 @@ const Footer = () => {
           px: { xs: 2, sm: 3, md: 4 }
         }}
       >
-        <Grid container spacing={{ xs: 3, sm: 4 }}>
+        <Grid container spacing={{ xs: 3, sm: 4 }} sx={{ justifyContent: { xs: 'center' } }}>
           {/* Brand Section */}
-          <Grid item xs={12} md={4}>
+          <Grid >
             <Box sx={{ mb: { xs: 2, md: 3 } }}>
               <Typography
                 variant={isSmallMobile ? "h6" : "h5"}
@@ -102,7 +102,7 @@ const Footer = () => {
                   justifyContent: { xs: 'center', md: 'flex-start' }
                 }}
               >
-                🎯 To-Do Tracker
+                To-Do
               </Typography>
               <Typography
                 variant="body2"
@@ -154,7 +154,7 @@ const Footer = () => {
           </Grid>
 
           {/* Quick Links */}
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid >
             <Typography
               variant="h6"
               sx={{
@@ -200,7 +200,7 @@ const Footer = () => {
           </Grid>
 
           {/* Support Links */}
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid >
             <Typography
               variant="h6"
               sx={{
@@ -246,94 +246,97 @@ const Footer = () => {
           </Grid>
 
           {/* Contact Info */}
-          <Grid item xs={12} md={4}>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 'bold',
-                mb: 2,
-                opacity: 0.95,
-                textAlign: { xs: 'center', md: 'left' },
-                fontSize: { xs: '1.1rem', sm: '1.25rem' }
-              }}
-            >
-              Get In Touch
-            </Typography>
-            <Box sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-              alignItems: { xs: 'center', md: 'flex-start' }
-            }}>
-              <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                opacity: 0.9,
-                fontSize: { xs: '0.85rem', sm: '0.875rem' }
-              }}>
-                <EmailIcon sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }} />
-                <Typography variant="body2" sx={{ fontSize: 'inherit' }}>
-                  contact@taskflowpro.com
-                </Typography>
-              </Box>
-              <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                opacity: 0.9,
-                fontSize: { xs: '0.85rem', sm: '0.875rem' }
-              }}>
-                <PhoneIcon sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }} />
-                <Typography variant="body2" sx={{ fontSize: 'inherit' }}>
-                  +1 (555) 123-4567
-                </Typography>
-              </Box>
-              <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                opacity: 0.9,
-                fontSize: { xs: '0.85rem', sm: '0.875rem' }
-              }}>
-                <LocationIcon sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }} />
-                <Typography variant="body2" sx={{ fontSize: 'inherit' }}>
-                  India, Mumbai
-                </Typography>
-              </Box>
-            </Box>
+          <Grid >
+            <Box sx={{ textAlign: { xs: 'center', md: 'start' } }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 'bold',
+                  mb: 2,
+                  opacity: 0.95,
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
+                Get In Touch
+              </Typography>
 
-            {/* Newsletter Signup */}
-            <Box
-              sx={{
-                mt: 3,
-                p: { xs: 1.5, sm: 2 },
-                background: 'rgba(255, 255, 255, 0.1)',
-                borderRadius: 2,
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                textAlign: { xs: 'center', md: 'left' }
-              }}
-            >
-              <Typography
-                variant="body2"
+              <Box
                 sx={{
-                  mb: 1,
-                  fontWeight: 'medium',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 2,
+                  alignItems: { xs: 'center', md: 'flex-start' }
+                }}
+              >
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  opacity: 0.9,
                   fontSize: { xs: '0.85rem', sm: '0.875rem' }
-                }}
-              >
-                📬 Stay Updated
-              </Typography>
-              <Typography
-                variant="caption"
+                }}>
+                  <EmailIcon sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }} />
+                  <Typography variant="body2" sx={{ fontSize: 'inherit' }}>
+                    contact@taskflowpro.com
+                  </Typography>
+                </Box>
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  opacity: 0.9,
+                  fontSize: { xs: '0.85rem', sm: '0.875rem' }
+                }}>
+                  <PhoneIcon sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }} />
+                  <Typography variant="body2" sx={{ fontSize: 'inherit' }}>
+                    +1 (555) 123-4567
+                  </Typography>
+                </Box>
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  opacity: 0.9,
+                  fontSize: { xs: '0.85rem', sm: '0.875rem' }
+                }}>
+                  <LocationIcon sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }} />
+                  <Typography variant="body2" sx={{ fontSize: 'inherit' }}>
+                    India, Mumbai
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Newsletter Signup */}
+              <Box
                 sx={{
-                  opacity: 0.8,
-                  fontSize: { xs: '0.75rem', sm: '0.8rem' }
+                  mt: 3,
+                  p: { xs: 1.5, sm: 2 },
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: 2,
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)'
                 }}
               >
-                Subscribe to our newsletter for the latest updates and productivity tips.
-              </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    mb: 1,
+                    fontWeight: 'medium',
+                    fontSize: { xs: '0.85rem', sm: '0.875rem' }
+                  }}
+                >
+                  📬 Stay Updated
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    opacity: 0.8,
+                    fontSize: { xs: '0.75rem', sm: '0.8rem' }
+                  }}
+                >
+                  Subscribe to our newsletter for the latest updates and productivity tips.
+                </Typography>
+              </Box>
             </Box>
           </Grid>
         </Grid>

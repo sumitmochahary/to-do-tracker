@@ -334,7 +334,7 @@ const LandingPage = () => {
       <header style={styles.header}>
         <div style={styles.logo}>
           <span style={{ marginRight: '0.5rem', fontSize: '1.8rem' }}>📋</span>
-          To-Do Tracker
+          To-Do
         </div>
         <div style={styles.navButtons}>
           <button

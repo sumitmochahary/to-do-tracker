@@ -1,5 +1,4 @@
 import { AppBar, Toolbar, Typography, Button, Box, IconButton } from '@mui/material';
-import AssignmentIcon from '@mui/icons-material/Assignment';
 import HomeIcon from '@mui/icons-material/Home';
 import { useNavigate } from 'react-router';
 
@@ -18,30 +17,28 @@ function CommonHeader() {
             py: 1
         }}>
             <Toolbar>
-                <AssignmentIcon sx={{ mr: 1, fontSize: 30 }} />
-                <Typography variant="h5" sx={{
+                <Typography variant="h5" color='textPrimary' sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    color: 'white',
                     fontWeight: 'bold',
+                    color: 'black',
                     flexGrow: 1
                 }}>
-                    {/* <span style={{ marginRight: '0.5rem', fontSize: '1.8rem' }}>📋</span> */}
+                    <span style={{ marginRight: '0.5rem', fontSize: '1.8rem' }}>📋</span>
                     To-Do
                 </Typography>
 
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                    <IconButton onClick={goToLandingPage} color='inherit'>
+                    <IconButton onClick={goToLandingPage}>
                         <HomeIcon />
                     </IconButton>
                     <Button
                         variant="contained"
-                        sx={{
-                            backgroundColor: '#667eea',
-                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
-                            '&:hover': { backgroundColor: '#5a6fd8' }
-                        }}
                         onClick={handleGoToBoard}
+                        sx={{
+                            backgroundColor: "#a0e7e5",
+                            color: "black"
+                        }}
                     >
                         Go to Board
                     </Button>
