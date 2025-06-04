@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -50,7 +50,6 @@ const SIDEBAR_WIDTH = 260;
 const Board = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  // const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // State Management
@@ -64,110 +63,155 @@ const Board = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [archivedTasks, setArchivedTasks] = useState([]);
 
-  // Effects
-  useEffect(() => {
-    loadTasks();
-  }, []);
-
   // API Functions
-  const loadTasks = async () => {
+  const loadTasks = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await fetchTask();
-      setTasks(response);
-      // Replace this with your actual API call
-
-      // For now, starting with empty tasks array
-      // setTasks([]);
+      // Ensure response is an array
+      setTasks(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error("Failed to fetch tasks", error);
       setError("Failed to load tasks. Please try again.");
+      // Set empty array on error to prevent crashes
+      setTasks([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Effects
+  useEffect(() => {
+    loadTasks();
+  }, [loadTasks]);
 
   // Event Handlers
-  const handleTaskAdded = (newTask) => {
+  const handleTaskAdded = useCallback((newTask) => {
+    if (!newTask) {
+      console.warn("Attempted to add null/undefined task");
+      return;
+    }
+    
     const taskWithId = {
       ...newTask,
-      id: Date.now(),
+      id: newTask.id || Date.now(),
+      taskId: newTask.taskId || Date.now(),
+      createdAt: new Date().toISOString(),
+      lastModified: new Date().toISOString()
     };
+    
     setTasks(prev => [...prev, taskWithId]);
     setShowTaskForm(false);
-  };
+  }, []);
 
-  const handleTaskUpdate = (updatedTask) => {
-  setTasks(prev => prev.map(task => {
-    const taskId = task.id || task.taskId;
-    const updatedTaskId = updatedTask.id || updatedTask.taskId;
-    
-    if (taskId === updatedTaskId) {
-      return {
-        ...task,
-        ...updatedTask,
-        lastModified: new Date().toISOString()
-      };
+  const handleTaskUpdate = useCallback((updatedTask) => {
+    if (!updatedTask) {
+      console.warn("Attempted to update with null/undefined task");
+      return;
     }
-    return task;
-  }));
-  
-  console.log('Task updated successfully');
-};
 
-  const handleTaskDelete = (taskId) => {
-  setTasks(prev => prev.filter(task => {
-    const currentTaskId = task.id || task.taskId;
-    return currentTaskId !== taskId;
-  }));
-  
-  console.log('Task deleted successfully');
-};
-
-  const handleTaskStatusChange = (taskId, newStatus) => {
-  setTasks(prev => prev.map(task => {
-    if ((task.id || task.taskId) === taskId) {
-      return { 
-        ...task, 
-        taskStatus: newStatus,
-        // Optionally update timestamp when status changes
-        lastModified: new Date().toISOString()
-      };
-    }
-    return task;
-  }));
-  
-  // Optional: Show a success message
-  console.log(`Task moved to ${newStatus}`);
-};
-
-const handleTaskArchive = (taskId) => {
-  const taskToArchive = tasks.find(task => (task.id || task.taskId) === taskId);
-  
-  if (taskToArchive) {
-    // Remove from active tasks
-    setTasks(prev => prev.filter(task => (task.id || task.taskId) !== taskId));
+    setTasks(prev => prev.map(task => {
+      const taskId = task.id || task.taskId;
+      const updatedTaskId = updatedTask.id || updatedTask.taskId;
+      
+      if (taskId === updatedTaskId) {
+        return {
+          ...task,
+          ...updatedTask,
+          lastModified: new Date().toISOString()
+        };
+      }
+      return task;
+    }));
     
-    // You can add archived tasks to a separate state if needed
-    setArchivedTasks(prev => [...prev, { ...taskToArchive, archivedAt: new Date().toISOString() }]);
-    
-    console.log('Task archived successfully');
-  }
-};
+    console.log('Task updated successfully');
+  }, []);
 
-  const handleAddColumn = () => {
-    if (newColumnTitle.trim() && !columns.includes(newColumnTitle.trim())) {
-      setColumns(prev => [...prev, newColumnTitle.trim()]);
-      setNewColumnTitle("");
-      setShowColumnDialog(false);
+  const handleTaskDelete = useCallback((taskId) => {
+    if (!taskId) {
+      console.warn("Attempted to delete task with null/undefined ID");
+      return;
     }
-  };
 
-  const handleRemoveColumn = (columnTitle) => {
-  const defaultColumns = ["To Do", "In Progress", "Completed"];
-  
-  if (!defaultColumns.includes(columnTitle)) {
+    setTasks(prev => prev.filter(task => {
+      const currentTaskId = task.id || task.taskId;
+      return currentTaskId !== taskId;
+    }));
+    
+    console.log('Task deleted successfully');
+  }, []);
+
+  const handleTaskStatusChange = useCallback((taskId, newStatus) => {
+    if (!taskId || !newStatus) {
+      console.warn("Invalid parameters for status change:", { taskId, newStatus });
+      return;
+    }
+
+    setTasks(prev => prev.map(task => {
+      if ((task.id || task.taskId) === taskId) {
+        return { 
+          ...task, 
+          taskStatus: newStatus,
+          lastModified: new Date().toISOString()
+        };
+      }
+      return task;
+    }));
+    
+    console.log(`Task moved to ${newStatus}`);
+  }, []);
+
+  const handleTaskArchive = useCallback((taskId) => {
+    if (!taskId) {
+      console.warn("Attempted to archive task with null/undefined ID");
+      return;
+    }
+
+    const taskToArchive = tasks.find(task => (task.id || task.taskId) === taskId);
+    
+    if (taskToArchive) {
+      // Remove from active tasks
+      setTasks(prev => prev.filter(task => (task.id || task.taskId) !== taskId));
+      
+      // Add to archived tasks
+      setArchivedTasks(prev => [...prev, { 
+        ...taskToArchive, 
+        archivedAt: new Date().toISOString() 
+      }]);
+      
+      console.log('Task archived successfully');
+    } else {
+      console.warn("Task to archive not found:", taskId);
+    }
+  }, [tasks]);
+
+  const handleAddColumn = useCallback(() => {
+    const trimmedTitle = newColumnTitle.trim();
+    
+    if (!trimmedTitle) {
+      console.warn("Empty column title");
+      return;
+    }
+    
+    if (columns.includes(trimmedTitle)) {
+      console.warn("Column already exists:", trimmedTitle);
+      return;
+    }
+    
+    setColumns(prev => [...prev, trimmedTitle]);
+    setNewColumnTitle("");
+    setShowColumnDialog(false);
+  }, [newColumnTitle, columns]);
+
+  const handleRemoveColumn = useCallback((columnTitle) => {
+    const defaultColumns = ["To Do", "In Progress", "Completed"];
+    
+    if (defaultColumns.includes(columnTitle)) {
+      console.warn("Cannot remove default column:", columnTitle);
+      return;
+    }
+    
     // Remove the column
     setColumns(prev => prev.filter(col => col !== columnTitle));
     
@@ -186,27 +230,37 @@ const handleTaskArchive = (taskId) => {
     );
     
     console.log(`Column "${columnTitle}" removed and tasks moved to "To Do"`);
-  }
-};
+  }, []);
 
-  const handleSearchResults = (results) => {
+  const handleSearchResults = useCallback((results) => {
     console.log("Search results:", results);
-  };
+  }, []);
 
-  const handleTaskSelection = (task) => {
+  const handleTaskSelection = useCallback((task) => {
     console.log("Selected task:", task);
-  };
+  }, []);
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(prev => !prev);
+  }, []);
 
-  const handleSidebarClose = () => {
+  const handleSidebarClose = useCallback(() => {
     setSidebarOpen(false);
-  };
+  }, []);
+
+  const handleDialogClose = useCallback(() => {
+    setShowColumnDialog(false);
+    setNewColumnTitle("");
+  }, []);
+
+  const handleTaskFormToggle = useCallback(() => {
+    setShowTaskForm(prev => !prev);
+  }, []);
 
   // Utility Functions
-  const getTasksByStatus = (status) => (tasks || []).filter(task => task.taskStatus === status);
+  const getTasksByStatus = useCallback((status) => {
+    return (tasks || []).filter(task => task?.taskStatus === status);
+  }, [tasks]);
 
   // Loading State
   if (loading) {
@@ -242,6 +296,7 @@ const handleTaskArchive = (taskId) => {
   // Main Render
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Desktop Sidebar */}
       {!isMobile && (
         <Drawer
           variant="temporary"
@@ -263,6 +318,7 @@ const handleTaskArchive = (taskId) => {
         </Drawer>
       )}
 
+      {/* Mobile Sidebar */}
       {isMobile && (
         <Drawer
           variant="temporary"
@@ -443,7 +499,7 @@ const handleTaskArchive = (taskId) => {
               <Button
                 variant="contained"
                 size={isMobile ? "medium" : "large"}
-                onClick={() => setShowTaskForm(!showTaskForm)}
+                onClick={handleTaskFormToggle}
                 startIcon={showTaskForm ? <CloseIcon /> : <AddIcon />}
                 fullWidth={isSmallMobile}
                 sx={{
@@ -484,7 +540,10 @@ const handleTaskArchive = (taskId) => {
                   p: { xs: 2, sm: 3 },
                   boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                 }}>
-                  <NewTaskForm onTaskAdded={handleTaskAdded} availableStatuses={columns} />
+                  <NewTaskForm 
+                    onTaskAdded={handleTaskAdded} 
+                    availableStatuses={columns} 
+                  />
                 </Box>
               </Collapse>
             </Box>
@@ -520,7 +579,7 @@ const handleTaskArchive = (taskId) => {
           </Container>
         </Box>
 
-        {/* Footer Component */}
+        {/* Footer Component - Uncomment if needed */}
         {/* <Footer /> */}
       </Box>
 
@@ -553,7 +612,7 @@ const handleTaskArchive = (taskId) => {
       {/* Add Column Dialog */}
       <Dialog
         open={showColumnDialog}
-        onClose={() => setShowColumnDialog(false)}
+        onClose={handleDialogClose}
         maxWidth="sm"
         fullWidth
         fullScreen={isSmallMobile}
@@ -591,6 +650,11 @@ const handleTaskArchive = (taskId) => {
             label="List Name"
             value={newColumnTitle}
             onChange={(e) => setNewColumnTitle(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleAddColumn();
+              }
+            }}
             variant="outlined"
             sx={{
               '& .MuiOutlinedInput-root': {
@@ -599,6 +663,7 @@ const handleTaskArchive = (taskId) => {
               }
             }}
             helperText="Enter a unique name for your new list"
+            error={newColumnTitle.trim() && columns.includes(newColumnTitle.trim())}
           />
         </DialogContent>
         <DialogActions sx={{
@@ -608,7 +673,7 @@ const handleTaskArchive = (taskId) => {
           backgroundColor: '#ffffff'
         }}>
           <Button
-            onClick={() => setShowColumnDialog(false)}
+            onClick={handleDialogClose}
             fullWidth={isSmallMobile}
             sx={{
               color: '#64748b',
