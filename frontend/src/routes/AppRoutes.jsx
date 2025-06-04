@@ -8,7 +8,6 @@ import ResetPasswordPage from "../pages/ResetPasswordPage"
 import ProtectedRoute from "../components/ProtectedRoute"
 import PageNotFound from "../components/PageNotFound"
 import Archived from "../components/Archived";
-import Sidebar from "../components/SideBar";
 
 function AppRoutes() {
     return (

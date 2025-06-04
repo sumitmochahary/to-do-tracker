@@ -23,7 +23,7 @@ import {
   CheckCircle as CheckCircleIcon,
   Visibility as VisibilityIcon
 } from '@mui/icons-material';
-import axios from 'axios';
+import { archiveTask, deleteTask, updateTask } from '../services/TaskService';
 
 const TaskCard = ({ 
   task, 
@@ -31,7 +31,7 @@ const TaskCard = ({
   onTaskDeleted, 
   onTaskArchived,
   onStatusChange, 
-  availableStatuses 
+  availableStatuses = ["To Do", "In Progress", "Completed"]
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTask, setEditedTask] = useState(task);
@@ -44,17 +44,23 @@ const TaskCard = ({
   const handleSave = async () => {
     try {
       setLoading(true);
-      const response = await axios.put(`http://localhost:3000/card/${task.id}`, {
+      const response = await updateTask({
+        taskId: task.taskId || task.id,
         taskTitle: editedTask.taskTitle,
         taskDescription: editedTask.taskDescription,
         taskStatus: editedTask.taskStatus,
-        taskDueDate: editedTask.taskDueDate
+        taskDueDate: editedTask.taskDueDate,
+        taskCategory: editedTask.taskCategory,
+        userId: task.userId
       });
       
-      onTaskUpdated(response.data);
+      if (onTaskUpdated) {
+        onTaskUpdated(response);
+      }
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating task:', error);
+      alert('Failed to update task. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -64,11 +70,14 @@ const TaskCard = ({
   const handleDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`http://localhost:3000/card/${task.id}`);
-      onTaskDeleted(task.id);
+      await deleteTask(task.taskId || task.id);
+      if (onTaskDeleted) {
+        onTaskDeleted(task.taskId || task.id);
+      }
       setDeleteDialogOpen(false);
     } catch (error) {
       console.error('Error deleting task:', error);
+      alert('Failed to delete task. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -78,14 +87,42 @@ const TaskCard = ({
   const handleArchive = async () => {
     try {
       setLoading(true);
-      await axios.put(`http://localhost:3000/card/${task.id}/archive`, {
-        archivedDate: new Date().toISOString().split('T')[0]
-      });
+      await archiveTask(task.taskId || task.id);
       
-      onTaskArchived(task.id);
+      if (onTaskArchived) {
+        onTaskArchived(task.taskId || task.id);
+      }
       setArchiveDialogOpen(false);
     } catch (error) {
       console.error('Error archiving task:', error);
+      alert('Failed to archive task. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to handle status change (mark as complete)
+  const handleStatusChange = async (newStatus) => {
+    try {
+      setLoading(true);
+      const response = await updateTask({
+        taskId: task.taskId || task.id,
+        taskTitle: task.taskTitle,
+        taskDescription: task.taskDescription,
+        taskStatus: newStatus,
+        taskDueDate: task.taskDueDate,
+        taskCategory: task.taskCategory,
+        userId: task.userId
+      });
+      
+      if (onStatusChange) {
+        onStatusChange(task.taskId || task.id, newStatus);
+      } else if (onTaskUpdated) {
+        onTaskUpdated(response);
+      }
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      alert('Failed to update task status. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -105,23 +142,42 @@ const TaskCard = ({
     }
   };
 
+  // Get category info
+  const getCategoryInfo = (category) => {
+    switch (category) {
+      case 'Personal':
+        return { icon: '👤' };
+      case 'Work':
+        return { icon: '💼' };
+      default:
+        return { icon: '📂' };
+    }
+  };
+
   // Check if task is overdue
   const isOverdue = () => {
+    if (!task.taskDueDate) return false;
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const dueDate = new Date(task.taskDueDate);
+    dueDate.setHours(0, 0, 0, 0);
     return dueDate < today && task.taskStatus !== 'Completed';
   };
 
   // Calculate days until due
   const getDaysUntilDue = () => {
+    if (!task.taskDueDate) return null;
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const dueDate = new Date(task.taskDueDate);
+    dueDate.setHours(0, 0, 0, 0);
     const diffTime = dueDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
 
   const statusInfo = getStatusInfo(task.taskStatus);
+  const categoryInfo = getCategoryInfo(task.taskCategory);
   const overdue = isOverdue();
   const daysUntilDue = getDaysUntilDue();
 
@@ -322,16 +378,16 @@ const TaskCard = ({
 
               <Box>
                 {task.taskStatus !== 'Completed' && (
-                  <Tooltip title="Mark Complete">
-                    <IconButton 
-                      size="small" 
-                      onClick={() => onStatusChange(task.id, 'Completed')}
-                      color="success"
-                    >
-                      <CheckCircleIcon />
-                    </IconButton>
-                  </Tooltip>
-                )}
+  <Tooltip title="Mark Complete">
+    <IconButton 
+      size="small" 
+      onClick={() => handleStatusChange('Completed')}  // Use handleStatusChange instead
+      color="success"
+    >
+      <CheckCircleIcon />
+    </IconButton>
+  </Tooltip>
+)}
                 
                 <Tooltip title="Archive Task">
                   <IconButton 

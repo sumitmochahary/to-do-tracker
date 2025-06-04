@@ -62,6 +62,7 @@ const Board = () => {
   const [showColumnDialog, setShowColumnDialog] = useState(false);
   const [newColumnTitle, setNewColumnTitle] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [archivedTasks, setArchivedTasks] = useState([]);
 
   // Effects
   useEffect(() => {
@@ -98,20 +99,62 @@ const Board = () => {
   };
 
   const handleTaskUpdate = (updatedTask) => {
-    setTasks(prev => prev.map(task =>
-      task.id === updatedTask.id ? updatedTask : task
-    ));
-  };
+  setTasks(prev => prev.map(task => {
+    const taskId = task.id || task.taskId;
+    const updatedTaskId = updatedTask.id || updatedTask.taskId;
+    
+    if (taskId === updatedTaskId) {
+      return {
+        ...task,
+        ...updatedTask,
+        lastModified: new Date().toISOString()
+      };
+    }
+    return task;
+  }));
+  
+  console.log('Task updated successfully');
+};
 
   const handleTaskDelete = (taskId) => {
-    setTasks(prev => prev.filter(task => task.id !== taskId));
-  };
+  setTasks(prev => prev.filter(task => {
+    const currentTaskId = task.id || task.taskId;
+    return currentTaskId !== taskId;
+  }));
+  
+  console.log('Task deleted successfully');
+};
 
   const handleTaskStatusChange = (taskId, newStatus) => {
-    setTasks(prev => prev.map(task =>
-      task.id === taskId ? { ...task, taskStatus: newStatus } : task
-    ));
-  };
+  setTasks(prev => prev.map(task => {
+    if ((task.id || task.taskId) === taskId) {
+      return { 
+        ...task, 
+        taskStatus: newStatus,
+        // Optionally update timestamp when status changes
+        lastModified: new Date().toISOString()
+      };
+    }
+    return task;
+  }));
+  
+  // Optional: Show a success message
+  console.log(`Task moved to ${newStatus}`);
+};
+
+const handleTaskArchive = (taskId) => {
+  const taskToArchive = tasks.find(task => (task.id || task.taskId) === taskId);
+  
+  if (taskToArchive) {
+    // Remove from active tasks
+    setTasks(prev => prev.filter(task => (task.id || task.taskId) !== taskId));
+    
+    // You can add archived tasks to a separate state if needed
+    setArchivedTasks(prev => [...prev, { ...taskToArchive, archivedAt: new Date().toISOString() }]);
+    
+    console.log('Task archived successfully');
+  }
+};
 
   const handleAddColumn = () => {
     if (newColumnTitle.trim() && !columns.includes(newColumnTitle.trim())) {
@@ -122,16 +165,29 @@ const Board = () => {
   };
 
   const handleRemoveColumn = (columnTitle) => {
-    const defaultColumns = ["To Do", "In Progress", "Completed"];
-    if (!defaultColumns.includes(columnTitle)) {
-      setColumns(prev => prev.filter(col => col !== columnTitle));
-      setTasks(prev =>
-        prev.map(task =>
-          task.taskStatus === columnTitle ? { ...task, taskStatus: "To Do" } : task
-        )
-      );
-    }
-  };
+  const defaultColumns = ["To Do", "In Progress", "Completed"];
+  
+  if (!defaultColumns.includes(columnTitle)) {
+    // Remove the column
+    setColumns(prev => prev.filter(col => col !== columnTitle));
+    
+    // Move tasks from removed column to "To Do"
+    setTasks(prev =>
+      prev.map(task => {
+        if (task.taskStatus === columnTitle) {
+          return { 
+            ...task, 
+            taskStatus: "To Do",
+            lastModified: new Date().toISOString()
+          };
+        }
+        return task;
+      })
+    );
+    
+    console.log(`Column "${columnTitle}" removed and tasks moved to "To Do"`);
+  }
+};
 
   const handleSearchResults = (results) => {
     console.log("Search results:", results);
@@ -327,7 +383,7 @@ const Board = () => {
                   lineHeight: { xs: 1.2, sm: 1.3, md: 1.2 }
                 }}
               >
-                🎯 Task Management Board
+                🎯 To-Do Tracker Board
               </Typography>
               <Typography
                 textAlign="center"
@@ -455,47 +511,13 @@ const Board = () => {
                     columnIndex={index}
                     onTaskUpdate={handleTaskUpdate}
                     onTaskDelete={handleTaskDelete}
+                    onTaskArchive={handleTaskArchive}  
                     onTaskStatusChange={handleTaskStatusChange}
                     TaskCardComponent={TaskCard}
                   />
                 </Grid>
               ))}
             </Grid>
-
-            {/* Empty State Message */}
-            {tasks && tasks.length === 0 && !loading && (
-              <Box sx={{
-                textAlign: 'center',
-                py: 8,
-                px: 4,
-                backgroundColor: '#ffffff',
-                borderRadius: 3,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                mt: 4
-              }}>
-                <Typography variant="h5" sx={{ mb: 2, color: '#64748b' }}>
-                  📝 No tasks yet
-                </Typography>
-                <Typography variant="body1" sx={{ color: '#94a3b8', mb: 3 }}>
-                  Get started by creating your first task using the button above
-                </Typography>
-                <Button
-                  variant="outlined"
-                  onClick={() => setShowTaskForm(true)}
-                  startIcon={<AddIcon />}
-                  sx={{
-                    borderColor: '#3b82f6',
-                    color: '#3b82f6',
-                    '&:hover': {
-                      backgroundColor: '#3b82f6',
-                      color: '#ffffff'
-                    }
-                  }}
-                >
-                  Create Your First Task
-                </Button>
-              </Box>
-            )}
 
           </Container>
         </Box>

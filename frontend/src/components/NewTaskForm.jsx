@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { TextField, Button, MenuItem, Card, CardContent, Typography, Alert } from '@mui/material';
 import { saveTask } from '../services/TaskService';
 
-const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress", "Completed"] }) => {
+const NewTaskForm = ({ onTaskAdded, availableCategories = ["Personal", "Work"] }) => {
   const [taskTitle, setTaskTitle] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
-  const [taskStatus, setTaskStatus] = useState('To Do');
+  const [taskCategory, setTaskCategory] = useState('Personal');
   const [taskDueDate, setTaskDueDate] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -13,7 +13,7 @@ const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress",
   const resetForm = () => {
     setTaskTitle('');
     setTaskDescription('');
-    setTaskStatus(availableStatuses[0] || 'To Do'); // Set to first available status
+    setTaskCategory(availableCategories[0] || 'Personal'); // Set to first available category
     setTaskDueDate('');
     setError('');
   };
@@ -44,11 +44,11 @@ const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress",
       const taskData = {
         taskTitle: taskTitle.trim(),
         taskDescription: taskDescription.trim(),
-        taskStatus,
+        taskStatus: 'To Do', // Always set to "To Do" by default
         taskCreatedDate: new Date().toISOString().split('T')[0],
         taskDueDate,
         userId: 'defaultUser', // or get it dynamically if needed
-        taskCategory: 'General',
+        taskCategory, // Use the selected category
       };
 
       const newTask = await saveTask(taskData);
@@ -137,9 +137,9 @@ const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress",
           <TextField
             select
             fullWidth
-            label="Status"
-            value={taskStatus}
-            onChange={(e) => setTaskStatus(e.target.value)}
+            label="Category"
+            value={taskCategory}
+            onChange={(e) => setTaskCategory(e.target.value)}
             margin="normal"
             sx={{
               '& .MuiOutlinedInput-root': {
@@ -148,11 +148,9 @@ const NewTaskForm = ({ onTaskAdded, availableStatuses = ["To Do", "In Progress",
               }
             }}
           >
-            {availableStatuses.map((status) => (
-              <MenuItem key={status} value={status}>
-                {status === 'To Do' ? '📋' :
-                  status === 'In Progress' ? '⚡' :
-                    status === 'Completed' ? '✅' : '🔖'} {status}
+            {availableCategories.map((category) => (
+              <MenuItem key={category} value={category}>
+                {category === 'Personal' ? '👤' : '💼'} {category}
               </MenuItem>
             ))}
           </TextField>
