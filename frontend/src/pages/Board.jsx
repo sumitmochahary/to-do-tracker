@@ -76,9 +76,6 @@ const Board = () => {
       const response = await fetchTask();
       setTasks(response);
       // Replace this with your actual API call
-      const response = await fetchTask()
-      // const tasksData = await response.json();
-      setTasks(response);
 
       // For now, starting with empty tasks array
       // setTasks([]);
