@@ -73,10 +73,15 @@ const Board = () => {
     try {
       setLoading(true);
       setError(null);
-
       const response = await fetchTask();
       setTasks(response);
+      // Replace this with your actual API call
+      const response = await fetchTask()
+      // const tasksData = await response.json();
+      setTasks(response);
 
+      // For now, starting with empty tasks array
+      // setTasks([]);
     } catch (error) {
       console.error("Failed to fetch tasks", error);
       setError("Failed to load tasks. Please try again.");
@@ -184,28 +189,36 @@ const Board = () => {
   // Main Render
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Desktop Sidebar - Fixed positioning */}
       {!isMobile && (
-        <Box
+        <Drawer
+          variant="temporary"
+          open={sidebarOpen}
+          onClose={handleSidebarClose}
+          ModalProps={{ keepMounted: true }}
           sx={{
             width: SIDEBAR_WIDTH,
             flexShrink: 0,
+            [`& .MuiDrawer-paper`]: {
+              width: SIDEBAR_WIDTH,
+              boxSizing: 'border-box',
+              backgroundColor: '#1e293b',
+              borderRight: '1px solid #334155',
+            },
           }}
         >
           <SideBar />
-        </Box>
+        </Drawer>
       )}
 
       {/* Mobile Sidebar - Drawer */}
+      {/* Mobile Sidebar - Temporary Drawer */}
       {isMobile && (
         <Drawer
           variant="temporary"
           anchor="left"
           open={sidebarOpen}
           onClose={handleSidebarClose}
-          ModalProps={{
-            keepMounted: true,
-          }}
+          ModalProps={{ keepMounted: true }}
           sx={{
             '& .MuiDrawer-paper': {
               width: SIDEBAR_WIDTH,
@@ -486,6 +499,7 @@ const Board = () => {
                 </Button>
               </Box>
             )}
+
           </Container>
         </Box>
 
