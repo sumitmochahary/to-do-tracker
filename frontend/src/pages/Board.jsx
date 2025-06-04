@@ -36,7 +36,6 @@ import {
   Settings as SettingsIcon,
   Info as InfoIcon
 } from "@mui/icons-material";
-import Footer from "../components/Footer";
 import SideBar from "../components/SideBar";
 import Header from "../components/Header";
 import Column from "../components/Column";
@@ -76,10 +75,6 @@ const Board = () => {
       setError(null);
       const response = await fetchTask();
       setTasks(response);
-      // Replace this with your actual API call
-
-      // For now, starting with empty tasks array
-      // setTasks([]);
     } catch (error) {
       console.error("Failed to fetch tasks", error);
       setError("Failed to load tasks. Please try again.");
@@ -91,70 +86,69 @@ const Board = () => {
   // Event Handlers
   const handleTaskAdded = (newTask) => {
     const taskWithId = {
-      ...newTask,
-      id: Date.now(),
+      ...newTask
     };
     setTasks(prev => [...prev, taskWithId]);
     setShowTaskForm(false);
   };
 
   const handleTaskUpdate = (updatedTask) => {
-  setTasks(prev => prev.map(task => {
-    const taskId = task.id || task.taskId;
-    const updatedTaskId = updatedTask.id || updatedTask.taskId;
-    
-    if (taskId === updatedTaskId) {
-      return {
-        ...task,
-        ...updatedTask,
-        lastModified: new Date().toISOString()
-      };
-    }
-    return task;
-  }));
-  
-  console.log('Task updated successfully');
-};
+    setTasks(prev => prev.map(task => {
+      const taskId = task.id || task.taskId;
+      const updatedTaskId = updatedTask.id || updatedTask.taskId;
+
+      if (taskId === updatedTaskId) {
+        return {
+          ...task,
+          ...updatedTask,
+          lastModified: new Date().toISOString()
+        };
+      }
+      return task;
+    }));
+
+    console.log('Task updated successfully');
+  };
 
   const handleTaskDelete = (taskId) => {
-  setTasks(prev => prev.filter(task => {
-    const currentTaskId = task.id || task.taskId;
-    return currentTaskId !== taskId;
-  }));
-  
-  console.log('Task deleted successfully');
-};
+    setTasks(prev => prev.filter(task => {
+      const currentTaskId = task.id || task.taskId;
+      return currentTaskId !== taskId;
+    }));
+
+    console.log('Task deleted successfully');
+  };
 
   const handleTaskStatusChange = (taskId, newStatus) => {
-  setTasks(prev => prev.map(task => {
-    if ((task.id || task.taskId) === taskId) {
-      return { 
-        ...task, 
-        taskStatus: newStatus,
-        // Optionally update timestamp when status changes
-        lastModified: new Date().toISOString()
-      };
-    }
-    return task;
-  }));
-  
-  // Optional: Show a success message
-  console.log(`Task moved to ${newStatus}`);
-};
+    setTasks(prev => prev.map(task => {
+      if ((task.id || task.taskId) === taskId) {
+        return {
+          ...task,
+          taskStatus: newStatus,
+          // Optionally update timestamp when status changes
+          lastModified: new Date().toISOString()
+        };
+      }
+      return task;
+    }));
 
-const handleTaskArchive = (taskId) => {
-  const taskToArchive = tasks.find(task => (task.id || task.taskId) === taskId);
-  
-  if (taskToArchive) {
-    // Remove from active tasks
-    setTasks(prev => prev.filter(task => (task.id || task.taskId) !== taskId));
-    
-    // You can add archived tasks to a separate state if needed
-    setArchivedTasks(prev => [...prev, { ...taskToArchive, archivedAt: new Date().toISOString() }]);
-    
-    console.log('Task archived successfully');
-  }
-};
+    // Optional: Show a success message
+    console.log(`Task moved to ${newStatus}`);
+  };
+
+  const handleTaskArchive = (taskId) => {
+    const taskToArchive = tasks.find(task => (task.id || task.taskId) === taskId);
+
+    if (taskToArchive) {
+      // Remove from active tasks
+      setTasks(prev => prev.filter(task => (task.id || task.taskId) !== taskId));
+
+      // You can add archived tasks to a separate state if needed
+      setArchivedTasks(prev => [...prev, { ...taskToArchive, archivedAt: new Date().toISOString() }]);
+
+      console.log('Task archived successfully');
+    }
+  };
 
   const handleAddColumn = () => {
     if (newColumnTitle.trim() && !columns.includes(newColumnTitle.trim())) {
@@ -165,29 +159,29 @@ const handleTaskArchive = (taskId) => {
   };
 
   const handleRemoveColumn = (columnTitle) => {
-  const defaultColumns = ["To Do", "In Progress", "Completed"];
-  
-  if (!defaultColumns.includes(columnTitle)) {
-    // Remove the column
-    setColumns(prev => prev.filter(col => col !== columnTitle));
-    
-    // Move tasks from removed column to "To Do"
-    setTasks(prev =>
-      prev.map(task => {
-        if (task.taskStatus === columnTitle) {
-          return { 
-            ...task, 
-            taskStatus: "To Do",
-            lastModified: new Date().toISOString()
-          };
-        }
-        return task;
-      })
-    );
-    
-    console.log(`Column "${columnTitle}" removed and tasks moved to "To Do"`);
-  }
-};
+    const defaultColumns = ["To Do", "In Progress", "Completed"];
+
+    if (!defaultColumns.includes(columnTitle)) {
+      // Remove the column
+      setColumns(prev => prev.filter(col => col !== columnTitle));
+
+      // Move tasks from removed column to "To Do"
+      setTasks(prev =>
+        prev.map(task => {
+          if (task.taskStatus === columnTitle) {
+            return {
+              ...task,
+              taskStatus: "To Do",
+              lastModified: new Date().toISOString()
+            };
+          }
+          return task;
+        })
+      );
+
+      console.log(`Column "${columnTitle}" removed and tasks moved to "To Do"`);
+    }
+  };
 
   const handleSearchResults = (results) => {
     console.log("Search results:", results);
@@ -493,7 +487,6 @@ const handleTaskArchive = (taskId) => {
             <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} sx={{ display: "flex", justifyContent: { md: "space-around", sm: "center", xs: "center" } }}>
               {columns.map((column, index) => (
                 <Grid
-                  item
                   xs={12}
                   sm={6}
                   md={columns.length <= 3 ? 4 : 6}
@@ -509,7 +502,7 @@ const handleTaskArchive = (taskId) => {
                     columnIndex={index}
                     onTaskUpdate={handleTaskUpdate}
                     onTaskDelete={handleTaskDelete}
-                    onTaskArchive={handleTaskArchive}  
+                    onTaskArchive={handleTaskArchive}
                     onTaskStatusChange={handleTaskStatusChange}
                     TaskCardComponent={TaskCard}
                   />
