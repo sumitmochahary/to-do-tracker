@@ -3,14 +3,14 @@ import axios from "axios";
 const BASE_URL = "http://localhost:8080/api/v1";
 
 // Headers
-const getHeaders = {
+const getHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
-};
+});
 
-const jsonHeaders = {
+const jsonHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
   "Content-Type": "application/json",
-};
+});
 
 // ========== GET ==========
 
@@ -18,12 +18,13 @@ const jsonHeaders = {
 export const fetchTask = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/fetch`, {
-      headers: getHeaders,
+      headers: getHeaders(),
       withCredentials: true,
     });
     return response.data;
   } catch (error) {
     console.error("Error fetching tasks:", error);
+    throw error;
   }
 };
 
@@ -31,12 +32,13 @@ export const fetchTask = async () => {
 export const fetchByCategory = async (category) => {
   try {
     const response = await axios.get(`${BASE_URL}/category/${category}`, {
-      headers: getHeaders,
+      headers: getHeaders(),
       withCredentials: true,
     });
     return response.data;
   } catch (error) {
     console.error("Error fetching tasks by category:", error);
+    throw error;
   }
 };
 
@@ -44,12 +46,13 @@ export const fetchByCategory = async (category) => {
 export const fetchByStatus = async (status) => {
   try {
     const response = await axios.get(`${BASE_URL}/status/${status}`, {
-      headers: getHeaders,
+      headers: getHeaders(),
       withCredentials: true,
     });
     return response.data;
   } catch (error) {
     console.error("Error fetching tasks by status:", error);
+    throw error;
   }
 };
 
@@ -57,12 +60,13 @@ export const fetchByStatus = async (status) => {
 export const fetchByDueDate = async (dueDate) => {
   try {
     const response = await axios.get(`${BASE_URL}/due/${dueDate}`, {
-      headers: getHeaders,
+      headers: getHeaders(),
       withCredentials: true,
     });
     return response.data;
   } catch (error) {
     console.error("Error fetching tasks by due date:", error);
+    throw error;
   }
 };
 
@@ -70,12 +74,13 @@ export const fetchByDueDate = async (dueDate) => {
 export const fetchArchivedTasks = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/status/archived`, {
-      headers: getHeaders,
+      headers: getHeaders(),
       withCredentials: true,
     });
     return response.data;
   } catch (error) {
     console.error("Error fetching archived tasks:", error);
+    throw error;
   }
 };
 
@@ -85,12 +90,13 @@ export const fetchArchivedTasks = async () => {
 export const saveTask = async (data) => {
   try {
     const response = await axios.post(`${BASE_URL}/save`, data, {
-      headers: jsonHeaders,
+      headers: jsonHeaders(),
       withCredentials: true,
     });
     return response.data;
   } catch (error) {
     console.error("Error saving task:", error);
+    throw error;
   }
 };
 
@@ -99,13 +105,19 @@ export const saveTask = async (data) => {
 // Update existing task
 export const updateTask = async (data) => {
   try {
-    const response = await axios.put(`${BASE_URL}/update`, data, {
-      headers: jsonHeaders,
-      withCredentials: true,
-    });
+    const response = await axios.patch(
+      `${BASE_URL}/update/${data.taskId}`,
+      data,
+      {
+        headers: jsonHeaders(),
+        withCredentials: true,
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error updating task:", error);
+    console.log("Task data sent:", data);
+    throw error;
   }
 };
 
@@ -116,13 +128,14 @@ export const archiveTask = async (taskId) => {
       `${BASE_URL}/archive/${taskId}`,
       {},
       {
-        headers: getHeaders,
+        headers: getHeaders(),
         withCredentials: true,
       }
     );
     return response.data;
   } catch (error) {
     console.error("Error archiving task:", error);
+    throw error;
   }
 };
 
@@ -132,11 +145,12 @@ export const archiveTask = async (taskId) => {
 export const deleteTask = async (taskId) => {
   try {
     const response = await axios.delete(`${BASE_URL}/delete/${taskId}`, {
-      headers: getHeaders,
+      headers: getHeaders(),
       withCredentials: true,
     });
     return response.data;
   } catch (error) {
     console.error("Error deleting task:", error);
+    throw error;
   }
 };

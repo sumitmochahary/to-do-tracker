@@ -138,26 +138,36 @@ public class TaskController {
         return new ResponseEntity<>(archivedTasks, HttpStatus.OK);
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<?> updateTask(@RequestBody Task task, HttpServletRequest request) throws TaskNotFoundException {
+    @PatchMapping("/update/{taskId}")
+    public ResponseEntity<?> updateTask(@PathVariable String taskId,
+                                        @RequestBody Task task,
+                                        HttpServletRequest request) throws TaskNotFoundException {
         String userId = validateAndGetUserId(request);
         if (userId == null) {
-            return new ResponseEntity<>("Unauthorized: User ID not found", HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized: User ID not found");
         }
 
-        // Optional: Verify that the task belongs to the requesting user before update
-        // Task existingTask = iTaskService.getTaskById(task.getTaskId());
-        // if (existingTask == null || !existingTask.getUserId().equals(userId)) {
-        //     return new ResponseEntity<>("Forbidden: Cannot update task that doesn't belong to you", HttpStatus.FORBIDDEN);
-        // }
-        // Ensure the task being updated maintains the correct userId
-        // task.setUserId(userId);
+        // Fetch the existing task
+        Task existingTask = iTaskService.getTaskById(taskId);
+        if (existingTask == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task not found with ID: " + taskId);
+        }
+
+        // Check task ownership
+        if (!existingTask.getUserId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden: You are not allowed to update this task");
+        }
+
+        // Ensure the updated task has the same ID and userId
+        task.setTaskId(taskId);
+        task.setUserId(userId);
 
         Task updatedTask = iTaskService.updateTask(task);
-        return new ResponseEntity<>(updatedTask, HttpStatus.OK);
+        return ResponseEntity.ok(updatedTask);
     }
 
-    @PutMapping("/archive/{taskId}")
+
+    @PatchMapping("/archive/{taskId}")
     public ResponseEntity<?> archiveTask(@PathVariable String taskId, HttpServletRequest request) throws TaskNotFoundException {
         String userId = validateAndGetUserId(request);
         if (userId == null) {
