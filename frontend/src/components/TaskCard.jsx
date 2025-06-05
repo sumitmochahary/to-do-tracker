@@ -176,11 +176,6 @@ const TaskCard = ({
     return diffDays;
   };
 
-  // Check if archiving is allowed (only for completed tasks)
-  const isArchiveAllowed = () => {
-    return task.taskStatus === 'Completed';
-  };
-
   const statusInfo = getStatusInfo(task.taskStatus);
   const categoryInfo = getCategoryInfo(task.taskCategory);
   const overdue = isOverdue();
@@ -383,32 +378,25 @@ const TaskCard = ({
 
               <Box>
                 {task.taskStatus !== 'Completed' && (
-                  <Tooltip title="Mark Complete">
-                    <IconButton 
-                      size="small" 
-                      onClick={() => handleStatusChange('Completed')}
-                      color="success"
-                    >
-                      <CheckCircleIcon />
-                    </IconButton>
-                  </Tooltip>
-                )}
+  <Tooltip title="Mark Complete">
+    <IconButton 
+      size="small" 
+      onClick={() => handleStatusChange('Completed')}  // Use handleStatusChange instead
+      color="success"
+    >
+      <CheckCircleIcon />
+    </IconButton>
+  </Tooltip>
+)}
                 
-                <Tooltip title={isArchiveAllowed() ? "Archive Task" : "Complete task first to archive"}>
-                  <span>
-                    <IconButton 
-                      size="small" 
-                      onClick={() => isArchiveAllowed() && setArchiveDialogOpen(true)}
-                      color="warning"
-                      disabled={!isArchiveAllowed()}
-                      sx={{
-                        opacity: isArchiveAllowed() ? 1 : 0.5,
-                        cursor: isArchiveAllowed() ? 'pointer' : 'not-allowed'
-                      }}
-                    >
-                      <ArchiveIcon />
-                    </IconButton>
-                  </span>
+                <Tooltip title="Archive Task">
+                  <IconButton 
+                    size="small" 
+                    onClick={() => setArchiveDialogOpen(true)}
+                    color="warning"
+                  >
+                    <ArchiveIcon />
+                  </IconButton>
                 </Tooltip>
                 
                 <Tooltip title="Delete Task">

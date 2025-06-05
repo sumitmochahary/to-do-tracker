@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -36,7 +36,6 @@ import {
   Settings as SettingsIcon,
   Info as InfoIcon
 } from "@mui/icons-material";
-import Footer from "../components/Footer";
 import SideBar from "../components/SideBar";
 import Header from "../components/Header";
 import Column from "../components/Column";
@@ -50,6 +49,7 @@ const SIDEBAR_WIDTH = 260;
 const Board = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  // const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // State Management
@@ -63,58 +63,40 @@ const Board = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [archivedTasks, setArchivedTasks] = useState([]);
 
+  // Effects
+  useEffect(() => {
+    loadTasks();
+  }, []);
+
   // API Functions
-  const loadTasks = useCallback(async () => {
+  const loadTasks = async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await fetchTask();
-      // Ensure response is an array
-      setTasks(Array.isArray(response) ? response : []);
+      setTasks(response);
     } catch (error) {
       console.error("Failed to fetch tasks", error);
       setError("Failed to load tasks. Please try again.");
-      // Set empty array on error to prevent crashes
-      setTasks([]);
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  // Effects
-  useEffect(() => {
-    loadTasks();
-  }, [loadTasks]);
+  };
 
   // Event Handlers
-  const handleTaskAdded = useCallback((newTask) => {
-    if (!newTask) {
-      console.warn("Attempted to add null/undefined task");
-      return;
-    }
-    
+  const handleTaskAdded = (newTask) => {
     const taskWithId = {
-      ...newTask,
-      id: newTask.id || Date.now(),
-      taskId: newTask.taskId || Date.now(),
-      createdAt: new Date().toISOString(),
-      lastModified: new Date().toISOString()
+      ...newTask
     };
-    
     setTasks(prev => [...prev, taskWithId]);
     setShowTaskForm(false);
-  }, []);
+  };
 
-  const handleTaskUpdate = useCallback((updatedTask) => {
-    if (!updatedTask) {
-      console.warn("Attempted to update with null/undefined task");
-      return;
-    }
-
+  const handleTaskUpdate = (updatedTask) => {
     setTasks(prev => prev.map(task => {
       const taskId = task.id || task.taskId;
       const updatedTaskId = updatedTask.id || updatedTask.taskId;
-      
+
       if (taskId === updatedTaskId) {
         return {
           ...task,
@@ -124,143 +106,101 @@ const Board = () => {
       }
       return task;
     }));
-    
+
     console.log('Task updated successfully');
-  }, []);
+  };
 
-  const handleTaskDelete = useCallback((taskId) => {
-    if (!taskId) {
-      console.warn("Attempted to delete task with null/undefined ID");
-      return;
-    }
-
+  const handleTaskDelete = (taskId) => {
     setTasks(prev => prev.filter(task => {
       const currentTaskId = task.id || task.taskId;
       return currentTaskId !== taskId;
     }));
-    
+
     console.log('Task deleted successfully');
-  }, []);
+  };
 
-  const handleTaskStatusChange = useCallback((taskId, newStatus) => {
-    if (!taskId || !newStatus) {
-      console.warn("Invalid parameters for status change:", { taskId, newStatus });
-      return;
-    }
-
+  const handleTaskStatusChange = (taskId, newStatus) => {
     setTasks(prev => prev.map(task => {
       if ((task.id || task.taskId) === taskId) {
-        return { 
-          ...task, 
+        return {
+          ...task,
           taskStatus: newStatus,
+          // Optionally update timestamp when status changes
           lastModified: new Date().toISOString()
         };
       }
       return task;
     }));
-    
+
+    // Optional: Show a success message
     console.log(`Task moved to ${newStatus}`);
-  }, []);
+  };
 
-  const handleTaskArchive = useCallback((taskId) => {
-    if (!taskId) {
-      console.warn("Attempted to archive task with null/undefined ID");
-      return;
-    }
-
+  const handleTaskArchive = (taskId) => {
     const taskToArchive = tasks.find(task => (task.id || task.taskId) === taskId);
-    
+
     if (taskToArchive) {
       // Remove from active tasks
       setTasks(prev => prev.filter(task => (task.id || task.taskId) !== taskId));
-      
-      // Add to archived tasks
-      setArchivedTasks(prev => [...prev, { 
-        ...taskToArchive, 
-        archivedAt: new Date().toISOString() 
-      }]);
-      
+
+      // You can add archived tasks to a separate state if needed
+      setArchivedTasks(prev => [...prev, { ...taskToArchive, archivedAt: new Date().toISOString() }]);
+
       console.log('Task archived successfully');
-    } else {
-      console.warn("Task to archive not found:", taskId);
     }
-  }, [tasks]);
+  };
 
-  const handleAddColumn = useCallback(() => {
-    const trimmedTitle = newColumnTitle.trim();
-    
-    if (!trimmedTitle) {
-      console.warn("Empty column title");
-      return;
+  const handleAddColumn = () => {
+    if (newColumnTitle.trim() && !columns.includes(newColumnTitle.trim())) {
+      setColumns(prev => [...prev, newColumnTitle.trim()]);
+      setNewColumnTitle("");
+      setShowColumnDialog(false);
     }
-    
-    if (columns.includes(trimmedTitle)) {
-      console.warn("Column already exists:", trimmedTitle);
-      return;
-    }
-    
-    setColumns(prev => [...prev, trimmedTitle]);
-    setNewColumnTitle("");
-    setShowColumnDialog(false);
-  }, [newColumnTitle, columns]);
+  };
 
-  const handleRemoveColumn = useCallback((columnTitle) => {
+  const handleRemoveColumn = (columnTitle) => {
     const defaultColumns = ["To Do", "In Progress", "Completed"];
-    
-    if (defaultColumns.includes(columnTitle)) {
-      console.warn("Cannot remove default column:", columnTitle);
-      return;
+
+    if (!defaultColumns.includes(columnTitle)) {
+      // Remove the column
+      setColumns(prev => prev.filter(col => col !== columnTitle));
+
+      // Move tasks from removed column to "To Do"
+      setTasks(prev =>
+        prev.map(task => {
+          if (task.taskStatus === columnTitle) {
+            return {
+              ...task,
+              taskStatus: "To Do",
+              lastModified: new Date().toISOString()
+            };
+          }
+          return task;
+        })
+      );
+
+      console.log(`Column "${columnTitle}" removed and tasks moved to "To Do"`);
     }
-    
-    // Remove the column
-    setColumns(prev => prev.filter(col => col !== columnTitle));
-    
-    // Move tasks from removed column to "To Do"
-    setTasks(prev =>
-      prev.map(task => {
-        if (task.taskStatus === columnTitle) {
-          return { 
-            ...task, 
-            taskStatus: "To Do",
-            lastModified: new Date().toISOString()
-          };
-        }
-        return task;
-      })
-    );
-    
-    console.log(`Column "${columnTitle}" removed and tasks moved to "To Do"`);
-  }, []);
+  };
 
-  const handleSearchResults = useCallback((results) => {
+  const handleSearchResults = (results) => {
     console.log("Search results:", results);
-  }, []);
+  };
 
-  const handleTaskSelection = useCallback((task) => {
+  const handleTaskSelection = (task) => {
     console.log("Selected task:", task);
-  }, []);
+  };
 
-  const toggleSidebar = useCallback(() => {
-    setSidebarOpen(prev => !prev);
-  }, []);
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
-  const handleSidebarClose = useCallback(() => {
+  const handleSidebarClose = () => {
     setSidebarOpen(false);
-  }, []);
-
-  const handleDialogClose = useCallback(() => {
-    setShowColumnDialog(false);
-    setNewColumnTitle("");
-  }, []);
-
-  const handleTaskFormToggle = useCallback(() => {
-    setShowTaskForm(prev => !prev);
-  }, []);
+  };
 
   // Utility Functions
-  const getTasksByStatus = useCallback((status) => {
-    return (tasks || []).filter(task => task?.taskStatus === status);
-  }, [tasks]);
+  const getTasksByStatus = (status) => (tasks || []).filter(task => task.taskStatus === status);
 
   // Loading State
   if (loading) {
@@ -296,7 +236,6 @@ const Board = () => {
   // Main Render
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Desktop Sidebar */}
       {!isMobile && (
         <Drawer
           variant="temporary"
@@ -318,7 +257,6 @@ const Board = () => {
         </Drawer>
       )}
 
-      {/* Mobile Sidebar */}
       {isMobile && (
         <Drawer
           variant="temporary"
@@ -499,7 +437,7 @@ const Board = () => {
               <Button
                 variant="contained"
                 size={isMobile ? "medium" : "large"}
-                onClick={handleTaskFormToggle}
+                onClick={() => setShowTaskForm(!showTaskForm)}
                 startIcon={showTaskForm ? <CloseIcon /> : <AddIcon />}
                 fullWidth={isSmallMobile}
                 sx={{
@@ -540,10 +478,7 @@ const Board = () => {
                   p: { xs: 2, sm: 3 },
                   boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                 }}>
-                  <NewTaskForm 
-                    onTaskAdded={handleTaskAdded} 
-                    availableStatuses={columns} 
-                  />
+                  <NewTaskForm onTaskAdded={handleTaskAdded} availableStatuses={columns} />
                 </Box>
               </Collapse>
             </Box>
@@ -552,7 +487,6 @@ const Board = () => {
             <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} sx={{ display: "flex", justifyContent: { md: "space-around", sm: "center", xs: "center" } }}>
               {columns.map((column, index) => (
                 <Grid
-                  item
                   xs={12}
                   sm={6}
                   md={columns.length <= 3 ? 4 : 6}
@@ -568,7 +502,7 @@ const Board = () => {
                     columnIndex={index}
                     onTaskUpdate={handleTaskUpdate}
                     onTaskDelete={handleTaskDelete}
-                    onTaskArchive={handleTaskArchive}  
+                    onTaskArchive={handleTaskArchive}
                     onTaskStatusChange={handleTaskStatusChange}
                     TaskCardComponent={TaskCard}
                   />
@@ -579,7 +513,7 @@ const Board = () => {
           </Container>
         </Box>
 
-        {/* Footer Component - Uncomment if needed */}
+        {/* Footer Component */}
         {/* <Footer /> */}
       </Box>
 
@@ -612,7 +546,7 @@ const Board = () => {
       {/* Add Column Dialog */}
       <Dialog
         open={showColumnDialog}
-        onClose={handleDialogClose}
+        onClose={() => setShowColumnDialog(false)}
         maxWidth="sm"
         fullWidth
         fullScreen={isSmallMobile}
@@ -650,11 +584,6 @@ const Board = () => {
             label="List Name"
             value={newColumnTitle}
             onChange={(e) => setNewColumnTitle(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                handleAddColumn();
-              }
-            }}
             variant="outlined"
             sx={{
               '& .MuiOutlinedInput-root': {
@@ -663,7 +592,6 @@ const Board = () => {
               }
             }}
             helperText="Enter a unique name for your new list"
-            error={newColumnTitle.trim() && columns.includes(newColumnTitle.trim())}
           />
         </DialogContent>
         <DialogActions sx={{
@@ -673,7 +601,7 @@ const Board = () => {
           backgroundColor: '#ffffff'
         }}>
           <Button
-            onClick={handleDialogClose}
+            onClick={() => setShowColumnDialog(false)}
             fullWidth={isSmallMobile}
             sx={{
               color: '#64748b',

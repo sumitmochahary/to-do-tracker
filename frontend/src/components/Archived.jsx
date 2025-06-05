@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Container, 
-  Grid, 
-  Typography, 
-  Card, 
-  CardContent, 
-  CardActions, 
-  Button, 
-  Chip, 
+import {
+  Container,
+  Grid,
+  Typography,
+  Card,
+  CardContent,
+  CardActions,
+  Button,
+  Chip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -19,14 +19,22 @@ import {
   Fade,
   Paper
 } from '@mui/material';
-import { 
-  Restore as RestoreIcon, 
-  Delete as DeleteIcon, 
+import {
+  Restore as RestoreIcon,
+  Delete as DeleteIcon,
   Visibility as VisibilityIcon,
-  Archive as ArchiveIcon 
+  Archive as ArchiveIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import axios from 'axios';
 import { useNavigate } from 'react-router';
+import { 
+  fetchArchivedTasks, 
+  fetchArchivedTasksClientFilter, 
+  restoreTask, 
+  permanentDeleteTask, 
+  deleteTask
+} from '../services/TaskService';
 
 const Archived = () => {
   const [archivedTasks, setArchivedTasks] = useState([]);
@@ -37,23 +45,62 @@ const Archived = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [debugInfo, setDebugInfo] = useState('');
   const navigate = useNavigate();
 
   // Fetch archived tasks on component mount
   useEffect(() => {
-    fetchArchivedTasks();
+    fetchArchivedTask();
   }, []);
 
-  const fetchArchivedTasks = async () => {
+  const fetchArchivedTask = async () => {
     try {
       setLoading(true);
       setError('');
-      // Assuming your API has an endpoint for archived tasks
-      const response = await axios.get('http://localhost:3000/cards/archived');
-      setArchivedTasks(response.data);
+      setDebugInfo('Attempting to fetch archived tasks...');
+      
+      // Try the enhanced fetchArchivedTasks first
+      try {
+        const response = await fetchArchivedTasks();
+        console.log('Archived tasks response:', response);
+        
+        // Handle different response structures
+        let tasks = [];
+        if (Array.isArray(response)) {
+          tasks = response;
+        } else if (response && Array.isArray(response.data)) {
+          tasks = response.data;
+        } else if (response && response.data && Array.isArray(response.data.data)) {
+          tasks = response.data.data;
+        }
+        
+        setArchivedTasks(tasks);
+        setDebugInfo(`✅ Found ${tasks.length} archived tasks using API endpoint`);
+        
+        // If no tasks found, try client-side filtering
+        if (tasks.length === 0) {
+          setDebugInfo('No tasks from API, trying client-side filtering...');
+          const clientResponse = await fetchArchivedTasksClientFilter();
+          const clientTasks = clientResponse.data || [];
+          setArchivedTasks(clientTasks);
+          setDebugInfo(`✅ Found ${clientTasks.length} archived tasks using client-side filtering`);
+        }
+        
+      } catch (apiError) {
+        console.error('API fetch failed, trying client-side filtering:', apiError);
+        setDebugInfo('API fetch failed, trying client-side filtering...');
+        
+        // Fallback to client-side filtering
+        const clientResponse = await fetchArchivedTasksClientFilter();
+        const clientTasks = clientResponse.data || [];
+        setArchivedTasks(clientTasks);
+        setDebugInfo(`✅ Found ${clientTasks.length} archived tasks using client-side filtering (fallback)`);
+      }
+      
     } catch (error) {
       console.error('Error fetching archived tasks:', error);
       setError('Failed to load archived tasks. Please try again.');
+      setDebugInfo(`❌ Error: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -62,36 +109,65 @@ const Archived = () => {
   // Restore task from archive
   const handleRestoreTask = async (taskId) => {
     try {
-      await axios.put(`http://localhost:3000/card/${taskId}/restore`);
+      setDebugInfo(`Restoring task ${taskId}...`);
       
+      // Try using the new restoreTask service first
+      try {
+        await restoreTask(taskId);
+        setDebugInfo(`✅ Task ${taskId} restored using API`);
+      } catch (apiError) {
+        console.error('API restore failed, trying direct endpoint:', apiError);
+        // Fallback to direct axios call
+        await axios.put(`http://localhost:8080/api/v1/restore/${taskId}`, {}, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          withCredentials: true,
+        });
+        setDebugInfo(`✅ Task ${taskId} restored using direct API call`);
+      }
+
       // Remove from archived tasks list
-      setArchivedTasks(prev => prev.filter(task => task.id !== taskId));
+      setArchivedTasks(prev => prev.filter(task => (task.taskId || task.id) !== taskId));
       setSuccessMessage('Task restored successfully!');
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error restoring task:', error);
       setError('Failed to restore task. Please try again.');
+      setDebugInfo(`❌ Restore error: ${error.message}`);
     }
   };
 
   // Permanently delete task
   const handlePermanentDelete = async (taskId) => {
     try {
-      await axios.delete(`http://localhost:3000/card/${taskId}/permanent`);
+      setDebugInfo(`Permanently deleting task ${taskId}...`);
       
+      // Try using the new permanentDeleteTask service first
+      try {
+        await permanentDeleteTask(taskId);
+        setDebugInfo(`✅ Task ${taskId} permanently deleted using API`);
+      } catch (apiError) {
+        console.error('API permanent delete failed, trying direct endpoint:', apiError);
+        // Fallback to direct axios call (matching your original code)
+        await deleteTask();
+        setDebugInfo(`✅ Task ${taskId} permanently deleted using direct API call`);
+      }
+
       // Remove from archived tasks list
-      setArchivedTasks(prev => prev.filter(task => task.id !== taskId));
+      setArchivedTasks(prev => prev.filter(task => (task.taskId || task.id) !== taskId));
       setDeleteDialogOpen(false);
       setTaskToDelete(null);
       setSuccessMessage('Task permanently deleted!');
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error deleting task permanently:', error);
       setError('Failed to delete task permanently. Please try again.');
+      setDebugInfo(`❌ Delete error: ${error.message}`);
       setDeleteDialogOpen(false);
     }
   };
@@ -117,6 +193,9 @@ const Archived = () => {
         return { color: '#2196f3', icon: '⚡' };
       case 'Completed':
         return { color: '#4caf50', icon: '✅' };
+      case 'Archived':
+      case 'archived':
+        return { color: '#9e9e9e', icon: '📦' };
       default:
         return { color: '#757575', icon: '🔖' };
     }
@@ -124,6 +203,7 @@ const Archived = () => {
 
   // Calculate days since archived
   const getDaysArchived = (archivedDate) => {
+    if (!archivedDate) return 0;
     const archived = new Date(archivedDate);
     const now = new Date();
     const diffTime = Math.abs(now - archived);
@@ -137,6 +217,11 @@ const Archived = () => {
         <Typography variant="h4" sx={{ textAlign: 'center', color: 'text.secondary' }}>
           Loading archived tasks...
         </Typography>
+        {debugInfo && (
+          <Typography variant="body2" sx={{ textAlign: 'center', color: 'text.secondary', mt: 2 }}>
+            {debugInfo}
+          </Typography>
+        )}
       </Container>
     );
   }
@@ -144,46 +229,71 @@ const Archived = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
-      <Paper 
-      elevation={3}
-      sx={{ 
-        p: 3, 
-        mb: 4, 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        borderRadius: 3
-      }}
-    >
-      <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
-        <Box display="flex" alignItems="center" gap={2}>
-          <ArchiveIcon sx={{ fontSize: 40 }} />
-          <Box>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-              📦 Archived Tasks
-            </Typography>
-            <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
-              {archivedTasks.length} archived task{archivedTasks.length !== 1 ? 's' : ''}
-            </Typography>
+      <Paper
+        elevation={3}
+        sx={{
+          p: 3,
+          mb: 4,
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          borderRadius: 3
+        }}
+      >
+        <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
+          <Box display="flex" alignItems="center" gap={2}>
+            <ArchiveIcon sx={{ fontSize: 40 }} />
+            <Box>
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+                📦 Archived Tasks
+              </Typography>
+              <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
+                {(archivedTasks?.length || 0)} archived task{archivedTasks?.length !== 1 ? 's' : ''}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Action Buttons */}
+          <Box display="flex" gap={2}>
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={fetchArchivedTask}
+              startIcon={<RefreshIcon />}
+              sx={{
+                borderColor: 'white',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.2)'
+                }
+              }}
+            >
+              Refresh
+            </Button>
+            
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={() => navigate('/dashboard')}
+              sx={{
+                borderColor: 'white',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.2)'
+                }
+              }}
+            >
+              Go to Board
+            </Button>
           </Box>
         </Box>
+      </Paper>
 
-        {/* Board Button */}
-        <Button
-          variant="outlined"
-          color="inherit"
-          onClick={() => navigate('/dashboard')} 
-          sx={{
-            borderColor: 'white',
-            color: 'white',
-            '&:hover': {
-              backgroundColor: 'rgba(255,255,255,0.2)'
-            }
-          }}
-        >
-          Go to Board
-        </Button>
-      </Box>
-    </Paper>
+      {/* Debug Info */}
+      {debugInfo && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <strong>Debug:</strong> {debugInfo}
+        </Alert>
+      )}
 
       {/* Success/Error Messages */}
       {successMessage && (
@@ -202,11 +312,11 @@ const Archived = () => {
 
       {/* Archived Tasks Grid */}
       {archivedTasks.length === 0 ? (
-        <Paper 
-          elevation={1} 
-          sx={{ 
-            p: 6, 
-            textAlign: 'center', 
+        <Paper
+          elevation={1}
+          sx={{
+            p: 6,
+            textAlign: 'center',
             background: 'linear-gradient(45deg, #f5f7fa 0%, #c3cfe2 100%)',
             borderRadius: 3
           }}
@@ -222,15 +332,16 @@ const Archived = () => {
       ) : (
         <Grid container spacing={3}>
           {archivedTasks.map((task) => {
+            const taskId = task.taskId || task.id;
             const statusInfo = getStatusInfo(task.taskStatus);
-            const daysArchived = getDaysArchived(task.archivedDate);
-            
+            const daysArchived = getDaysArchived(task.archivedDate || task.taskCreatedDate);
+
             return (
-              <Grid item xs={12} sm={6} md={4} key={task.id}>
-                <Card 
-                  sx={{ 
-                    height: '100%', 
-                    display: 'flex', 
+              <Grid item xs={12} sm={6} md={4} key={taskId}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    display: 'flex',
                     flexDirection: 'column',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                     borderRadius: 3,
@@ -258,7 +369,7 @@ const Archived = () => {
                       <Chip
                         label={`${daysArchived} day${daysArchived !== 1 ? 's' : ''} ago`}
                         size="small"
-                        sx={{ 
+                        sx={{
                           backgroundColor: '#f5f5f5',
                           color: 'text.secondary'
                         }}
@@ -266,11 +377,11 @@ const Archived = () => {
                     </Box>
 
                     {/* Task Title */}
-                    <Typography 
-                      variant="h6" 
-                      component="h3" 
-                      sx={{ 
-                        mb: 2, 
+                    <Typography
+                      variant="h6"
+                      component="h3"
+                      sx={{
+                        mb: 2,
                         fontWeight: 'bold',
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
@@ -282,10 +393,10 @@ const Archived = () => {
                     </Typography>
 
                     {/* Task Description Preview */}
-                    <Typography 
-                      variant="body2" 
-                      color="text.secondary" 
-                      sx={{ 
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
                         mb: 2,
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
@@ -298,10 +409,10 @@ const Archived = () => {
 
                     {/* Dates */}
                     <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Due:</strong> {new Date(task.taskDueDate).toLocaleDateString()}
+                      <strong>Due:</strong> {task.taskDueDate ? new Date(task.taskDueDate).toLocaleDateString() : 'No due date'}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      <strong>Archived:</strong> {new Date(task.archivedDate).toLocaleDateString()}
+                      <strong>Archived:</strong> {(task.archivedDate || task.taskCreatedDate) ? new Date(task.archivedDate || task.taskCreatedDate).toLocaleDateString() : 'Unknown'}
                     </Typography>
                   </CardContent>
 
@@ -309,7 +420,7 @@ const Archived = () => {
                   <CardActions sx={{ p: 2, justifyContent: 'space-between' }}>
                     <Box>
                       <Tooltip title="View Details">
-                        <IconButton 
+                        <IconButton
                           onClick={() => openViewDialog(task)}
                           color="primary"
                           size="small"
@@ -318,11 +429,11 @@ const Archived = () => {
                         </IconButton>
                       </Tooltip>
                     </Box>
-                    
+
                     <Box>
                       <Tooltip title="Restore Task">
-                        <IconButton 
-                          onClick={() => handleRestoreTask(task.id)}
+                        <IconButton
+                          onClick={() => handleRestoreTask(taskId)}
                           color="success"
                           size="small"
                           sx={{ mr: 1 }}
@@ -330,9 +441,9 @@ const Archived = () => {
                           <RestoreIcon />
                         </IconButton>
                       </Tooltip>
-                      
+
                       <Tooltip title="Delete Permanently">
-                        <IconButton 
+                        <IconButton
                           onClick={() => openDeleteDialog(task)}
                           color="error"
                           size="small"
@@ -350,15 +461,15 @@ const Archived = () => {
       )}
 
       {/* View Task Dialog */}
-      <Dialog 
-        open={viewDialogOpen} 
+      <Dialog
+        open={viewDialogOpen}
         onClose={() => setViewDialogOpen(false)}
-        maxWidth="sm" 
+        maxWidth="sm"
         fullWidth
       >
         {selectedTask && (
           <>
-            <DialogTitle sx={{ 
+            <DialogTitle sx={{
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               color: 'white',
               fontWeight: 'bold'
@@ -378,15 +489,15 @@ const Archived = () => {
                   }}
                 />
               </Box>
-              
+
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
                 {selectedTask.taskTitle}
               </Typography>
-              
+
               <Typography variant="body1" sx={{ mb: 3 }}>
                 {selectedTask.taskDescription || 'No description provided'}
               </Typography>
-              
+
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <Typography variant="body2">
@@ -418,7 +529,7 @@ const Archived = () => {
               <Button onClick={() => setViewDialogOpen(false)}>
                 Close
               </Button>
-              <Button 
+              <Button
                 onClick={() => {
                   handleRestoreTask(selectedTask.id);
                   setViewDialogOpen(false);
@@ -435,8 +546,8 @@ const Archived = () => {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog 
-        open={deleteDialogOpen} 
+      <Dialog
+        open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
       >
         <DialogTitle sx={{ color: 'error.main' }}>
@@ -454,7 +565,7 @@ const Archived = () => {
           <Button onClick={() => setDeleteDialogOpen(false)}>
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={() => handlePermanentDelete(taskToDelete?.id)}
             color="error"
             variant="contained"
