@@ -390,14 +390,18 @@ const TaskCard = ({
 )}
                 
                 <Tooltip title="Archive Task">
-                  <IconButton 
-                    size="small" 
-                    onClick={() => setArchiveDialogOpen(true)}
-                    color="warning"
-                  >
-                    <ArchiveIcon />
-                  </IconButton>
-                </Tooltip>
+  <span> {/* Needed so Tooltip works on disabled elements */}
+    <IconButton 
+      size="small" 
+      onClick={() => setArchiveDialogOpen(true)}
+      color="warning"
+      disabled={task.taskStatus !== 'Completed'}
+    >
+      <ArchiveIcon />
+    </IconButton>
+  </span>
+</Tooltip>
+
                 
                 <Tooltip title="Delete Task">
                   <IconButton 
