@@ -2,6 +2,7 @@ import axios from "axios";
 
 const BASE_URL = "http://localhost:8080/api/v1";
 
+
 // ✅ ENHANCED: Better token management
 const getAuthToken = () => {
   const token = localStorage.getItem("token");
@@ -61,6 +62,17 @@ const handleApiError = (error, operation) => {
   }
 };
 
+// Headers
+const getHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+});
+
+const jsonHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+  "Content-Type": "application/json",
+});
+
+
 // ========== GET OPERATIONS ==========
 
 // Fetch all tasks
@@ -74,7 +86,12 @@ export const fetchTask = async () => {
     console.log("✅ Tasks fetched successfully:", response.data);
     return response.data;
   } catch (error) {
+
     handleApiError(error, "fetching tasks");
+
+    console.error("Error fetching tasks:", error);
+    throw error;
+
   }
 };
 
@@ -89,7 +106,12 @@ export const fetchByCategory = async (category) => {
     console.log("✅ Tasks by category fetched:", response.data);
     return response.data;
   } catch (error) {
+
     handleApiError(error, `fetching tasks by category ${category}`);
+
+    console.error("Error fetching tasks by category:", error);
+    throw error;
+
   }
 };
 
@@ -104,7 +126,12 @@ export const fetchByStatus = async (status) => {
     console.log("✅ Tasks by status fetched:", response.data);
     return response.data;
   } catch (error) {
+
     handleApiError(error, `fetching tasks by status ${status}`);
+
+    console.error("Error fetching tasks by status:", error);
+    throw error;
+
   }
 };
 
@@ -119,13 +146,19 @@ export const fetchByDueDate = async (dueDate) => {
     console.log("✅ Tasks by due date fetched:", response.data);
     return response.data;
   } catch (error) {
+
     handleApiError(error, `fetching tasks by due date ${dueDate}`);
+
+    console.error("Error fetching tasks by due date:", error);
+    throw error;
+
   }
 };
 
 // ✅ FIXED: Multiple approaches to fetch archived tasks
 export const fetchArchivedTasks = async () => {
   try {
+
     console.log("Fetching archived tasks...");
     
     // Try different endpoints/approaches
@@ -172,6 +205,16 @@ export const fetchArchivedTasks = async () => {
     
   } catch (error) {
     handleApiError(error, "fetching archived tasks");
+
+    const response = await axios.get(`${BASE_URL}/status/archived`, {
+      headers: getHeaders(),
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching archived tasks:", error);
+    throw error;
+
   }
 };
 
@@ -207,14 +250,23 @@ export const saveTask = async (data) => {
     }
     
     const response = await axios.post(`${BASE_URL}/save`, data, {
+
       headers: getJsonHeaders(),
+
+      headers: jsonHeaders(),
+
       withCredentials: true,
     });
     
     console.log("✅ Task saved successfully:", response.data);
     return response.data;
   } catch (error) {
+
     handleApiError(error, "saving task");
+
+    console.error("Error saving task:", error);
+    throw error;
+
   }
 };
 
@@ -223,6 +275,7 @@ export const saveTask = async (data) => {
 // ✅ ENHANCED: Update existing task with validation
 export const updateTask = async (data) => {
   try {
+
     console.log("Updating task:", data);
     
     // Validate task ID
@@ -244,6 +297,21 @@ export const updateTask = async (data) => {
     return response.data;
   } catch (error) {
     handleApiError(error, `updating task ${data.taskId}`);
+
+    const response = await axios.patch(
+      `${BASE_URL}/update/${data.taskId}`,
+      data,
+      {
+        headers: jsonHeaders(),
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating task:", error);
+    console.log("Task data sent:", data);
+    throw error;
+
   }
 };
 
@@ -269,7 +337,12 @@ export const archiveTask = async (taskId) => {
     console.log("✅ Task status after archiving:", response.data.taskStatus);
     return response.data;
   } catch (error) {
+
     handleApiError(error, `archiving task ${taskId}`);
+
+    console.error("Error archiving task:", error);
+    throw error;
+
   }
 };
 
@@ -317,7 +390,12 @@ export const deleteTask = async (taskId) => {
     console.log("✅ Task deleted successfully:", response.data);
     return response.data;
   } catch (error) {
+
     handleApiError(error, `deleting task ${taskId}`);
+
+    console.error("Error deleting task:", error);
+    throw error;
+
   }
 };
 

@@ -9,7 +9,7 @@ import java.time.LocalDate;
 public class Task {
 
     @Id
-    private String id;
+    private String taskId;
     private String taskTitle;
     private String userId;
     private String taskDescription;
@@ -23,8 +23,8 @@ public class Task {
     public Task() {
     }
 
-    public Task(String id, String taskTitle, String userId, String taskDescription, String taskCategory, String taskStatus, LocalDate taskDueDate, LocalDate taskCreatedDate, Media media, boolean archived) {
-        this.id = id;
+    public Task(String taskId, String taskTitle, String userId, String taskDescription, String taskCategory, String taskStatus, LocalDate taskDueDate, LocalDate taskCreatedDate, Media media, boolean archived) {
+        this.taskId = taskId;
         this.taskTitle = taskTitle;
         this.userId = userId;
         this.taskDescription = taskDescription;
@@ -36,12 +36,12 @@ public class Task {
         this.archived = archived;
     }
 
-    public String getId() {
-        return id;
+    public String getTaskId() {
+        return taskId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 
     public String getTaskTitle() {

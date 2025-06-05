@@ -49,7 +49,7 @@ public class TaskServiceImpl implements ITaskService {
 
     @Override
     public Task updateTask(Task updatedTask) throws TaskNotFoundException {
-        Task existingTask = taskRepository.findById(updatedTask.getId())  // Changed from findByTaskId to findById
+        Task existingTask = taskRepository.findById(updatedTask.getTaskId())  // Changed from findByTaskId to findById
                 .orElseThrow(() -> new TaskNotFoundException("Task not found for updating"));
 
         // Update task details and force status to 'In-Progress'
@@ -58,7 +58,7 @@ public class TaskServiceImpl implements ITaskService {
         existingTask.setTaskCategory(updatedTask.getTaskCategory());
         existingTask.setTaskDueDate(updatedTask.getTaskDueDate());
         existingTask.setMedia(updatedTask.getMedia());
-        existingTask.setTaskStatus("In-Progress");  // Force status
+        existingTask.setTaskStatus(updatedTask.getTaskStatus());  // Force status
 
         return taskRepository.save(existingTask);
     }
@@ -78,6 +78,12 @@ public class TaskServiceImpl implements ITaskService {
         Task task = taskRepository.findById(taskId)  // Changed from findByTaskId to findById
                 .orElseThrow(() -> new TaskNotFoundException("Task not found"));
         taskRepository.delete(task);
+    }
+
+    @Override
+    public Task getTaskById(String taskId) throws TaskNotFoundException {
+        return taskRepository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found with ID: " + taskId));
     }
 
     @Override

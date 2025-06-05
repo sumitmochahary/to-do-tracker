@@ -23,6 +23,7 @@ import {
   Restore as RestoreIcon,
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
+
   Archive as ArchiveIcon,
   Refresh as RefreshIcon
 } from '@mui/icons-material';
@@ -35,6 +36,13 @@ import {
   permanentDeleteTask, 
   deleteTask
 } from '../services/TaskService';
+
+  Archive as ArchiveIcon
+} from '@mui/icons-material';
+import axios from 'axios';
+import { useNavigate } from 'react-router';
+import { fetchArchivedTasks } from '../services/TaskService';
+
 
 const Archived = () => {
   const [archivedTasks, setArchivedTasks] = useState([]);
@@ -57,6 +65,7 @@ const Archived = () => {
     try {
       setLoading(true);
       setError('');
+
       setDebugInfo('Attempting to fetch archived tasks...');
       
       // Try the enhanced fetchArchivedTasks first
@@ -97,6 +106,11 @@ const Archived = () => {
         setDebugInfo(`✅ Found ${clientTasks.length} archived tasks using client-side filtering (fallback)`);
       }
       
+
+      // Assuming your API has an endpoint for archived tasks
+      const response = await fetchArchivedTasks();
+      setArchivedTasks(response.data);
+
     } catch (error) {
       console.error('Error fetching archived tasks:', error);
       setError('Failed to load archived tasks. Please try again.');
@@ -109,6 +123,7 @@ const Archived = () => {
   // Restore task from archive
   const handleRestoreTask = async (taskId) => {
     try {
+
       setDebugInfo(`Restoring task ${taskId}...`);
       
       // Try using the new restoreTask service first
@@ -127,6 +142,9 @@ const Archived = () => {
         setDebugInfo(`✅ Task ${taskId} restored using direct API call`);
       }
 
+      await axios.put(`http://localhost:3000/card/${taskId}/restore`);
+
+
       // Remove from archived tasks list
       setArchivedTasks(prev => prev.filter(task => (task.taskId || task.id) !== taskId));
       setSuccessMessage('Task restored successfully!');
@@ -143,6 +161,7 @@ const Archived = () => {
   // Permanently delete task
   const handlePermanentDelete = async (taskId) => {
     try {
+
       setDebugInfo(`Permanently deleting task ${taskId}...`);
       
       // Try using the new permanentDeleteTask service first
@@ -155,6 +174,9 @@ const Archived = () => {
         await deleteTask();
         setDebugInfo(`✅ Task ${taskId} permanently deleted using direct API call`);
       }
+
+      await axios.delete(`http://localhost:3000/card/${taskId}/permanent`);
+
 
       // Remove from archived tasks list
       setArchivedTasks(prev => prev.filter(task => (task.taskId || task.id) !== taskId));
@@ -250,6 +272,7 @@ const Archived = () => {
                 {(archivedTasks?.length || 0)} archived task{archivedTasks?.length !== 1 ? 's' : ''}
               </Typography>
             </Box>
+
           </Box>
 
           {/* Action Buttons */}
@@ -295,6 +318,27 @@ const Archived = () => {
         </Alert>
       )}
 
+          </Box>
+
+          {/* Board Button */}
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={() => navigate('/dashboard')}
+            sx={{
+              borderColor: 'white',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.2)'
+              }
+            }}
+          >
+            Go to Board
+          </Button>
+        </Box>
+      </Paper>
+
+
       {/* Success/Error Messages */}
       {successMessage && (
         <Fade in={Boolean(successMessage)}>
@@ -334,10 +378,17 @@ const Archived = () => {
           {archivedTasks.map((task) => {
             const taskId = task.taskId || task.id;
             const statusInfo = getStatusInfo(task.taskStatus);
+
             const daysArchived = getDaysArchived(task.archivedDate || task.taskCreatedDate);
 
             return (
               <Grid item xs={12} sm={6} md={4} key={taskId}>
+
+            const daysArchived = getDaysArchived(task.archivedDate);
+
+            return (
+              <Grid item xs={12} sm={6} md={4} key={task.id}>
+
                 <Card
                   sx={{
                     height: '100%',
@@ -433,7 +484,11 @@ const Archived = () => {
                     <Box>
                       <Tooltip title="Restore Task">
                         <IconButton
+
                           onClick={() => handleRestoreTask(taskId)}
+
+                          onClick={() => handleRestoreTask(task.id)}
+
                           color="success"
                           size="small"
                           sx={{ mr: 1 }}
