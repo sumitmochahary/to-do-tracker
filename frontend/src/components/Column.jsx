@@ -1,7 +1,6 @@
 import React from "react";
 import { Box, Paper, Typography, IconButton } from "@mui/material";
 import { Assignment, CheckCircle, Schedule, Delete } from "@mui/icons-material";
-import { useState } from "react";
 import TaskCard from "./TaskCard";
 
 const getStatusColor = (status, index = 0) => {
@@ -52,10 +51,8 @@ const getStatusColor = (status, index = 0) => {
   };
 };
 
-const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, columnIndex = 0, onEditTask, onTaskDeleted, onTaskArchive, onTaskStatusChange, onUpdateTask }) => {
+const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, columnIndex = 0, onEditTask, onTaskDeleted, onTaskArchive, onTaskStatusChange, onTaskUpdate }) => {
   const statusInfo = getStatusColor(title, columnIndex);
-  const [archivedTasks, setArchivedTasks] = useState([]);
-
 
   return (
     <Paper
@@ -186,7 +183,7 @@ const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, column
                 onTaskArchived={onTaskArchive}
                 onTaskDeleted={onTaskDeleted}
                 onStatusChange={onTaskStatusChange}
-                onTaskUpdated={onUpdateTask}
+                onTaskUpdated={onTaskUpdate}
               />
             ))}
           </Box>
