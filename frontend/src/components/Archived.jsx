@@ -23,26 +23,15 @@ import {
   Restore as RestoreIcon,
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
-
   Archive as ArchiveIcon,
   Refresh as RefreshIcon
 } from '@mui/icons-material';
-import axios from 'axios';
 import { useNavigate } from 'react-router';
 import { 
-  fetchArchivedTasks, 
-  fetchArchivedTasksClientFilter, 
-  restoreTask, 
-  permanentDeleteTask, 
+  fetchArchivedTasks,
+  updateTask,
   deleteTask
 } from '../services/TaskService';
-
-  Archive as ArchiveIcon
-} from '@mui/icons-material';
-import axios from 'axios';
-import { useNavigate } from 'react-router';
-import { fetchArchivedTasks } from '../services/TaskService';
-
 
 const Archived = () => {
   const [archivedTasks, setArchivedTasks] = useState([]);
@@ -58,59 +47,31 @@ const Archived = () => {
 
   // Fetch archived tasks on component mount
   useEffect(() => {
-    fetchArchivedTask();
+    fetchArchivedTasksData();
   }, []);
 
-  const fetchArchivedTask = async () => {
+  const fetchArchivedTasksData = async () => {
     try {
       setLoading(true);
       setError('');
-
-      setDebugInfo('Attempting to fetch archived tasks...');
+      setDebugInfo('Fetching archived tasks...');
       
-      // Try the enhanced fetchArchivedTasks first
-      try {
-        const response = await fetchArchivedTasks();
-        console.log('Archived tasks response:', response);
-        
-        // Handle different response structures
-        let tasks = [];
-        if (Array.isArray(response)) {
-          tasks = response;
-        } else if (response && Array.isArray(response.data)) {
-          tasks = response.data;
-        } else if (response && response.data && Array.isArray(response.data.data)) {
-          tasks = response.data.data;
-        }
-        
-        setArchivedTasks(tasks);
-        setDebugInfo(`✅ Found ${tasks.length} archived tasks using API endpoint`);
-        
-        // If no tasks found, try client-side filtering
-        if (tasks.length === 0) {
-          setDebugInfo('No tasks from API, trying client-side filtering...');
-          const clientResponse = await fetchArchivedTasksClientFilter();
-          const clientTasks = clientResponse.data || [];
-          setArchivedTasks(clientTasks);
-          setDebugInfo(`✅ Found ${clientTasks.length} archived tasks using client-side filtering`);
-        }
-        
-      } catch (apiError) {
-        console.error('API fetch failed, trying client-side filtering:', apiError);
-        setDebugInfo('API fetch failed, trying client-side filtering...');
-        
-        // Fallback to client-side filtering
-        const clientResponse = await fetchArchivedTasksClientFilter();
-        const clientTasks = clientResponse.data || [];
-        setArchivedTasks(clientTasks);
-        setDebugInfo(`✅ Found ${clientTasks.length} archived tasks using client-side filtering (fallback)`);
+      const response = await fetchArchivedTasks();
+      console.log('Archived tasks response:', response);
+      
+      // Handle different response structures
+      let tasks = [];
+      if (Array.isArray(response)) {
+        tasks = response;
+      } else if (response && Array.isArray(response.data)) {
+        tasks = response.data;
+      } else if (response && response.data && Array.isArray(response.data.data)) {
+        tasks = response.data.data;
       }
       
-
-      // Assuming your API has an endpoint for archived tasks
-      const response = await fetchArchivedTasks();
-      setArchivedTasks(response.data);
-
+      setArchivedTasks(tasks);
+      setDebugInfo(`✅ Found ${tasks.length} archived tasks`);
+      
     } catch (error) {
       console.error('Error fetching archived tasks:', error);
       setError('Failed to load archived tasks. Please try again.');
@@ -120,34 +81,36 @@ const Archived = () => {
     }
   };
 
-  // Restore task from archive
+  // Restore task from archive by updating its status
   const handleRestoreTask = async (taskId) => {
     try {
-
       setDebugInfo(`Restoring task ${taskId}...`);
       
-      // Try using the new restoreTask service first
-      try {
-        await restoreTask(taskId);
-        setDebugInfo(`✅ Task ${taskId} restored using API`);
-      } catch (apiError) {
-        console.error('API restore failed, trying direct endpoint:', apiError);
-        // Fallback to direct axios call
-        await axios.put(`http://localhost:8080/api/v1/restore/${taskId}`, {}, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          withCredentials: true,
-        });
-        setDebugInfo(`✅ Task ${taskId} restored using direct API call`);
+      // Find the task to get its current data
+      const taskToRestore = archivedTasks.find(task => (task.taskId || task.id) === taskId);
+      
+      if (!taskToRestore) {
+        throw new Error('Task not found');
       }
 
-      await axios.put(`http://localhost:3000/card/${taskId}/restore`);
+      // Create updated task data with status changed to "To Do"
+      const updatedTaskData = {
+        taskId: taskToRestore.taskId || taskToRestore.id,
+        taskTitle: taskToRestore.taskTitle,
+        taskDescription: taskToRestore.taskDescription,
+        taskDueDate: taskToRestore.taskDueDate,
+        taskCategory: taskToRestore.taskCategory,
+        taskStatus: 'To Do', // Change from archived to To Do
+        taskCreatedDate: taskToRestore.taskCreatedDate
+      };
 
-
+      // Use the existing updateTask function from TaskService
+      await updateTask(updatedTaskData);
+      
       // Remove from archived tasks list
       setArchivedTasks(prev => prev.filter(task => (task.taskId || task.id) !== taskId));
       setSuccessMessage('Task restored successfully!');
+      setDebugInfo(`✅ Task ${taskId} restored to "To Do" status`);
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
@@ -158,31 +121,20 @@ const Archived = () => {
     }
   };
 
-  // Permanently delete task
+  // Permanently delete task using existing deleteTask function
   const handlePermanentDelete = async (taskId) => {
     try {
-
       setDebugInfo(`Permanently deleting task ${taskId}...`);
       
-      // Try using the new permanentDeleteTask service first
-      try {
-        await permanentDeleteTask(taskId);
-        setDebugInfo(`✅ Task ${taskId} permanently deleted using API`);
-      } catch (apiError) {
-        console.error('API permanent delete failed, trying direct endpoint:', apiError);
-        // Fallback to direct axios call (matching your original code)
-        await deleteTask();
-        setDebugInfo(`✅ Task ${taskId} permanently deleted using direct API call`);
-      }
-
-      await axios.delete(`http://localhost:3000/card/${taskId}/permanent`);
-
-
+      // Use the existing deleteTask function from TaskService
+      await deleteTask(taskId);
+      
       // Remove from archived tasks list
       setArchivedTasks(prev => prev.filter(task => (task.taskId || task.id) !== taskId));
       setDeleteDialogOpen(false);
       setTaskToDelete(null);
       setSuccessMessage('Task permanently deleted!');
+      setDebugInfo(`✅ Task ${taskId} permanently deleted`);
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
@@ -272,7 +224,6 @@ const Archived = () => {
                 {(archivedTasks?.length || 0)} archived task{archivedTasks?.length !== 1 ? 's' : ''}
               </Typography>
             </Box>
-
           </Box>
 
           {/* Action Buttons */}
@@ -280,7 +231,7 @@ const Archived = () => {
             <Button
               variant="outlined"
               color="inherit"
-              onClick={fetchArchivedTask}
+              onClick={fetchArchivedTasksData}
               startIcon={<RefreshIcon />}
               sx={{
                 borderColor: 'white',
@@ -317,27 +268,6 @@ const Archived = () => {
           <strong>Debug:</strong> {debugInfo}
         </Alert>
       )}
-
-          </Box>
-
-          {/* Board Button */}
-          <Button
-            variant="outlined"
-            color="inherit"
-            onClick={() => navigate('/dashboard')}
-            sx={{
-              borderColor: 'white',
-              color: 'white',
-              '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.2)'
-              }
-            }}
-          >
-            Go to Board
-          </Button>
-        </Box>
-      </Paper>
-
 
       {/* Success/Error Messages */}
       {successMessage && (
@@ -378,17 +308,10 @@ const Archived = () => {
           {archivedTasks.map((task) => {
             const taskId = task.taskId || task.id;
             const statusInfo = getStatusInfo(task.taskStatus);
-
             const daysArchived = getDaysArchived(task.archivedDate || task.taskCreatedDate);
 
             return (
               <Grid item xs={12} sm={6} md={4} key={taskId}>
-
-            const daysArchived = getDaysArchived(task.archivedDate);
-
-            return (
-              <Grid item xs={12} sm={6} md={4} key={task.id}>
-
                 <Card
                   sx={{
                     height: '100%',
@@ -484,11 +407,7 @@ const Archived = () => {
                     <Box>
                       <Tooltip title="Restore Task">
                         <IconButton
-
                           onClick={() => handleRestoreTask(taskId)}
-
-                          onClick={() => handleRestoreTask(task.id)}
-
                           color="success"
                           size="small"
                           sx={{ mr: 1 }}
@@ -557,25 +476,27 @@ const Archived = () => {
                 <Grid item xs={6}>
                   <Typography variant="body2">
                     <strong>Created:</strong><br />
-                    {new Date(selectedTask.taskCreatedDate).toLocaleDateString()}
+                    {selectedTask.taskCreatedDate ? new Date(selectedTask.taskCreatedDate).toLocaleDateString() : 'Unknown'}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="body2">
                     <strong>Due Date:</strong><br />
-                    {new Date(selectedTask.taskDueDate).toLocaleDateString()}
+                    {selectedTask.taskDueDate ? new Date(selectedTask.taskDueDate).toLocaleDateString() : 'No due date'}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="body2">
                     <strong>Category:</strong><br />
-                    {selectedTask.taskCategory}
+                    {selectedTask.taskCategory || 'No category'}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="body2">
                     <strong>Archived:</strong><br />
-                    {new Date(selectedTask.archivedDate).toLocaleDateString()}
+                    {(selectedTask.archivedDate || selectedTask.taskCreatedDate) ? 
+                      new Date(selectedTask.archivedDate || selectedTask.taskCreatedDate).toLocaleDateString() : 
+                      'Unknown'}
                   </Typography>
                 </Grid>
               </Grid>
@@ -586,7 +507,7 @@ const Archived = () => {
               </Button>
               <Button
                 onClick={() => {
-                  handleRestoreTask(selectedTask.id);
+                  handleRestoreTask(selectedTask.taskId || selectedTask.id);
                   setViewDialogOpen(false);
                 }}
                 startIcon={<RestoreIcon />}
@@ -621,7 +542,7 @@ const Archived = () => {
             Cancel
           </Button>
           <Button
-            onClick={() => handlePermanentDelete(taskToDelete?.id)}
+            onClick={() => handlePermanentDelete(taskToDelete?.taskId || taskToDelete?.id)}
             color="error"
             variant="contained"
             startIcon={<DeleteIcon />}
