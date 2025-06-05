@@ -501,7 +501,7 @@ const Board = () => {
                     isRemovable={!["To Do", "In Progress", "Completed"].includes(column)}
                     columnIndex={index}
                     onTaskUpdate={handleTaskUpdate}
-                    onTaskDelete={handleTaskDelete}
+                    onTaskDeleted={handleTaskDelete}
                     onTaskArchive={handleTaskArchive}
                     onTaskStatusChange={handleTaskStatusChange}
                     TaskCardComponent={TaskCard}
