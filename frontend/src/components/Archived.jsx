@@ -42,7 +42,6 @@ const Archived = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
-  const [debugInfo, setDebugInfo] = useState('');
   const navigate = useNavigate();
 
   // Fetch archived tasks on component mount
@@ -75,7 +74,6 @@ const Archived = () => {
     } catch (error) {
       console.error('Error fetching archived tasks:', error);
       setError('Failed to load archived tasks. Please try again.');
-      setDebugInfo(`❌ Error: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -108,7 +106,7 @@ const Archived = () => {
       await updateTask(updatedTaskData);
       
       // Remove from archived tasks list
-      setArchivedTasks(prev => prev.filter(task => (task.taskId || task.id) !== taskId));
+      setArchivedTasks(prev => prev.filter(task => task.id !== taskId));
       setSuccessMessage('Task restored successfully!');
       setDebugInfo(`✅ Task ${taskId} restored to "To Do" status`);
 
@@ -117,7 +115,6 @@ const Archived = () => {
     } catch (error) {
       console.error('Error restoring task:', error);
       setError('Failed to restore task. Please try again.');
-      setDebugInfo(`❌ Restore error: ${error.message}`);
     }
   };
 
@@ -130,7 +127,7 @@ const Archived = () => {
       await deleteTask(taskId);
       
       // Remove from archived tasks list
-      setArchivedTasks(prev => prev.filter(task => (task.taskId || task.id) !== taskId));
+      setArchivedTasks(prev => prev.filter(task => task.id !== taskId));
       setDeleteDialogOpen(false);
       setTaskToDelete(null);
       setSuccessMessage('Task permanently deleted!');
@@ -141,7 +138,6 @@ const Archived = () => {
     } catch (error) {
       console.error('Error deleting task permanently:', error);
       setError('Failed to delete task permanently. Please try again.');
-      setDebugInfo(`❌ Delete error: ${error.message}`);
       setDeleteDialogOpen(false);
     }
   };
@@ -167,9 +163,6 @@ const Archived = () => {
         return { color: '#2196f3', icon: '⚡' };
       case 'Completed':
         return { color: '#4caf50', icon: '✅' };
-      case 'Archived':
-      case 'archived':
-        return { color: '#9e9e9e', icon: '📦' };
       default:
         return { color: '#757575', icon: '🔖' };
     }
@@ -177,7 +170,6 @@ const Archived = () => {
 
   // Calculate days since archived
   const getDaysArchived = (archivedDate) => {
-    if (!archivedDate) return 0;
     const archived = new Date(archivedDate);
     const now = new Date();
     const diffTime = Math.abs(now - archived);
@@ -191,11 +183,6 @@ const Archived = () => {
         <Typography variant="h4" sx={{ textAlign: 'center', color: 'text.secondary' }}>
           Loading archived tasks...
         </Typography>
-        {debugInfo && (
-          <Typography variant="body2" sx={{ textAlign: 'center', color: 'text.secondary', mt: 2 }}>
-            {debugInfo}
-          </Typography>
-        )}
       </Container>
     );
   }
@@ -306,7 +293,6 @@ const Archived = () => {
       ) : (
         <Grid container spacing={3}>
           {archivedTasks.map((task) => {
-            const taskId = task.taskId || task.id;
             const statusInfo = getStatusInfo(task.taskStatus);
             const daysArchived = getDaysArchived(task.archivedDate || task.taskCreatedDate);
 
@@ -383,10 +369,10 @@ const Archived = () => {
 
                     {/* Dates */}
                     <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Due:</strong> {task.taskDueDate ? new Date(task.taskDueDate).toLocaleDateString() : 'No due date'}
+                      <strong>Due:</strong> {new Date(task.taskDueDate).toLocaleDateString()}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      <strong>Archived:</strong> {(task.archivedDate || task.taskCreatedDate) ? new Date(task.archivedDate || task.taskCreatedDate).toLocaleDateString() : 'Unknown'}
+                      <strong>Archived:</strong> {new Date(task.archivedDate).toLocaleDateString()}
                     </Typography>
                   </CardContent>
 
