@@ -88,7 +88,7 @@ function LoginForm({ onLoadingChange, onShowSnackbar }) {
                         {...register("emailId", {
                             required: "Email is required.",
                             pattern: {
-                                value: /^\S+@\S+\.\S+$/,
+                                value: /^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook)\.(com|in|co\.in)$/,
                                 message: "Invalid email address."
                             }
                         })}
@@ -116,11 +116,7 @@ function LoginForm({ onLoadingChange, onShowSnackbar }) {
                         autoComplete="current-password"
                         type={showPassword ? "text" : "password"}
                         {...register("password", {
-                            required: "Password is required",
-                            minLength: {
-                                value: 6,
-                                message: "Password must be at least 6 characters."
-                            }
+                            required: "Password is required"
                         })}
                         error={!!errors.password}
                         helperText={errors.password?.message || " "}

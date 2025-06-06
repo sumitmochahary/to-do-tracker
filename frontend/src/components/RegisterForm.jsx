@@ -71,6 +71,18 @@ function RegisterForm({ onLoadingChange, onShowSnackbar }) {
         }
     };
 
+    const validatePhoneNumber = (value) => {
+        if (!/^[0-9]+$/.test(value)) {
+            return "Phone number must contain digits only.";
+        }
+        if (value.length !== 10) {
+            return "Phone number must be exactly 10 digits.";
+        }
+        if (!/^[6-9]/.test(value)) {
+            return "Phone number must start with 6, 7, 8, or 9.";
+        }
+        return true;
+    };
 
     return (
         <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
@@ -83,7 +95,15 @@ function RegisterForm({ onLoadingChange, onShowSnackbar }) {
                     autoComplete="name"
                     value={watch("userName")}
                     {...register("userName", {
-                        required: "First name is required."
+                        required: "First name is required.",
+                        minLength: {
+                            value: 3,
+                            message: "Name must be at least 3 characters long.",
+                        },
+                        pattern: {
+                            value: /^[A-Za-z\s]+$/, // Only letters and spaces
+                            message: "Name can only contain letters (A-Z or a-z).",
+                        },
                     })}
                     error={!!errors.userName}
                     helperText={errors.userName?.message || " "}
@@ -110,7 +130,7 @@ function RegisterForm({ onLoadingChange, onShowSnackbar }) {
                     {...register("emailId", {
                         required: "Email is required.",
                         pattern: {
-                            value: /^\S+@\S+\.\S+$/,
+                            value: /^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook)\.(com|in|co\.in)$/,
                             message: "Invalid email address.",
                         },
                     })}
@@ -128,7 +148,7 @@ function RegisterForm({ onLoadingChange, onShowSnackbar }) {
                     }}
                 />
             </Box>
-
+            {/* Phone number field */}
             <Box mb={2}>
                 <TextField
                     fullWidth
@@ -138,10 +158,7 @@ function RegisterForm({ onLoadingChange, onShowSnackbar }) {
                     value={watch("phoneNumber")}
                     {...register("phoneNumber", {
                         required: "Phone number is required.",
-                        pattern: {
-                            value: /^[0-9]{10}$/,
-                            message: "Phone number must be 10 digits.",
-                        },
+                        validate: validatePhoneNumber,
                     })}
                     error={!!errors.phoneNumber}
                     helperText={errors.phoneNumber?.message || " "}

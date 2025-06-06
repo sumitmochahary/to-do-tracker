@@ -79,6 +79,7 @@ function ResetPasswordForm({ onLoadingChange, onShowSnackbar }) {
 
     return (
         <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
+            {/* New Password Field */}
             <Box mb={2}>
                 <TextField
                     fullWidth
@@ -108,7 +109,7 @@ function ResetPasswordForm({ onLoadingChange, onShowSnackbar }) {
                     }}
                 />
             </Box>
-
+            {/* Confirm Password Field */}
             <Box mb={2}>
                 <TextField
                     fullWidth

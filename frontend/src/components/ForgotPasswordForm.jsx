@@ -73,7 +73,7 @@ function ForgotPasswordForm({ onLoadingChange, onShowSnackbar }) {
                     {...register("emailId", {
                         required: "Email is required.",
                         pattern: {
-                            value: /^\S+@\S+\.\S+$/,
+                            value: /^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook)\.(com|in|co\.in)$/,
                             message: "Invalid email address."
                         }
                     })}
