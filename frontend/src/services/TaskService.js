@@ -13,7 +13,6 @@ const jsonHeaders = () => ({
 });
 
 // ========== GET ==========
-// ========== GET ==========
 
 // Fetch all tasks
 export const fetchTask = async () => {
@@ -58,7 +57,6 @@ export const fetchByStatus = async (status) => {
 };
 
 // Fetch by due date (yyyy-mm-dd)
-// Fetch by due date (yyyy-mm-dd)
 export const fetchByDueDate = async (dueDate) => {
   try {
     const response = await axios.get(`${BASE_URL}/due/${dueDate}`, {
@@ -72,7 +70,6 @@ export const fetchByDueDate = async (dueDate) => {
   }
 };
 
-// Fetch archived tasks
 // Fetch archived tasks
 export const fetchArchivedTasks = async () => {
   try {
@@ -88,9 +85,7 @@ export const fetchArchivedTasks = async () => {
 };
 
 // ========== POST ==========
-// ========== POST ==========
 
-// Save new task
 // Save new task
 export const saveTask = async (data) => {
   try {
@@ -106,9 +101,7 @@ export const saveTask = async (data) => {
 };
 
 // ========== PUT ==========
-// ========== PUT ==========
 
-// Update existing task
 // Update existing task
 export const updateTask = async (data) => {
   try {
@@ -129,7 +122,6 @@ export const updateTask = async (data) => {
 };
 
 // Archive task
-// Archive task
 export const archiveTask = async (taskId) => {
   try {
     const response = await axios.patch(
@@ -148,9 +140,7 @@ export const archiveTask = async (taskId) => {
 };
 
 // ========== DELETE ==========
-// ========== DELETE ==========
 
-// Delete task
 // Delete task
 export const deleteTask = async (taskId) => {
   try {

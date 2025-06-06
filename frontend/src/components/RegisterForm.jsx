@@ -32,39 +32,15 @@ function RegisterForm({ onLoadingChange, onShowSnackbar }) {
         setLoading(true);
         onLoadingChange?.(true);
 
-        // Remove confirmPassword before submitting
         const submitData = { ...data };
         delete submitData.confirmPassword;
 
         try {
-            const response = await registerUser(submitData);
-            console.log(response);
+            const message = await registerUser(submitData);
             reset();
-
-            onShowSnackbar?.("Registration successful!", "success")
+            onShowSnackbar?.(message, "success");
         } catch (error) {
-            console.error("Login error:", error);
-
-            let message = "Login failed. Please try again.";
-
-            // Network error (server is down or refused connection)
-            if (error.message === "Network Error") {
-                message = "Unable to connect to the server. Please check your internet or server.";
-            }
-
-            // Backend responded with error
-            else if (error.response) {
-                const status = error.response.status;
-                const backendMessage = error.response.data?.message || error.response.data?.error || null;
-
-                if (backendMessage) {
-                    message = backendMessage;
-                } else {
-                    message = `Login failed with status ${status}.`;
-                }
-            }
-
-            onShowSnackbar?.(message, "error");
+            onShowSnackbar?.(error.message, "error");
         } finally {
             setLoading(false);
             onLoadingChange?.(false);

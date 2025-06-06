@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,21 +28,43 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Users users) throws UserAlreadyExistException{
-        userService.register(users);
-        return new ResponseEntity<>("User register successfully", HttpStatus.CREATED);
+    public ResponseEntity<?> register(@RequestBody Users users) {
+        try {
+            // Call service — it will throw exception if user already exists
+            userService.register(users);
+            // Success response
+            return new ResponseEntity<>("Registration successful!", HttpStatus.CREATED);
+        } catch (UserAlreadyExistException e) {
+            // Return JSON error response
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage()); // e.getMessage() will now contain your custom message
+            return new ResponseEntity<>(error, HttpStatus.CONFLICT); // 409 Conflict
+        }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Users users) throws UserNotFoundException, InvalidCredentialsException {
-        Optional<Users> userOptional = userService.login(users.getEmailId(), users.getPassword());
+    public ResponseEntity<?> login(@RequestBody Users users) {
+        try {
+            Optional<Users> userOptional = userService.login(users.getEmailId(), users.getPassword());
 
-        if (userOptional.isPresent()) {
-            Users user = userOptional.get();
-            Map<String, String> tokenMap = securityToken.generateToken(user);
-            return new ResponseEntity<>(tokenMap, HttpStatus.OK);
-        } else {
-            throw new InvalidCredentialsException();
+            if (userOptional.isPresent()) {
+                Users user = userOptional.get();
+                Map<String, String> tokenMap = securityToken.generateToken(user);
+                return new ResponseEntity<>(tokenMap, HttpStatus.OK);
+            } else {
+                // This path should technically never be reached because the service throws exception already
+                throw new InvalidCredentialsException("Invalid credentials");
+            }
+
+        } catch (UserNotFoundException | InvalidCredentialsException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            // fallback for unexpected errors
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "An unexpected error occurred during login.");
+            return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

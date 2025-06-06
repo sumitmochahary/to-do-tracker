@@ -35,7 +35,7 @@ public class PasswordResetServiceImpl implements PasswordResetService{
 
     @Override
     public void createPasswordResetToken(String emailId) throws UserNotFoundException {
-        Users user = userRepository.findByEmailId(emailId).orElseThrow(UserNotFoundException::new);
+        Users user = userRepository.findByEmailId(emailId).orElseThrow();
         String token = UUID.randomUUID().toString();
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setToken(token);

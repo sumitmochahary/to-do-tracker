@@ -36,41 +36,18 @@ function LoginForm({ onLoadingChange, onShowSnackbar }) {
         onLoadingChange?.(true);
 
         try {
-            const response = await loginUser(data)
-            localStorage.setItem("token", response.token)
-            reset()
+            const response = await loginUser(data);
+            localStorage.setItem("token", response.token);
+            reset();
 
             setTimeout(() => {
-                navigate("/dashboard")
-            }, 1000)
-
+                navigate("/dashboard");
+            }, 1000);
         } catch (error) {
-            console.error("Login error:", error);
-
-            let message = "Login failed. Please try again.";
-
-            // Network error (server is down or refused connection)
-            if (error.message === "Network Error") {
-                message = "Unable to connect to the server. Please check your internet or server.";
-            }
-
-            // Backend responded with error
-            else if (error.response) {
-                const status = error.response.status;
-                const backendMessage = error.response.data?.message || error.response.data?.error || null;
-
-                if (backendMessage) {
-                    message = backendMessage;
-                } else {
-                    message = `Login failed with status ${status}.`;
-                }
-            }
-
-            onShowSnackbar?.(message, "error");
-        }
-        finally {
-            setLoading(false)
-            onLoadingChange?.(false)
+            onShowSnackbar?.(error.message, "error");
+        } finally {
+            setLoading(false);
+            onLoadingChange?.(false);
         }
     };
 

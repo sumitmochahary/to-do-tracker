@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService{
     public void register(Users users) throws UserAlreadyExistException {
         Optional<Users> existingUser = userRepository.findByEmailId(users.getEmailId());
         if (existingUser.isPresent()) {
-            throw new UserAlreadyExistException();
+            throw new UserAlreadyExistException("User already exists. Use a different email ID.");
         }
 
         users.setPassword(passwordEncoder.encode(users.getPassword()));
@@ -37,13 +37,15 @@ public class UserServiceImpl implements UserService{
     @Override
     public Optional<Users> login(String emailId, String password) throws UserNotFoundException, InvalidCredentialsException {
         Optional<Users> user = userRepository.findByEmailId(emailId);
-        if (user.isEmpty()){
-            throw new UserNotFoundException();
+
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("No user found with the provided email.");
         }
 
-        if (!passwordEncoder.matches(password, user.get().getPassword())){
-            throw new InvalidCredentialsException();
+        if (!passwordEncoder.matches(password, user.get().getPassword())) {
+            throw new InvalidCredentialsException("Incorrect password. Please try again.");
         }
+
         return user;
     }
 }
