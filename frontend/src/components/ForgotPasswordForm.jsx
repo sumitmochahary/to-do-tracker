@@ -22,43 +22,24 @@ function ForgotPasswordForm({ onLoadingChange, onShowSnackbar }) {
     const [loading, setLoading] = useState(false)
 
     const onFormSubmit = async (data) => {
-        setLoading(true)
-        onLoadingChange?.(true)
+        setLoading(true);
+        onLoadingChange?.(true);
 
         try {
-            const response = await forgotPassword(data)
-            console.log(response)
-            reset()
+            const response = await forgotPassword(data);
+            console.log(response);
+            reset();
 
-            onShowSnackbar?.("Reset link is send successfully", "success")
+            onShowSnackbar?.("Reset link is sent successfully", "success");
         } catch (error) {
-            console.error("Login error:", error);
-
-            let message = "Login failed. Please try again.";
-
-            // Network error (server is down or refused connection)
-            if (error.message === "Network Error") {
-                message = "Unable to connect to the server. Please check your internet or server.";
-            }
-
-            // Backend responded with error
-            else if (error.response) {
-                const status = error.response.status;
-                const backendMessage = error.response.data?.message || error.response.data?.error || null;
-
-                if (backendMessage) {
-                    message = backendMessage;
-                } else {
-                    message = `Login failed with status ${status}.`;
-                }
-            }
-
-            onShowSnackbar?.(message, "error");
+            console.error("Forgot password error:", error);
+            onShowSnackbar?.(error.message, "error");
         } finally {
-            setLoading(false)
-            onLoadingChange?.(false)
+            setLoading(false);
+            onLoadingChange?.(false);
         }
     };
+
 
     return (
         <form onSubmit={handleSubmit(onFormSubmit)} noValidate>

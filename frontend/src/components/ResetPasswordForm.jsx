@@ -34,46 +34,27 @@ function ResetPasswordForm({ onLoadingChange, onShowSnackbar }) {
     }, [location])
 
     const onFormSubmit = async (data) => {
-        setLoading(true)
-        onLoadingChange?.(true)
+        setLoading(true);
+        onLoadingChange?.(true);
 
-        const { password } = data
+        const { password } = data;
 
         try {
-            const response = await resetPassword(token, password)
-            console.log(response)
-            reset()
+            const response = await resetPassword(token, password);
+            console.log(response);
+            reset();
 
-            onShowSnackbar?.("Password changed successfully. Redirecting to login page...", "success")
+            onShowSnackbar?.("Password changed successfully. Redirecting to login page...", "success");
+
             setTimeout(() => {
-                navigate("/login")
+                navigate("/login");
             }, 3000);
         } catch (error) {
-            console.error("Login error:", error);
-
-            let message = "Login failed. Please try again.";
-
-            // Network error (server is down or refused connection)
-            if (error.message === "Network Error") {
-                message = "Unable to connect to the server. Please check your internet or server.";
-            }
-
-            // Backend responded with error
-            else if (error.response) {
-                const status = error.response.status;
-                const backendMessage = error.response.data?.message || error.response.data?.error || null;
-
-                if (backendMessage) {
-                    message = backendMessage;
-                } else {
-                    message = `Login failed with status ${status}.`;
-                }
-            }
-
-            onShowSnackbar?.(message, "error");
+            console.error("Reset password error:", error);
+            onShowSnackbar?.(error.message, "error");
         } finally {
-            setLoading(false)
-            onLoadingChange(false)
+            setLoading(false);
+            onLoadingChange(false);
         }
     };
 

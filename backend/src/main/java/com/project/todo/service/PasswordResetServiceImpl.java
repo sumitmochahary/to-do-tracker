@@ -2,6 +2,8 @@ package com.project.todo.service;
 
 import com.project.todo.domain.PasswordResetToken;
 import com.project.todo.domain.Users;
+import com.project.todo.exception.InvalidTokenException;
+import com.project.todo.exception.TokenExpiredException;
 import com.project.todo.exception.UserNotFoundException;
 import com.project.todo.repository.PasswordResetTokenRepository;
 import com.project.todo.repository.UserRepository;
@@ -35,7 +37,7 @@ public class PasswordResetServiceImpl implements PasswordResetService{
 
     @Override
     public void createPasswordResetToken(String emailId) throws UserNotFoundException {
-        Users user = userRepository.findByEmailId(emailId).orElseThrow();
+        Users user = userRepository.findByEmailId(emailId).orElseThrow(() -> new UserNotFoundException("User with email " + emailId + " not found."));
         String token = UUID.randomUUID().toString();
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setToken(token);
@@ -51,10 +53,11 @@ public class PasswordResetServiceImpl implements PasswordResetService{
     @Transactional
     @Override
     public void resetPassword(String token, String newPassword) {
-        PasswordResetToken resetToken = tokenRepository.findByToken(token).orElseThrow(()->new RuntimeException("Invalid token"));
+        PasswordResetToken resetToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new InvalidTokenException("The reset token is invalid."));
 
-        if(resetToken.getExpiryDate().isBefore(LocalDateTime.now())){
-            throw new RuntimeException("Token expired");
+        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new TokenExpiredException("The reset token has expired. Please request a new one.");
         }
 
         Users user = resetToken.getUser();
@@ -63,4 +66,5 @@ public class PasswordResetServiceImpl implements PasswordResetService{
 
         tokenRepository.delete(resetToken);
     }
+
 }

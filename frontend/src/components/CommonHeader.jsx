@@ -11,7 +11,7 @@ function CommonHeader() {
     const goToLandingPage = () => navigate('/');
 
     return (
-        <AppBar position="sticky" sx={{
+        <AppBar position="static" sx={{
             backgroundColor: "transparent",
             boxShadow: "none",
             py: 1
