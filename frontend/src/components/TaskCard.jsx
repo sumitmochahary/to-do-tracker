@@ -390,13 +390,15 @@ const TaskCard = ({
                 )}
 
                 <Tooltip title="Archive Task">
-                  <IconButton
-                    size="small"
-                    onClick={() => setArchiveDialogOpen(true)}
-                    color="warning"
-                  >
-                    <ArchiveIcon />
-                  </IconButton>
+                 <IconButton 
+      size="small" 
+      onClick={() => setArchiveDialogOpen(true)}
+      color="warning"
+      disabled={task.taskStatus !== 'Completed'}
+    >
+      <ArchiveIcon />
+    </IconButton>
+
                 </Tooltip>
 
                 <Tooltip title="Delete Task">
