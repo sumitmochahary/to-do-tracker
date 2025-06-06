@@ -1,8 +1,7 @@
 import React from "react";
 import { Box, Paper, Typography, IconButton } from "@mui/material";
 import { Assignment, CheckCircle, Schedule, Delete } from "@mui/icons-material";
-import { useState } from "react";
-import TaskCard from "./TaskCard"; 
+import TaskCard from "./TaskCard";
 
 const getStatusColor = (status, index = 0) => {
   // Predefined gradients for default columns
@@ -44,7 +43,7 @@ const getStatusColor = (status, index = 0) => {
   ];
 
   const gradientIndex = index % dynamicGradients.length;
-  
+
   return {
     gradient: dynamicGradients[gradientIndex],
     icon: <Assignment sx={{ color: 'white', fontSize: 20 }} />,
@@ -52,15 +51,13 @@ const getStatusColor = (status, index = 0) => {
   };
 };
 
-const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, columnIndex = 0, onEditTask, onDeleteTask }) => {
+const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, columnIndex = 0, onEditTask, onTaskDeleted, onTaskArchive, onTaskStatusChange, onTaskUpdate }) => {
   const statusInfo = getStatusColor(title, columnIndex);
-   const [archivedTasks, setArchivedTasks] = useState([]);
-  
-  
+
   return (
-    <Paper 
-      elevation={0} 
-      sx={{ 
+    <Paper
+      elevation={0}
+      sx={{
         borderRadius: 3,
         overflow: 'hidden',
         backgroundColor: 'white',
@@ -100,7 +97,7 @@ const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, column
           </Typography>
         </Box>
         {statusInfo.icon}
-        
+
         {/* Remove Column Button - Only show for custom columns */}
         {isRemovable && (
           <IconButton
@@ -127,9 +124,9 @@ const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, column
       </Box>
 
       {/* Column Content */}
-      <Box sx={{ 
-        p: 1.5, 
-        maxHeight: 'calc(70vh - 60px)', 
+      <Box sx={{
+        p: 1.5,
+        maxHeight: 'calc(70vh - 60px)',
         overflowY: 'auto',
         backgroundColor: '#fafbfc',
         '&::-webkit-scrollbar': {
@@ -170,21 +167,23 @@ const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, column
               No tasks yet
             </Typography>
             <Typography variant="caption" sx={{ opacity: 0.5, mt: 0.5 }}>
-              {title === 'To Do' ? 'Add your first task!' : 
-               title === 'In Progress' ? 'Move tasks here when you start working' :
-               title === 'Completed' ? 'Complete tasks will appear here' :
-               'Add a task to get started'}
+              {title === 'To Do' ? 'Add your first task!' :
+                title === 'In Progress' ? 'Move tasks here when you start working' :
+                  title === 'Completed' ? 'Complete tasks will appear here' :
+                    'Add a task to get started'}
             </Typography>
           </Box>
         ) : (
           <Box>
             {tasks.map((task) => (
-              <TaskCard 
-                key={task.taskId || task.id} 
+              <TaskCard
+                key={task.taskId || task.id}
                 task={task}
                 onEdit={onEditTask}
-                // onTaskArchived={onTaskArchive} 
-                onDelete={onDeleteTask}
+                onTaskArchived={onTaskArchive}
+                onTaskDeleted={onTaskDeleted}
+                onStatusChange={onTaskStatusChange}
+                onTaskUpdated={onTaskUpdate}
               />
             ))}
           </Box>
