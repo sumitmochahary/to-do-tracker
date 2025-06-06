@@ -65,7 +65,7 @@ const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, column
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
         height: 'fit-content',
         maxHeight: '70vh',
-        width: '280px',
+        width: '340px',
         minWidth: '280px',
         transition: 'all 0.3s ease',
         '&:hover': {
