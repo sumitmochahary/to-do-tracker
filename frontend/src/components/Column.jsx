@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Paper, Typography, IconButton } from "@mui/material";
 import { Assignment, CheckCircle, Schedule, Delete } from "@mui/icons-material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TaskCard from "./TaskCard"; 
 
 const getStatusColor = (status, index = 0) => {
@@ -52,13 +52,47 @@ const getStatusColor = (status, index = 0) => {
   };
 };
 
-const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, columnIndex = 0, onEditTask, onDeleteTask }) => {
+const Column = ({ 
+  title, 
+  tasks = [], 
+  onRemoveColumn, 
+  isRemovable = false, 
+  columnIndex = 0, 
+  onEditTask, 
+  onDeleteTask,
+  onTaskArchive 
+}) => {
   const statusInfo = getStatusColor(title, columnIndex);
-   const [archivedTasks, setArchivedTasks] = useState([]);
   
+  // Use useEffect to force re-render when tasks change
+  const [renderKey, setRenderKey] = useState(0);
+  
+  useEffect(() => {
+    setRenderKey(prev => prev + 1);
+  }, [tasks, tasks.length]);
+
+  // Memoize task operations to prevent stale closures
+  const handleEditTask = (taskId, updatedTask) => {
+    if (onEditTask) {
+      onEditTask(taskId, updatedTask);
+    }
+  };
+
+  const handleDeleteTask = (taskId) => {
+    if (onDeleteTask) {
+      onDeleteTask(taskId);
+    }
+  };
+
+  const handleArchiveTask = (taskId) => {
+    if (onTaskArchive) {
+      onTaskArchive(taskId);
+    }
+  };
   
   return (
     <Paper 
+      key={`${title}-${renderKey}`} // Add key to force re-render
       elevation={0} 
       sx={{ 
         borderRadius: 3,
@@ -178,13 +212,13 @@ const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, column
           </Box>
         ) : (
           <Box>
-            {tasks.map((task) => (
+            {tasks.map((task, index) => (
               <TaskCard 
-                key={task.taskId || task.id} 
+                key={`${task.taskId || task.id}-${renderKey}-${index}`} // Enhanced key for better tracking
                 task={task}
-                onEdit={onEditTask}
-                // onTaskArchived={onTaskArchive} 
-                onDelete={onDeleteTask}
+                onEdit={handleEditTask}
+                onTaskArchived={handleArchiveTask}
+                onDelete={handleDeleteTask}
               />
             ))}
           </Box>

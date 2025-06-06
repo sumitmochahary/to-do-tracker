@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -49,7 +49,6 @@ const SIDEBAR_WIDTH = 260;
 const Board = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  // const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // State Management
@@ -74,7 +73,13 @@ const Board = () => {
       setLoading(true);
       setError(null);
       const response = await fetchTask();
-      setTasks(response);
+      // Normalize task IDs to ensure consistency
+      const normalizedTasks = response.map(task => ({
+        ...task,
+        id: task.id || task.taskId, // Ensure we have a consistent ID field
+        taskId: task.id || task.taskId // Keep both for backward compatibility
+      }));
+      setTasks(normalizedTasks);
     } catch (error) {
       console.error("Failed to fetch tasks", error);
       setError("Failed to load tasks. Please try again.");
@@ -83,82 +88,114 @@ const Board = () => {
     }
   };
 
-  // Event Handlers
-  const handleTaskAdded = (newTask) => {
+  // Utility function to get consistent task ID
+  const getTaskId = useCallback((task) => {
+    return task.id || task.taskId;
+  }, []);
+
+  // Event Handlers - Using useCallback to prevent unnecessary re-renders
+  const handleTaskAdded = useCallback((newTask) => {
     const taskWithId = {
-      ...newTask
+      ...newTask,
+      id: newTask.id || newTask.taskId || Date.now().toString(), // Ensure we have an ID
+      taskId: newTask.id || newTask.taskId || Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      lastModified: new Date().toISOString()
     };
-    setTasks(prev => [...prev, taskWithId]);
+    
+    setTasks(prev => {
+      const updated = [...prev, taskWithId];
+      console.log('Task added successfully:', taskWithId);
+      return updated;
+    });
     setShowTaskForm(false);
-  };
+  }, []);
 
-  const handleTaskUpdate = (updatedTask) => {
-    setTasks(prev => prev.map(task => {
-      const taskId = task.id || task.taskId;
-      const updatedTaskId = updatedTask.id || updatedTask.taskId;
+ const handleTaskUpdate = useCallback((updatedTask) => {
+  const updatedTaskId = getTaskId(updatedTask);
 
+  setTasks(prevTasks =>
+    prevTasks.map(task => {
+      const taskId = getTaskId(task);
       if (taskId === updatedTaskId) {
         return {
           ...task,
           ...updatedTask,
+          id: taskId, // Ensure ID is consistent
+          taskId: taskId,
           lastModified: new Date().toISOString()
         };
       }
       return task;
-    }));
+    })
+  );
 
-    console.log('Task updated successfully');
-  };
+  console.log('Task updated successfully:', updatedTask);
+}, [getTaskId]);
 
-  const handleTaskDelete = (taskId) => {
-    setTasks(prev => prev.filter(task => {
-      const currentTaskId = task.id || task.taskId;
-      return currentTaskId !== taskId;
-    }));
 
-    console.log('Task deleted successfully');
-  };
+  const handleTaskDelete = useCallback((taskId) => {
+  setTasks(prevTasks =>
+    prevTasks.filter(task => getTaskId(task) !== taskId)
+  );
 
-  const handleTaskStatusChange = (taskId, newStatus) => {
-    setTasks(prev => prev.map(task => {
-      if ((task.id || task.taskId) === taskId) {
-        return {
-          ...task,
-          taskStatus: newStatus,
-          // Optionally update timestamp when status changes
-          lastModified: new Date().toISOString()
-        };
-      }
-      return task;
-    }));
+  console.log('Task deleted successfully, ID:', taskId);
+}, [getTaskId]);
 
-    // Optional: Show a success message
-    console.log(`Task moved to ${newStatus}`);
-  };
 
-  const handleTaskArchive = (taskId) => {
-    const taskToArchive = tasks.find(task => (task.id || task.taskId) === taskId);
+  const handleTaskStatusChange = useCallback((taskId, newStatus) => {
+    setTasks(prev => {
+      const updated = prev.map(task => {
+        const currentTaskId = getTaskId(task);
+        if (currentTaskId === taskId) {
+          return {
+            ...task,
+            taskStatus: newStatus,
+            lastModified: new Date().toISOString()
+          };
+        }
+        return task;
+      });
+      
+      console.log(`Task moved to ${newStatus}, ID:`, taskId);
+      return updated;
+    });
+  }, [getTaskId]);
+
+  const handleTaskArchive = useCallback((taskId) => {
+  setTasks(prevTasks => {
+    const taskToArchive = prevTasks.find(task => getTaskId(task) === taskId);
 
     if (taskToArchive) {
+      // Add to archived tasks
+      const archivedTask = {
+        ...taskToArchive,
+        archivedAt: new Date().toISOString()
+      };
+
+      setArchivedTasks(prevArchived => [...prevArchived, archivedTask]);
+
       // Remove from active tasks
-      setTasks(prev => prev.filter(task => (task.id || task.taskId) !== taskId));
-
-      // You can add archived tasks to a separate state if needed
-      setArchivedTasks(prev => [...prev, { ...taskToArchive, archivedAt: new Date().toISOString() }]);
-
-      console.log('Task archived successfully');
+      const updated = prevTasks.filter(task => getTaskId(task) !== taskId);
+      console.log('Task archived successfully:', archivedTask);
+      return updated;
     }
-  };
 
-  const handleAddColumn = () => {
+    return prevTasks;
+  });
+}, [getTaskId, setArchivedTasks]);
+
+
+  const handleAddColumn = useCallback(() => {
     if (newColumnTitle.trim() && !columns.includes(newColumnTitle.trim())) {
       setColumns(prev => [...prev, newColumnTitle.trim()]);
       setNewColumnTitle("");
       setShowColumnDialog(false);
+      console.log('Column added:', newColumnTitle.trim());
     }
-  };
+  }, [newColumnTitle, columns]);
 
-  const handleRemoveColumn = (columnTitle) => {
+  const handleRemoveColumn = useCallback((columnTitle) => {
     const defaultColumns = ["To Do", "In Progress", "Completed"];
 
     if (!defaultColumns.includes(columnTitle)) {
@@ -181,26 +218,28 @@ const Board = () => {
 
       console.log(`Column "${columnTitle}" removed and tasks moved to "To Do"`);
     }
-  };
+  }, []);
 
-  const handleSearchResults = (results) => {
+  const handleSearchResults = useCallback((results) => {
     console.log("Search results:", results);
-  };
+  }, []);
 
-  const handleTaskSelection = (task) => {
+  const handleTaskSelection = useCallback((task) => {
     console.log("Selected task:", task);
-  };
+  }, []);
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(prev => !prev);
+  }, []);
 
-  const handleSidebarClose = () => {
+  const handleSidebarClose = useCallback(() => {
     setSidebarOpen(false);
-  };
+  }, []);
 
-  // Utility Functions
-  const getTasksByStatus = (status) => (tasks || []).filter(task => task.taskStatus === status);
+  // Utility Functions - Memoized to prevent unnecessary recalculations
+  const getTasksByStatus = useCallback((status) => {
+    return (tasks || []).filter(task => task.taskStatus === status);
+  }, [tasks]);
 
   // Loading State
   if (loading) {
@@ -487,6 +526,7 @@ const Board = () => {
             <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} sx={{ display: "flex", justifyContent: { md: "space-around", sm: "center", xs: "center" } }}>
               {columns.map((column, index) => (
                 <Grid
+                  item
                   xs={12}
                   sm={6}
                   md={columns.length <= 3 ? 4 : 6}
@@ -512,9 +552,6 @@ const Board = () => {
 
           </Container>
         </Box>
-
-        {/* Footer Component */}
-        {/* <Footer /> */}
       </Box>
 
       {/* Floating Action Button - Add Column */}
@@ -576,7 +613,7 @@ const Board = () => {
           pb: 2,
           px: { xs: 2, sm: 3 },
           backgroundColor: '#ffffff'
-        }}>
+        }}> 
           <TextField
             autoFocus
             fullWidth

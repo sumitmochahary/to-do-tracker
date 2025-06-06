@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -40,6 +40,11 @@ const TaskCard = ({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
+  // Sync local state with prop changes
+  useEffect(() => {
+    setEditedTask(task);
+  }, [task]);
+
   // Function to handle task updates
   const handleSave = async () => {
     try {
@@ -71,10 +76,13 @@ const TaskCard = ({
     try {
       setLoading(true);
       await deleteTask(task.taskId || task.id);
+      
+      // Close dialog first for better UX
+      setDeleteDialogOpen(false);
+      
       if (onTaskDeleted) {
         onTaskDeleted(task.taskId || task.id);
       }
-      setDeleteDialogOpen(false);
     } catch (error) {
       console.error('Error deleting task:', error);
       alert('Failed to delete task. Please try again.');
@@ -89,10 +97,12 @@ const TaskCard = ({
       setLoading(true);
       await archiveTask(task.taskId || task.id);
       
+      // Close dialog first for better UX
+      setArchiveDialogOpen(false);
+      
       if (onTaskArchived) {
         onTaskArchived(task.taskId || task.id);
       }
-      setArchiveDialogOpen(false);
     } catch (error) {
       console.error('Error archiving task:', error);
       alert('Failed to archive task. Please try again.');
@@ -105,7 +115,7 @@ const TaskCard = ({
   const handleStatusChange = async (newStatus) => {
     try {
       setLoading(true);
-      const response = await updateTask({
+      const updatedTaskData = {
         taskId: task.taskId || task.id,
         taskTitle: task.taskTitle,
         taskDescription: task.taskDescription,
@@ -113,7 +123,9 @@ const TaskCard = ({
         taskDueDate: task.taskDueDate,
         taskCategory: task.taskCategory,
         userId: task.userId
-      });
+      };
+      
+      const response = await updateTask(updatedTaskData);
       
       if (onStatusChange) {
         onStatusChange(task.taskId || task.id, newStatus);
@@ -126,6 +138,12 @@ const TaskCard = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  // Function to handle cancel editing
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditedTask(task); // Reset to original task data
   };
 
   // Get status color and icon
@@ -220,7 +238,7 @@ const TaskCard = ({
                 }}
               />
             )}
-            {!overdue && daysUntilDue <= 3 && task.taskStatus !== 'Completed' && (
+            {!overdue && daysUntilDue !== null && daysUntilDue <= 3 && task.taskStatus !== 'Completed' && (
               <Chip
                 label={daysUntilDue === 0 ? 'Due Today' : `${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''} left`}
                 size="small"
@@ -242,6 +260,7 @@ const TaskCard = ({
               variant="outlined"
               size="small"
               sx={{ mb: 2 }}
+              placeholder="Task title"
             />
           ) : (
             <Typography 
@@ -266,11 +285,12 @@ const TaskCard = ({
               fullWidth
               multiline
               rows={3}
-              value={editedTask.taskDescription}
+              value={editedTask.taskDescription || ''}
               onChange={(e) => setEditedTask({...editedTask, taskDescription: e.target.value})}
               variant="outlined"
               size="small"
               sx={{ mb: 2 }}
+              placeholder="Task description"
             />
           ) : (
             <Typography 
@@ -294,21 +314,25 @@ const TaskCard = ({
               fullWidth
               label="Due Date"
               type="date"
-              value={editedTask.taskDueDate}
+              value={editedTask.taskDueDate || ''}
               onChange={(e) => setEditedTask({...editedTask, taskDueDate: e.target.value})}
               InputLabelProps={{ shrink: true }}
               sx={{ mb: 2 }}
             />
           ) : (
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              <strong>Due:</strong> {new Date(task.taskDueDate).toLocaleDateString()}
-            </Typography>
+            task.taskDueDate && (
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                <strong>Due:</strong> {new Date(task.taskDueDate).toLocaleDateString()}
+              </Typography>
+            )
           )}
 
           {/* Created Date */}
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            <strong>Created:</strong> {new Date(task.taskCreatedDate).toLocaleDateString()}
-          </Typography>
+          {task.taskCreatedDate && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              <strong>Created:</strong> {new Date(task.taskCreatedDate).toLocaleDateString()}
+            </Typography>
+          )}
 
           {/* Status Dropdown (if editing) */}
           {isEditing && (
@@ -327,6 +351,22 @@ const TaskCard = ({
               ))}
             </TextField>
           )}
+
+          {/* Category Dropdown (if editing) */}
+          {isEditing && (
+            <TextField
+              select
+              fullWidth
+              label="Category"
+              value={editedTask.taskCategory || ''}
+              onChange={(e) => setEditedTask({...editedTask, taskCategory: e.target.value})}
+              sx={{ mb: 2 }}
+            >
+              <MenuItem value="Personal">👤 Personal</MenuItem>
+              <MenuItem value="Work">💼 Work</MenuItem>
+              <MenuItem value="Other">📂 Other</MenuItem>
+            </TextField>
+          )}
         </CardContent>
 
         {/* Action Buttons */}
@@ -337,17 +377,16 @@ const TaskCard = ({
                 size="small" 
                 onClick={handleSave} 
                 color="primary"
-                disabled={loading}
+                disabled={loading || !editedTask.taskTitle?.trim()}
+                variant="contained"
               >
                 {loading ? 'Saving...' : 'Save'}
               </Button>
               <Button 
                 size="small" 
-                onClick={() => {
-                  setIsEditing(false);
-                  setEditedTask(task);
-                }}
+                onClick={handleCancelEdit}
                 sx={{ ml: 1 }}
+                disabled={loading}
               >
                 Cancel
               </Button>
@@ -378,36 +417,37 @@ const TaskCard = ({
 
               <Box>
                 {task.taskStatus !== 'Completed' && (
-  <Tooltip title="Mark Complete">
-    <IconButton 
-      size="small" 
-      onClick={() => handleStatusChange('Completed')}  // Use handleStatusChange instead
-      color="success"
-    >
-      <CheckCircleIcon />
-    </IconButton>
-  </Tooltip>
-)}
+                  <Tooltip title="Mark Complete">
+                    <IconButton 
+                      size="small" 
+                      onClick={() => handleStatusChange('Completed')}
+                      color="success"
+                      disabled={loading}
+                    >
+                      <CheckCircleIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
                 
-                <Tooltip title="Archive Task">
-  <span> {/* Needed so Tooltip works on disabled elements */}
-    <IconButton 
-      size="small" 
-      onClick={() => setArchiveDialogOpen(true)}
-      color="warning"
-      disabled={task.taskStatus !== 'Completed'}
-    >
-      <ArchiveIcon />
-    </IconButton>
-  </span>
-</Tooltip>
+                <Tooltip title={task.taskStatus !== 'Completed' ? 'Complete task first to archive' : 'Archive Task'}>
+                  <span>
+                    <IconButton 
+                      size="small" 
+                      onClick={() => setArchiveDialogOpen(true)}
+                      color="warning"
+                      disabled={task.taskStatus !== 'Completed' || loading}
+                    >
+                      <ArchiveIcon />
+                    </IconButton>
+                  </span>
+                </Tooltip>
 
-                
                 <Tooltip title="Delete Task">
                   <IconButton 
                     size="small" 
                     onClick={() => setDeleteDialogOpen(true)}
                     color="error"
+                    disabled={loading}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -466,18 +506,26 @@ const TaskCard = ({
           </Typography>
           
           <Box display="flex" flexDirection="column" gap={1}>
-            <Typography variant="body2">
-              <strong>Created:</strong> {new Date(task.taskCreatedDate).toLocaleDateString()}
-            </Typography>
-            <Typography variant="body2">
-              <strong>Due Date:</strong> {new Date(task.taskDueDate).toLocaleDateString()}
-            </Typography>
-            <Typography variant="body2">
-              <strong>Category:</strong> {task.taskCategory}
-            </Typography>
-            <Typography variant="body2">
-              <strong>User:</strong> {task.userId}
-            </Typography>
+            {task.taskCreatedDate && (
+              <Typography variant="body2">
+                <strong>Created:</strong> {new Date(task.taskCreatedDate).toLocaleDateString()}
+              </Typography>
+            )}
+            {task.taskDueDate && (
+              <Typography variant="body2">
+                <strong>Due Date:</strong> {new Date(task.taskDueDate).toLocaleDateString()}
+              </Typography>
+            )}
+            {task.taskCategory && (
+              <Typography variant="body2">
+                <strong>Category:</strong> {task.taskCategory}
+              </Typography>
+            )}
+            {task.userId && (
+              <Typography variant="body2">
+                <strong>User:</strong> {task.userId}
+              </Typography>
+            )}
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
@@ -515,7 +563,7 @@ const TaskCard = ({
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>
+          <Button onClick={() => setDeleteDialogOpen(false)} disabled={loading}>
             Cancel
           </Button>
           <Button 
@@ -547,7 +595,7 @@ const TaskCard = ({
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setArchiveDialogOpen(false)}>
+          <Button onClick={() => setArchiveDialogOpen(false)} disabled={loading}>
             Cancel
           </Button>
           <Button 
