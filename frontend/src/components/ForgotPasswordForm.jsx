@@ -27,12 +27,12 @@ function ForgotPasswordForm({ onLoadingChange, onShowSnackbar }) {
 
         try {
             const response = await forgotPassword(data);
-            console.log(response);
+            // console.log(response);
             reset();
 
             onShowSnackbar?.("Reset link is sent successfully", "success");
         } catch (error) {
-            console.error("Forgot password error:", error);
+            // console.error("Forgot password error:", error);
             onShowSnackbar?.(error.message, "error");
         } finally {
             setLoading(false);

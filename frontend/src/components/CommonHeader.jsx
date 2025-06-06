@@ -21,10 +21,9 @@ function CommonHeader() {
                     display: 'flex',
                     alignItems: 'center',
                     fontWeight: 'bold',
-                    color: 'black',
+                    color: 'inherit',
                     flexGrow: 1
                 }}>
-                    <span style={{ marginRight: '0.5rem', fontSize: '1.8rem' }}>📋</span>
                     To-Do
                 </Typography>
 
@@ -37,7 +36,7 @@ function CommonHeader() {
                         onClick={handleGoToBoard}
                         sx={{
                             backgroundColor: "#a0e7e5",
-                            color: "black"
+                            color: "inherit"
                         }}
                     >
                         Go to Board

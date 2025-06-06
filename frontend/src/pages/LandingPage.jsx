@@ -13,17 +13,17 @@ const LandingPage = () => {
   }, []);
 
   const handleLogin = () => {
-    console.log('Navigate to login');
+    // console.log('Navigate to login');
     navigate("/login")
   };
 
   const handleSignUp = () => {
-    console.log('Navigate to signup with email:');
+    // console.log('Navigate to signup with email:');
     navigate("/register")
   };
 
   const handleGoToBoard = () => {
-    console.log('Navigate to board');
+    // console.log('Navigate to board');
     navigate("/dashboard")
   };
 

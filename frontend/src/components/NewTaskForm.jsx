@@ -59,9 +59,9 @@ const NewTaskForm = ({ onTaskAdded, availableCategories = ["Personal", "Work"] }
       // Reset the form
       resetForm();
 
-      console.log('Task added successfully:', newTask);
+      // console.log('Task added successfully:', newTask);
     } catch (error) {
-      console.error('Error adding task:', error);
+      // console.error('Error adding task:', error);
 
       if (error.response) {
         if (error.response.status === 401) {

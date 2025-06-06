@@ -40,8 +40,8 @@ function ResetPasswordForm({ onLoadingChange, onShowSnackbar }) {
         const { password } = data;
 
         try {
-            const response = await resetPassword(token, password);
-            console.log(response);
+            await resetPassword(token, password);
+            // console.log(response);
             reset();
 
             onShowSnackbar?.("Password changed successfully. Redirecting to login page...", "success");
@@ -50,7 +50,7 @@ function ResetPasswordForm({ onLoadingChange, onShowSnackbar }) {
                 navigate("/login");
             }, 3000);
         } catch (error) {
-            console.error("Reset password error:", error);
+            // console.error("Reset password error:", error);
             onShowSnackbar?.(error.message, "error");
         } finally {
             setLoading(false);

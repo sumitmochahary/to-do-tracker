@@ -27,7 +27,7 @@ import {
   Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
-import { 
+import {
   fetchArchivedTasks,
   updateTask,
   deleteTask
@@ -55,10 +55,10 @@ const Archived = () => {
       setLoading(true);
       setError('');
       setDebugInfo('Fetching archived tasks...');
-      
+
       const response = await fetchArchivedTasks();
-      console.log('Archived tasks response:', response);
-      
+      // console.log('Archived tasks response:', response);
+
       // Handle different response structures
       let tasks = [];
       if (Array.isArray(response)) {
@@ -68,12 +68,12 @@ const Archived = () => {
       } else if (response && response.data && Array.isArray(response.data.data)) {
         tasks = response.data.data;
       }
-      
+
       setArchivedTasks(tasks);
       setDebugInfo(`✅ Found ${tasks.length} archived tasks`);
-      
+
     } catch (error) {
-      console.error('Error fetching archived tasks:', error);
+      // console.error('Error fetching archived tasks:', error);
       setError('Failed to load archived tasks. Please try again.');
       setDebugInfo(`❌ Error: ${error.message}`);
     } finally {
@@ -85,10 +85,10 @@ const Archived = () => {
   const handleRestoreTask = async (taskId) => {
     try {
       setDebugInfo(`Restoring task ${taskId}...`);
-      
+
       // Find the task to get its current data
       const taskToRestore = archivedTasks.find(task => (task.taskId || task.id) === taskId);
-      
+
       if (!taskToRestore) {
         throw new Error('Task not found');
       }
@@ -106,7 +106,7 @@ const Archived = () => {
 
       // Use the existing updateTask function from TaskService
       await updateTask(updatedTaskData);
-      
+
       // Remove from archived tasks list
       setArchivedTasks(prev => prev.filter(task => (task.taskId || task.id) !== taskId));
       setSuccessMessage('Task restored successfully!');
@@ -115,7 +115,7 @@ const Archived = () => {
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      console.error('Error restoring task:', error);
+      // console.error('Error restoring task:', error);
       setError('Failed to restore task. Please try again.');
       setDebugInfo(`❌ Restore error: ${error.message}`);
     }
@@ -125,10 +125,10 @@ const Archived = () => {
   const handlePermanentDelete = async (taskId) => {
     try {
       setDebugInfo(`Permanently deleting task ${taskId}...`);
-      
+
       // Use the existing deleteTask function from TaskService
       await deleteTask(taskId);
-      
+
       // Remove from archived tasks list
       setArchivedTasks(prev => prev.filter(task => (task.taskId || task.id) !== taskId));
       setDeleteDialogOpen(false);
@@ -139,7 +139,7 @@ const Archived = () => {
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      console.error('Error deleting task permanently:', error);
+      // console.error('Error deleting task permanently:', error);
       setError('Failed to delete task permanently. Please try again.');
       setDebugInfo(`❌ Delete error: ${error.message}`);
       setDeleteDialogOpen(false);
@@ -243,7 +243,7 @@ const Archived = () => {
             >
               Refresh
             </Button>
-            
+
             <Button
               variant="outlined"
               color="inherit"
@@ -494,8 +494,8 @@ const Archived = () => {
                 <Grid item xs={6}>
                   <Typography variant="body2">
                     <strong>Archived:</strong><br />
-                    {(selectedTask.archivedDate || selectedTask.taskCreatedDate) ? 
-                      new Date(selectedTask.archivedDate || selectedTask.taskCreatedDate).toLocaleDateString() : 
+                    {(selectedTask.archivedDate || selectedTask.taskCreatedDate) ?
+                      new Date(selectedTask.archivedDate || selectedTask.taskCreatedDate).toLocaleDateString() :
                       'Unknown'}
                   </Typography>
                 </Grid>

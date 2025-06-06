@@ -58,8 +58,8 @@ const TaskCard = ({
         onTaskUpdated(response);
       }
       setIsEditing(false);
-    } catch (error) {
-      console.error('Error updating task:', error);
+    } catch {
+      // console.error('Error updating task:', error);
       alert('Failed to update task. Please try again.');
     } finally {
       setLoading(false);
@@ -75,8 +75,8 @@ const TaskCard = ({
         onTaskDeleted(task.taskId || task.id);
       }
       setDeleteDialogOpen(false);
-    } catch (error) {
-      console.error('Error deleting task:', error);
+    } catch {
+      // console.error('Error deleting task:', error);
       alert('Failed to delete task. Please try again.');
     } finally {
       setLoading(false);
@@ -93,8 +93,8 @@ const TaskCard = ({
         onTaskArchived(task.taskId || task.id);
       }
       setArchiveDialogOpen(false);
-    } catch (error) {
-      console.error('Error archiving task:', error);
+    } catch {
+      // console.error('Error archiving task:', error);
       alert('Failed to archive task. Please try again.');
     } finally {
       setLoading(false);
@@ -120,8 +120,8 @@ const TaskCard = ({
       } else if (onTaskUpdated) {
         onTaskUpdated(response);
       }
-    } catch (error) {
-      console.error('Error updating task status:', error);
+    } catch {
+      // console.error('Error updating task status:', error);
       alert('Failed to update task status. Please try again.');
     } finally {
       setLoading(false);
@@ -389,17 +389,17 @@ const TaskCard = ({
                   </Tooltip>
                 )}
 
-                <Tooltip title="Archive Task">
-                 <IconButton 
-      size="small" 
-      onClick={() => setArchiveDialogOpen(true)}
-      color="warning"
-      disabled={task.taskStatus !== 'Completed'}
-    >
-      <ArchiveIcon />
-    </IconButton>
-
-                </Tooltip>
+                {task.taskStatus === 'Completed' && (
+                  <Tooltip title="Archive Task">
+                    <IconButton
+                      size="small"
+                      onClick={() => setArchiveDialogOpen(true)}
+                      color="warning"
+                    >
+                      <ArchiveIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
 
                 <Tooltip title="Delete Task">
                   <IconButton

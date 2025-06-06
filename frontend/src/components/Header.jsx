@@ -45,7 +45,7 @@ export const Header = ({
 
   const handleLogout = () => {
     handleMenuClose();
-    console.log("Logged out");
+    // console.log("Logged out");
     localStorage.removeItem("token");
     navigate("/");
     // TODO: Add your logout logic here (e.g., clear token, redirect)
