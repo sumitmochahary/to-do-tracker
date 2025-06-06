@@ -185,7 +185,7 @@ const SearchBar = ({
                         '&:hover': { color: '#ef4444', backgroundColor: '#fef2f2' }
                       }}
                     >
-                      <ClearIcon sx={{ fontSize: '1rem' }} />
+          
                     </IconButton>
                   )}
                   {params.InputProps.endAdornment}

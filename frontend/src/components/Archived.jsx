@@ -263,14 +263,14 @@ const Archived = () => {
       </Paper>
 
       {/* Debug Info */}
-      {debugInfo && (
+      {/* {debugInfo && (
         <Alert severity="info" sx={{ mb: 3 }}>
           <strong>Debug:</strong> {debugInfo}
         </Alert>
       )}
 
       {/* Success/Error Messages */}
-      {successMessage && (
+      {/* {successMessage && (
         <Fade in={Boolean(successMessage)}>
           <Alert severity="success" sx={{ mb: 3 }}>
             {successMessage}
@@ -282,7 +282,7 @@ const Archived = () => {
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
           {error}
         </Alert>
-      )}
+      )} */}
 
       {/* Archived Tasks Grid */}
       {archivedTasks.length === 0 ? (
