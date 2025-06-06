@@ -1,8 +1,7 @@
 import React from "react";
 import { Box, Paper, Typography, IconButton } from "@mui/material";
 import { Assignment, CheckCircle, Schedule, Delete } from "@mui/icons-material";
-import { useState, useEffect } from "react";
-import TaskCard from "./TaskCard"; 
+import TaskCard from "./TaskCard";
 
 const getStatusColor = (status, index = 0) => {
   // Predefined gradients for default columns
@@ -44,7 +43,7 @@ const getStatusColor = (status, index = 0) => {
   ];
 
   const gradientIndex = index % dynamicGradients.length;
-  
+
   return {
     gradient: dynamicGradients[gradientIndex],
     icon: <Assignment sx={{ color: 'white', fontSize: 20 }} />,
@@ -52,49 +51,13 @@ const getStatusColor = (status, index = 0) => {
   };
 };
 
-const Column = ({ 
-  title, 
-  tasks = [], 
-  onRemoveColumn, 
-  isRemovable = false, 
-  columnIndex = 0, 
-  onEditTask, 
-  onDeleteTask,
-  onTaskArchive 
-}) => {
+const Column = ({ title, tasks = [], onRemoveColumn, isRemovable = false, columnIndex = 0, onEditTask, onTaskDeleted, onTaskArchive, onTaskStatusChange, onTaskUpdate }) => {
   const statusInfo = getStatusColor(title, columnIndex);
-  
-  // Use useEffect to force re-render when tasks change
-  const [renderKey, setRenderKey] = useState(0);
-  
-  useEffect(() => {
-    setRenderKey(prev => prev + 1);
-  }, [tasks, tasks.length]);
 
-  // Memoize task operations to prevent stale closures
-  const handleEditTask = (taskId, updatedTask) => {
-    if (onEditTask) {
-      onEditTask(taskId, updatedTask);
-    }
-  };
-
-  const handleDeleteTask = (taskId) => {
-    if (onDeleteTask) {
-      onDeleteTask(taskId);
-    }
-  };
-
-  const handleArchiveTask = (taskId) => {
-    if (onTaskArchive) {
-      onTaskArchive(taskId);
-    }
-  };
-  
   return (
-    <Paper 
-      key={`${title}-${renderKey}`} // Add key to force re-render
-      elevation={0} 
-      sx={{ 
+    <Paper
+      elevation={0}
+      sx={{
         borderRadius: 3,
         overflow: 'hidden',
         backgroundColor: 'white',
@@ -134,7 +97,7 @@ const Column = ({
           </Typography>
         </Box>
         {statusInfo.icon}
-        
+
         {/* Remove Column Button - Only show for custom columns */}
         {isRemovable && (
           <IconButton
@@ -161,9 +124,9 @@ const Column = ({
       </Box>
 
       {/* Column Content */}
-      <Box sx={{ 
-        p: 1.5, 
-        maxHeight: 'calc(70vh - 60px)', 
+      <Box sx={{
+        p: 1.5,
+        maxHeight: 'calc(70vh - 60px)',
         overflowY: 'auto',
         backgroundColor: '#fafbfc',
         '&::-webkit-scrollbar': {
@@ -204,21 +167,23 @@ const Column = ({
               No tasks yet
             </Typography>
             <Typography variant="caption" sx={{ opacity: 0.5, mt: 0.5 }}>
-              {title === 'To Do' ? 'Add your first task!' : 
-               title === 'In Progress' ? 'Move tasks here when you start working' :
-               title === 'Completed' ? 'Complete tasks will appear here' :
-               'Add a task to get started'}
+              {title === 'To Do' ? 'Add your first task!' :
+                title === 'In Progress' ? 'Move tasks here when you start working' :
+                  title === 'Completed' ? 'Complete tasks will appear here' :
+                    'Add a task to get started'}
             </Typography>
           </Box>
         ) : (
           <Box>
-            {tasks.map((task, index) => (
-              <TaskCard 
-                key={`${task.taskId || task.id}-${renderKey}-${index}`} // Enhanced key for better tracking
+            {tasks.map((task) => (
+              <TaskCard
+                key={task.taskId || task.id}
                 task={task}
-                onEdit={handleEditTask}
-                onTaskArchived={handleArchiveTask}
-                onDelete={handleDeleteTask}
+                onEdit={onEditTask}
+                onTaskArchived={onTaskArchive}
+                onTaskDeleted={onTaskDeleted}
+                onStatusChange={onTaskStatusChange}
+                onTaskUpdated={onTaskUpdate}
               />
             ))}
           </Box>

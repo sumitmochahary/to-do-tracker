@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardActions, 
-  Typography, 
-  Button, 
-  TextField, 
-  MenuItem, 
+import React, { useState } from 'react';
+import {
+  Card,
+  CardContent,
+  CardActions,
+  Typography,
+  Button,
+  TextField,
+  MenuItem,
   Chip,
   Dialog,
   DialogTitle,
@@ -16,7 +16,7 @@ import {
   Tooltip,
   Box
 } from '@mui/material';
-import { 
+import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Archive as ArchiveIcon,
@@ -25,12 +25,12 @@ import {
 } from '@mui/icons-material';
 import { archiveTask, deleteTask, updateTask } from '../services/TaskService';
 
-const TaskCard = ({ 
-  task, 
-  onTaskUpdated, 
-  onTaskDeleted, 
+const TaskCard = ({
+  task,
+  onTaskUpdated,
+  onTaskDeleted,
   onTaskArchived,
-  onStatusChange, 
+  onStatusChange,
   availableStatuses = ["To Do", "In Progress", "Completed"]
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -39,11 +39,6 @@ const TaskCard = ({
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
-
-  // Sync local state with prop changes
-  useEffect(() => {
-    setEditedTask(task);
-  }, [task]);
 
   // Function to handle task updates
   const handleSave = async () => {
@@ -58,7 +53,7 @@ const TaskCard = ({
         taskCategory: editedTask.taskCategory,
         userId: task.userId
       });
-      
+
       if (onTaskUpdated) {
         onTaskUpdated(response);
       }
@@ -76,13 +71,10 @@ const TaskCard = ({
     try {
       setLoading(true);
       await deleteTask(task.taskId || task.id);
-      
-      // Close dialog first for better UX
-      setDeleteDialogOpen(false);
-      
       if (onTaskDeleted) {
         onTaskDeleted(task.taskId || task.id);
       }
+      setDeleteDialogOpen(false);
     } catch (error) {
       console.error('Error deleting task:', error);
       alert('Failed to delete task. Please try again.');
@@ -96,13 +88,11 @@ const TaskCard = ({
     try {
       setLoading(true);
       await archiveTask(task.taskId || task.id);
-      
-      // Close dialog first for better UX
-      setArchiveDialogOpen(false);
-      
+
       if (onTaskArchived) {
         onTaskArchived(task.taskId || task.id);
       }
+      setArchiveDialogOpen(false);
     } catch (error) {
       console.error('Error archiving task:', error);
       alert('Failed to archive task. Please try again.');
@@ -115,7 +105,7 @@ const TaskCard = ({
   const handleStatusChange = async (newStatus) => {
     try {
       setLoading(true);
-      const updatedTaskData = {
+      const response = await updateTask({
         taskId: task.taskId || task.id,
         taskTitle: task.taskTitle,
         taskDescription: task.taskDescription,
@@ -123,10 +113,8 @@ const TaskCard = ({
         taskDueDate: task.taskDueDate,
         taskCategory: task.taskCategory,
         userId: task.userId
-      };
-      
-      const response = await updateTask(updatedTaskData);
-      
+      });
+
       if (onStatusChange) {
         onStatusChange(task.taskId || task.id, newStatus);
       } else if (onTaskUpdated) {
@@ -138,12 +126,6 @@ const TaskCard = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  // Function to handle cancel editing
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setEditedTask(task); // Reset to original task data
   };
 
   // Get status color and icon
@@ -201,9 +183,9 @@ const TaskCard = ({
 
   return (
     <>
-      <Card sx={{ 
-        height: '100%', 
-        display: 'flex', 
+      <Card sx={{
+        height: '100%',
+        display: 'flex',
         flexDirection: 'column',
         boxShadow: overdue ? '0 4px 12px rgba(244, 67, 54, 0.3)' : '0 4px 12px rgba(0,0,0,0.1)',
         borderRadius: 3,
@@ -231,18 +213,18 @@ const TaskCard = ({
               <Chip
                 label={`Overdue by ${Math.abs(daysUntilDue)} day${Math.abs(daysUntilDue) !== 1 ? 's' : ''}`}
                 size="small"
-                sx={{ 
+                sx={{
                   backgroundColor: '#f44336',
                   color: 'white',
                   fontWeight: 'bold'
                 }}
               />
             )}
-            {!overdue && daysUntilDue !== null && daysUntilDue <= 3 && task.taskStatus !== 'Completed' && (
+            {!overdue && daysUntilDue <= 3 && task.taskStatus !== 'Completed' && (
               <Chip
                 label={daysUntilDue === 0 ? 'Due Today' : `${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''} left`}
                 size="small"
-                sx={{ 
+                sx={{
                   backgroundColor: daysUntilDue === 0 ? '#ff9800' : '#2196f3',
                   color: 'white',
                   fontWeight: 'bold'
@@ -256,18 +238,17 @@ const TaskCard = ({
             <TextField
               fullWidth
               value={editedTask.taskTitle}
-              onChange={(e) => setEditedTask({...editedTask, taskTitle: e.target.value})}
+              onChange={(e) => setEditedTask({ ...editedTask, taskTitle: e.target.value })}
               variant="outlined"
               size="small"
               sx={{ mb: 2 }}
-              placeholder="Task title"
             />
           ) : (
-            <Typography 
-              variant="h6" 
-              component="h3" 
-              sx={{ 
-                mb: 2, 
+            <Typography
+              variant="h6"
+              component="h3"
+              sx={{
+                mb: 2,
                 fontWeight: 'bold',
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
@@ -285,18 +266,17 @@ const TaskCard = ({
               fullWidth
               multiline
               rows={3}
-              value={editedTask.taskDescription || ''}
-              onChange={(e) => setEditedTask({...editedTask, taskDescription: e.target.value})}
+              value={editedTask.taskDescription}
+              onChange={(e) => setEditedTask({ ...editedTask, taskDescription: e.target.value })}
               variant="outlined"
               size="small"
               sx={{ mb: 2 }}
-              placeholder="Task description"
             />
           ) : (
-            <Typography 
-              variant="body2" 
-              color="text.secondary" 
-              sx={{ 
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
                 mb: 2,
                 display: '-webkit-box',
                 WebkitLineClamp: 3,
@@ -314,25 +294,21 @@ const TaskCard = ({
               fullWidth
               label="Due Date"
               type="date"
-              value={editedTask.taskDueDate || ''}
-              onChange={(e) => setEditedTask({...editedTask, taskDueDate: e.target.value})}
+              value={editedTask.taskDueDate}
+              onChange={(e) => setEditedTask({ ...editedTask, taskDueDate: e.target.value })}
               InputLabelProps={{ shrink: true }}
               sx={{ mb: 2 }}
             />
           ) : (
-            task.taskDueDate && (
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                <strong>Due:</strong> {new Date(task.taskDueDate).toLocaleDateString()}
-              </Typography>
-            )
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              <strong>Due:</strong> {new Date(task.taskDueDate).toLocaleDateString()}
+            </Typography>
           )}
 
           {/* Created Date */}
-          {task.taskCreatedDate && (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              <strong>Created:</strong> {new Date(task.taskCreatedDate).toLocaleDateString()}
-            </Typography>
-          )}
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <strong>Created:</strong> {new Date(task.taskCreatedDate).toLocaleDateString()}
+          </Typography>
 
           {/* Status Dropdown (if editing) */}
           {isEditing && (
@@ -341,7 +317,7 @@ const TaskCard = ({
               fullWidth
               label="Status"
               value={editedTask.taskStatus}
-              onChange={(e) => setEditedTask({...editedTask, taskStatus: e.target.value})}
+              onChange={(e) => setEditedTask({ ...editedTask, taskStatus: e.target.value })}
               sx={{ mb: 2 }}
             >
               {availableStatuses.map((status) => (
@@ -351,42 +327,27 @@ const TaskCard = ({
               ))}
             </TextField>
           )}
-
-          {/* Category Dropdown (if editing) */}
-          {isEditing && (
-            <TextField
-              select
-              fullWidth
-              label="Category"
-              value={editedTask.taskCategory || ''}
-              onChange={(e) => setEditedTask({...editedTask, taskCategory: e.target.value})}
-              sx={{ mb: 2 }}
-            >
-              <MenuItem value="Personal">👤 Personal</MenuItem>
-              <MenuItem value="Work">💼 Work</MenuItem>
-              <MenuItem value="Other">📂 Other</MenuItem>
-            </TextField>
-          )}
         </CardContent>
 
         {/* Action Buttons */}
         <CardActions sx={{ p: 2, justifyContent: 'space-between' }}>
           {isEditing ? (
             <Box>
-              <Button 
-                size="small" 
-                onClick={handleSave} 
+              <Button
+                size="small"
+                onClick={handleSave}
                 color="primary"
-                disabled={loading || !editedTask.taskTitle?.trim()}
-                variant="contained"
+                disabled={loading}
               >
                 {loading ? 'Saving...' : 'Save'}
               </Button>
-              <Button 
-                size="small" 
-                onClick={handleCancelEdit}
+              <Button
+                size="small"
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditedTask(task);
+                }}
                 sx={{ ml: 1 }}
-                disabled={loading}
               >
                 Cancel
               </Button>
@@ -395,18 +356,18 @@ const TaskCard = ({
             <>
               <Box>
                 <Tooltip title="View Details">
-                  <IconButton 
-                    size="small" 
+                  <IconButton
+                    size="small"
                     onClick={() => setViewDialogOpen(true)}
                     color="primary"
                   >
                     <VisibilityIcon />
                   </IconButton>
                 </Tooltip>
-                
+
                 <Tooltip title="Edit Task">
-                  <IconButton 
-                    size="small" 
+                  <IconButton
+                    size="small"
                     onClick={() => setIsEditing(true)}
                     color="primary"
                   >
@@ -418,36 +379,31 @@ const TaskCard = ({
               <Box>
                 {task.taskStatus !== 'Completed' && (
                   <Tooltip title="Mark Complete">
-                    <IconButton 
-                      size="small" 
-                      onClick={() => handleStatusChange('Completed')}
+                    <IconButton
+                      size="small"
+                      onClick={() => handleStatusChange('Completed')}  // Use handleStatusChange instead
                       color="success"
-                      disabled={loading}
                     >
                       <CheckCircleIcon />
                     </IconButton>
                   </Tooltip>
                 )}
-                
-                <Tooltip title={task.taskStatus !== 'Completed' ? 'Complete task first to archive' : 'Archive Task'}>
-                  <span>
-                    <IconButton 
-                      size="small" 
-                      onClick={() => setArchiveDialogOpen(true)}
-                      color="warning"
-                      disabled={task.taskStatus !== 'Completed' || loading}
-                    >
-                      <ArchiveIcon />
-                    </IconButton>
-                  </span>
+
+                <Tooltip title="Archive Task">
+                  <IconButton
+                    size="small"
+                    onClick={() => setArchiveDialogOpen(true)}
+                    color="warning"
+                  >
+                    <ArchiveIcon />
+                  </IconButton>
                 </Tooltip>
 
                 <Tooltip title="Delete Task">
-                  <IconButton 
-                    size="small" 
+                  <IconButton
+                    size="small"
                     onClick={() => setDeleteDialogOpen(true)}
                     color="error"
-                    disabled={loading}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -459,13 +415,13 @@ const TaskCard = ({
       </Card>
 
       {/* View Task Dialog */}
-      <Dialog 
-        open={viewDialogOpen} 
+      <Dialog
+        open={viewDialogOpen}
         onClose={() => setViewDialogOpen(false)}
-        maxWidth="sm" 
+        maxWidth="sm"
         fullWidth
       >
-        <DialogTitle sx={{ 
+        <DialogTitle sx={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white',
           fontWeight: 'bold'
@@ -487,7 +443,7 @@ const TaskCard = ({
             {overdue && (
               <Chip
                 label="OVERDUE"
-                sx={{ 
+                sx={{
                   backgroundColor: '#f44336',
                   color: 'white',
                   fontWeight: 'bold',
@@ -496,43 +452,35 @@ const TaskCard = ({
               />
             )}
           </Box>
-          
+
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
             {task.taskTitle}
           </Typography>
-          
+
           <Typography variant="body1" sx={{ mb: 3 }}>
             {task.taskDescription || 'No description provided'}
           </Typography>
-          
+
           <Box display="flex" flexDirection="column" gap={1}>
-            {task.taskCreatedDate && (
-              <Typography variant="body2">
-                <strong>Created:</strong> {new Date(task.taskCreatedDate).toLocaleDateString()}
-              </Typography>
-            )}
-            {task.taskDueDate && (
-              <Typography variant="body2">
-                <strong>Due Date:</strong> {new Date(task.taskDueDate).toLocaleDateString()}
-              </Typography>
-            )}
-            {task.taskCategory && (
-              <Typography variant="body2">
-                <strong>Category:</strong> {task.taskCategory}
-              </Typography>
-            )}
-            {task.userId && (
-              <Typography variant="body2">
-                <strong>User:</strong> {task.userId}
-              </Typography>
-            )}
+            <Typography variant="body2">
+              <strong>Created:</strong> {new Date(task.taskCreatedDate).toLocaleDateString()}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Due Date:</strong> {new Date(task.taskDueDate).toLocaleDateString()}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Category:</strong> {task.taskCategory}
+            </Typography>
+            <Typography variant="body2">
+              <strong>User:</strong> {task.userId}
+            </Typography>
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setViewDialogOpen(false)}>
             Close
           </Button>
-          <Button 
+          <Button
             onClick={() => {
               setViewDialogOpen(false);
               setIsEditing(true);
@@ -547,8 +495,8 @@ const TaskCard = ({
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog 
-        open={deleteDialogOpen} 
+      <Dialog
+        open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
       >
         <DialogTitle sx={{ color: 'error.main' }}>
@@ -563,10 +511,10 @@ const TaskCard = ({
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)} disabled={loading}>
+          <Button onClick={() => setDeleteDialogOpen(false)}>
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleDelete}
             color="error"
             variant="contained"
@@ -579,8 +527,8 @@ const TaskCard = ({
       </Dialog>
 
       {/* Archive Confirmation Dialog */}
-      <Dialog 
-        open={archiveDialogOpen} 
+      <Dialog
+        open={archiveDialogOpen}
         onClose={() => setArchiveDialogOpen(false)}
       >
         <DialogTitle sx={{ color: 'warning.main' }}>
@@ -595,10 +543,10 @@ const TaskCard = ({
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setArchiveDialogOpen(false)} disabled={loading}>
+          <Button onClick={() => setArchiveDialogOpen(false)}>
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleArchive}
             color="warning"
             variant="contained"
