@@ -64,8 +64,8 @@ public class TaskServiceImpl implements ITaskService {
     }
 
     @Override
-    public List<Task> fetchArchivedTasks() {
-        return taskRepository.findByArchived(true);
+    public List<Task> fetchArchivedTasks(String userId) {
+        return taskRepository.findByArchived(userId, true);
     }
 
     @Override

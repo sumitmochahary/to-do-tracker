@@ -100,7 +100,7 @@ export const saveTask = async (data) => {
   }
 };
 
-// ========== PUT ==========
+// ========== PATCH ==========
 
 // Update existing task
 export const updateTask = async (data) => {
