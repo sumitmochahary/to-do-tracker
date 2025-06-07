@@ -100,8 +100,9 @@ const Archived = () => {
         taskDescription: taskToRestore.taskDescription,
         taskDueDate: taskToRestore.taskDueDate,
         taskCategory: taskToRestore.taskCategory,
-        taskStatus: 'To Do', // Change from archived to To Do
-        taskCreatedDate: taskToRestore.taskCreatedDate
+        taskStatus: 'Completed', // Change from archived to To Do
+        taskCreatedDate: taskToRestore.taskCreatedDate,
+        archived: false
       };
 
       // Use the existing updateTask function from TaskService

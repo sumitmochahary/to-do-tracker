@@ -2,155 +2,54 @@ import axios from "axios";
 
 const BASE_URL = "http://localhost:8080/api/v1";
 
-// Headers
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
+// Common Headers
+const getHeaders = (isJson = false) => {
+  const headers = {
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  };
+  if (isJson) headers["Content-Type"] = "application/json";
+  return headers;
+};
 
-const jsonHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-  "Content-Type": "application/json",
-});
+// Generic request handler
+const request = async (method, endpoint, data = null, isJson = false) => {
+  try {
+    const config = {
+      method,
+      url: `${BASE_URL}${endpoint}`,
+      headers: getHeaders(isJson),
+      withCredentials: true,
+    };
+    if (data) config.data = data;
+
+    const response = await axios(config);
+    return response.data;
+  } catch (error) {
+    console.error(`Error during ${method.toUpperCase()} ${endpoint}:`, error);
+    throw error;
+  }
+};
 
 // ========== GET ==========
 
-// Fetch all tasks
-export const fetchTask = async () => {
-  try {
-    const response = await axios.get(`${BASE_URL}/fetch`, {
-      headers: getHeaders(),
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching tasks:", error);
-    throw error;
-  }
-};
-
-// Fetch by category
-export const fetchByCategory = async (category) => {
-  try {
-    const response = await axios.get(`${BASE_URL}/category/${category}`, {
-      headers: getHeaders(),
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching tasks by category:", error);
-    throw error;
-  }
-};
-
-// Fetch by status
-export const fetchByStatus = async (status) => {
-  try {
-    const response = await axios.get(`${BASE_URL}/status/${status}`, {
-      headers: getHeaders(),
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching tasks by status:", error);
-    throw error;
-  }
-};
-
-// Fetch by due date (yyyy-mm-dd)
-export const fetchByDueDate = async (dueDate) => {
-  try {
-    const response = await axios.get(`${BASE_URL}/due/${dueDate}`, {
-      headers: getHeaders(),
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching tasks by due date:", error);
-    throw error;
-  }
-};
-
-// Fetch archived tasks
-export const fetchArchivedTasks = async () => {
-  try {
-    const response = await axios.get(`${BASE_URL}/status/archived`, {
-      headers: getHeaders(),
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching archived tasks:", error);
-    throw error;
-  }
-};
+export const fetchTask = () => request("get", "/fetch");
+export const fetchByCategory = (category) =>
+  request("get", `/category/${category}`);
+export const fetchByStatus = (status) => request("get", `/status/${status}`);
+export const fetchByDueDate = (dueDate) => request("get", `/due/${dueDate}`);
+export const fetchArchivedTasks = () => request("get", "/status/archived");
 
 // ========== POST ==========
 
-// Save new task
-export const saveTask = async (data) => {
-  try {
-    const response = await axios.post(`${BASE_URL}/save`, data, {
-      headers: jsonHeaders(),
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error saving task:", error);
-    throw error;
-  }
-};
+export const saveTask = (data) => request("post", "/save", data, true);
 
 // ========== PATCH ==========
 
-// Update existing task
-export const updateTask = async (data) => {
-  try {
-    const response = await axios.patch(
-      `${BASE_URL}/update/${data.taskId}`,
-      data,
-      {
-        headers: jsonHeaders(),
-        withCredentials: true,
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error updating task:", error);
-    console.log("Task data sent:", data);
-    throw error;
-  }
-};
-
-// Archive task
-export const archiveTask = async (taskId) => {
-  try {
-    const response = await axios.patch(
-      `${BASE_URL}/archive/${taskId}`,
-      {},
-      {
-        headers: getHeaders(),
-        withCredentials: true,
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error archiving task:", error);
-    throw error;
-  }
-};
+export const updateTask = (data) =>
+  request("patch", `/update/${data.taskId}`, data, true);
+export const archiveTask = (taskId) =>
+  request("patch", `/archive/${taskId}`, {}, false);
 
 // ========== DELETE ==========
 
-// Delete task
-export const deleteTask = async (taskId) => {
-  try {
-    const response = await axios.delete(`${BASE_URL}/delete/${taskId}`, {
-      headers: getHeaders(),
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error deleting task:", error);
-    throw error;
-  }
-};
+export const deleteTask = (taskId) => request("delete", `/delete/${taskId}`);
