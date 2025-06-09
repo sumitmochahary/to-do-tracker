@@ -20,8 +20,10 @@ function AppRoutes() {
             <Route path="/dashboard" element={<ProtectedRoute>
                 <Board />
             </ProtectedRoute>} />
+            <Route path="/archived" element={<ProtectedRoute>
+                <Archived />
+            </ProtectedRoute>} />
             <Route path="*" element={<PageNotFound />} />
-            <Route path="/archived" element={<Archived/>} />
         </Routes>
     )
 }

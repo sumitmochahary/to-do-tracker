@@ -38,11 +38,12 @@ function LoginForm({ onLoadingChange, onShowSnackbar }) {
         try {
             const response = await loginUser(data);
             localStorage.setItem("token", response.token);
+            onShowSnackbar?.(response.message, "success")
             reset();
 
             setTimeout(() => {
                 navigate("/dashboard");
-            }, 1000);
+            }, 2000);
         } catch (error) {
             onShowSnackbar?.(error.message, "error");
         } finally {

@@ -35,7 +35,7 @@ const SearchBar = ({
 }) => {
   const theme = useTheme();
   const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   // State
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
@@ -54,21 +54,21 @@ const SearchBar = ({
 
     return tasks.filter(task => {
       // Text search
-      const matchesSearch = !searchTerm.trim() || 
+      const matchesSearch = !searchTerm.trim() ||
         task.taskTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         task.taskDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         task.taskCategory?.toLowerCase().includes(searchTerm.toLowerCase());
 
       // Status filter
-      const matchesStatus = selectedFilters.status === 'all' || 
+      const matchesStatus = selectedFilters.status === 'all' ||
         task.taskStatus === selectedFilters.status;
 
       // Priority filter
-      const matchesPriority = selectedFilters.priority === 'all' || 
+      const matchesPriority = selectedFilters.priority === 'all' ||
         task.taskPriority === selectedFilters.priority;
 
       // Category filter
-      const matchesCategory = selectedFilters.category === 'all' || 
+      const matchesCategory = selectedFilters.category === 'all' ||
         task.taskCategory === selectedFilters.category;
 
       return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
@@ -132,9 +132,9 @@ const SearchBar = ({
   const hasActiveFilters = Object.values(selectedFilters).some(filter => filter !== 'all');
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      alignItems: 'center', 
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
       gap: { xs: 1, sm: 2 },
       width: '100%'
     }}>
@@ -150,7 +150,7 @@ const SearchBar = ({
         filterOptions={(options, { inputValue }) => {
           if (!inputValue.trim()) return options.slice(0, 5);
           return options
-            .filter(task => 
+            .filter(task =>
               task.taskTitle?.toLowerCase().includes(inputValue.toLowerCase()) ||
               task.taskDescription?.toLowerCase().includes(inputValue.toLowerCase())
             )
@@ -168,7 +168,7 @@ const SearchBar = ({
               ...params.InputProps,
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ 
+                  <SearchIcon sx={{
                     color: isSearchFocused ? '#3b82f6' : '#64748b',
                     fontSize: { xs: '1.1rem', sm: '1.25rem' }
                   }} />
@@ -180,12 +180,12 @@ const SearchBar = ({
                     <IconButton
                       size="small"
                       onClick={handleClearSearch}
-                      sx={{ 
+                      sx={{
                         color: '#64748b',
                         '&:hover': { color: '#ef4444', backgroundColor: '#fef2f2' }
                       }}
                     >
-          
+
                     </IconButton>
                   )}
                   {params.InputProps.endAdornment}
@@ -245,10 +245,10 @@ const SearchBar = ({
                   sx={{
                     height: 20,
                     fontSize: '0.7rem',
-                    backgroundColor: task.taskStatus === 'Completed' ? '#dcfce7' : 
-                                   task.taskStatus === 'In Progress' ? '#fef3c7' : '#f1f5f9',
-                    color: task.taskStatus === 'Completed' ? '#166534' : 
-                           task.taskStatus === 'In Progress' ? '#92400e' : '#64748b'
+                    backgroundColor: task.taskStatus === 'Completed' ? '#dcfce7' :
+                      task.taskStatus === 'In Progress' ? '#fef3c7' : '#f1f5f9',
+                    color: task.taskStatus === 'Completed' ? '#166534' :
+                      task.taskStatus === 'In Progress' ? '#92400e' : '#64748b'
                   }}
                 />
                 {task.taskPriority && (
@@ -259,10 +259,10 @@ const SearchBar = ({
                     sx={{
                       height: 20,
                       fontSize: '0.7rem',
-                      backgroundColor: task.taskPriority === 'High' ? '#fecaca' : 
-                                     task.taskPriority === 'Medium' ? '#fed7aa' : '#e0e7ff',
-                      color: task.taskPriority === 'High' ? '#dc2626' : 
-                             task.taskPriority === 'Medium' ? '#ea580c' : '#4338ca'
+                      backgroundColor: task.taskPriority === 'High' ? '#fecaca' :
+                        task.taskPriority === 'Medium' ? '#fed7aa' : '#e0e7ff',
+                      color: task.taskPriority === 'High' ? '#dc2626' :
+                        task.taskPriority === 'Medium' ? '#ea580c' : '#4338ca'
                     }}
                   />
                 )}
@@ -388,11 +388,11 @@ const SearchBar = ({
           )}
 
           <Divider sx={{ my: 1 }} />
-          
+
           {/* Clear Filters */}
-          <MenuItem 
+          <MenuItem
             onClick={handleClearSearch}
-            sx={{ 
+            sx={{
               justifyContent: 'center',
               color: '#ef4444',
               '&:hover': { backgroundColor: '#fef2f2' }

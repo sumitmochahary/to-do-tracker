@@ -50,6 +50,9 @@ public class UserController {
             if (userOptional.isPresent()) {
                 Users user = userOptional.get();
                 Map<String, String> tokenMap = securityToken.generateToken(user);
+                String fullName = user.getUserName();
+                String firstName = fullName.split(" ")[0];
+                tokenMap.put("message", "Welcome, " + firstName + "!");
                 return new ResponseEntity<>(tokenMap, HttpStatus.OK);
             } else {
                 // This path should technically never be reached because the service throws exception already
