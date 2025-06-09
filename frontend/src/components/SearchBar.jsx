@@ -57,8 +57,7 @@ const SearchBar = ({
     return nonArchivedTasks.filter(task => {
       const matchesSearch = !searchTerm.trim() ||
         task.taskTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.taskDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.taskCategory?.toLowerCase().includes(searchTerm.toLowerCase());
+        task.taskDescription?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesStatus = selectedFilters.status === 'all' ||
         task.taskStatus === selectedFilters.status;
