@@ -29,6 +29,7 @@ const SearchBar = ({
   tasks = [],
   onSearchResults,
   onTaskSelect,
+  onClearSearch,
   placeholder = "Search tasks...",
   showFilters = true,
   isMobile = false
@@ -87,8 +88,7 @@ const SearchBar = ({
 
   // Event handlers
   const handleSearchChange = (event, value) => {
-    const newSearchTerm = value || event?.target?.value || '';
-    setSearchTerm(newSearchTerm);
+    setSearchTerm(value || '');
   };
 
   const handleTaskSelect = (event, task) => {
@@ -108,6 +108,7 @@ const SearchBar = ({
       priority: 'all',
       category: 'all'
     });
+    if (onClearSearch) onClearSearch();
   };
 
   const handleFilterClick = (event) => {
@@ -143,20 +144,14 @@ const SearchBar = ({
       <Autocomplete
         freeSolo
         fullWidth
-        options={filteredTasks}
+        clearOnEscape
+        options={[]}
+        open={false}
+        disablePortal
         getOptionLabel={getTaskOptionLabel}
         value={searchTerm}
         onInputChange={handleSearchChange}
         onChange={handleTaskSelect}
-        filterOptions={(options, { inputValue }) => {
-          if (!inputValue.trim()) return options.slice(0, 5);
-          return options
-            .filter(task =>
-              task.taskTitle?.toLowerCase().includes(inputValue.toLowerCase()) ||
-              task.taskDescription?.toLowerCase().includes(inputValue.toLowerCase())
-            )
-            .slice(0, 8);
-        }}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -174,23 +169,6 @@ const SearchBar = ({
                     fontSize: { xs: '1.1rem', sm: '1.25rem' }
                   }} />
                 </InputAdornment>
-              ),
-              endAdornment: (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  {(searchTerm || hasActiveFilters) && (
-                    <IconButton
-                      size="small"
-                      onClick={handleClearSearch}
-                      sx={{
-                        color: '#64748b',
-                        '&:hover': { color: '#ef4444', backgroundColor: '#fef2f2' }
-                      }}
-                    >
-
-                    </IconButton>
-                  )}
-                  {params.InputProps.endAdornment}
-                </Box>
               ),
               sx: {
                 backgroundColor: '#f8fafc',

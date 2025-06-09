@@ -24,6 +24,7 @@ export const Header = ({
   tasks = [],
   onSearchResults,
   onTaskSelect,
+  onClearSearch,
   searchPlaceholder = "Search tasks...",
   showFilters = true,
   isMobile = false,
@@ -135,6 +136,7 @@ export const Header = ({
               placeholder={searchPlaceholder}
               showFilters={showFilters}
               isMobile={isMobile}
+              onClearSearch={onClearSearch}
             />
           </Box>
 

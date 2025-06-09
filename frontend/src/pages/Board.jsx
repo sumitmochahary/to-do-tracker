@@ -64,6 +64,16 @@ const Board = () => {
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
+  const clearSearch = useCallback(() => {
+    setFilteredTasks([]);
+    setIsSearching(false);
+  }, []);
+
+  const handleSearchResults = useCallback((results) => {
+    setFilteredTasks(results);
+    setIsSearching(true);
+  }, []);
+
   // Effects
   useEffect(() => {
     loadTasks();
@@ -222,11 +232,6 @@ const Board = () => {
     }
   }, []);
 
-  const handleSearchResults = useCallback((results) => {
-    setFilteredTasks(results);
-    setIsSearching(true);
-  }, []);
-
   const handleTaskSelection = useCallback((task) => {
     // console.log("Selected task:", task);
     task
@@ -338,6 +343,7 @@ const Board = () => {
             tasks={tasks}
             onSearchResults={handleSearchResults}
             onTaskSelect={handleTaskSelection}
+            onClearSearch={clearSearch}
             searchPlaceholder="Search your tasks..."
             showFilters={true}
             isMobile={isMobile}
