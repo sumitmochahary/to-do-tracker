@@ -45,29 +45,26 @@ const SearchBar = ({
     category: 'all'
   });
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const nonArchivedTasks = tasks.filter(task => task.taskStatus !== 'Archived');
 
   // Memoized filtered results
   const filteredTasks = useMemo(() => {
     if (!searchTerm.trim() && Object.values(selectedFilters).every(filter => filter === 'all')) {
-      return tasks;
+      return nonArchivedTasks;
     }
 
-    return tasks.filter(task => {
-      // Text search
+    return nonArchivedTasks.filter(task => {
       const matchesSearch = !searchTerm.trim() ||
         task.taskTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         task.taskDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         task.taskCategory?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      // Status filter
       const matchesStatus = selectedFilters.status === 'all' ||
         task.taskStatus === selectedFilters.status;
 
-      // Priority filter
       const matchesPriority = selectedFilters.priority === 'all' ||
         task.taskPriority === selectedFilters.priority;
 
-      // Category filter
       const matchesCategory = selectedFilters.category === 'all' ||
         task.taskCategory === selectedFilters.category;
 
@@ -75,10 +72,11 @@ const SearchBar = ({
     });
   }, [tasks, searchTerm, selectedFilters]);
 
+
   // Get unique values for filters
-  const uniqueStatuses = [...new Set(tasks.map(task => task.taskStatus).filter(Boolean))];
-  const uniquePriorities = [...new Set(tasks.map(task => task.taskPriority).filter(Boolean))];
-  const uniqueCategories = [...new Set(tasks.map(task => task.taskCategory).filter(Boolean))];
+  const uniqueStatuses = [...new Set(nonArchivedTasks.map(task => task.taskStatus).filter(Boolean))];
+  const uniquePriorities = [...new Set(nonArchivedTasks.map(task => task.taskPriority).filter(Boolean))];
+  const uniqueCategories = [...new Set(nonArchivedTasks.map(task => task.taskCategory).filter(Boolean))];
 
   // Effects
   useEffect(() => {
@@ -94,8 +92,11 @@ const SearchBar = ({
   };
 
   const handleTaskSelect = (event, task) => {
-    if (task && onTaskSelect) {
-      onTaskSelect(task);
+    if (task && onSearchResults) {
+      const matchingTasks = tasks.filter(
+        t => t.taskTitle === task.taskTitle // or match by ID if needed
+      );
+      onSearchResults(matchingTasks);
       setSearchTerm('');
     }
   };

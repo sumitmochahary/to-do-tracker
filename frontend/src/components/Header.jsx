@@ -56,6 +56,7 @@ export const Header = ({
   // const toggleDrawer = () => {
   //   setIsDrawerOpen(!isDrawerOpen);
   // };
+  // const activeTasks = tasks.filter(task => task.taskStatus !== "Archived");
 
   return (
     <AppBar

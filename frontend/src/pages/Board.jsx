@@ -61,6 +61,8 @@ const Board = () => {
   const [newColumnTitle, setNewColumnTitle] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [archivedTasks, setArchivedTasks] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Effects
   useEffect(() => {
@@ -221,8 +223,8 @@ const Board = () => {
   }, []);
 
   const handleSearchResults = useCallback((results) => {
-    // console.log("Search results:", results);
-    results
+    setFilteredTasks(results);
+    setIsSearching(true);
   }, []);
 
   const handleTaskSelection = useCallback((task) => {
@@ -240,8 +242,9 @@ const Board = () => {
 
   // Utility Functions - Memoized to prevent unnecessary recalculations
   const getTasksByStatus = useCallback((status) => {
-    return (tasks || []).filter(task => task.taskStatus === status);
-  }, [tasks]);
+    const taskList = isSearching ? filteredTasks : tasks;
+    return (taskList || []).filter(task => task.taskStatus === status);
+  }, [tasks, filteredTasks, isSearching]);
 
   // Loading State
   if (loading) {
