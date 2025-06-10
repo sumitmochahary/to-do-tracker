@@ -24,6 +24,7 @@ export const Header = ({
   tasks = [],
   onSearchResults,
   onTaskSelect,
+  onClearSearch,
   searchPlaceholder = "Search tasks...",
   showFilters = true,
   isMobile = false,
@@ -56,6 +57,7 @@ export const Header = ({
   // const toggleDrawer = () => {
   //   setIsDrawerOpen(!isDrawerOpen);
   // };
+  // const activeTasks = tasks.filter(task => task.taskStatus !== "Archived");
 
   return (
     <AppBar
@@ -134,6 +136,7 @@ export const Header = ({
               placeholder={searchPlaceholder}
               showFilters={showFilters}
               isMobile={isMobile}
+              onClearSearch={onClearSearch}
             />
           </Box>
 

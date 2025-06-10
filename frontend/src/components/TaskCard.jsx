@@ -184,6 +184,7 @@ const TaskCard = ({
   return (
     <>
       <Card sx={{
+        mb: 1.5,
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -507,9 +508,6 @@ const TaskCard = ({
         <DialogContent>
           <Typography>
             Are you sure you want to delete "{task.taskTitle}"?
-          </Typography>
-          <Typography color="text.secondary" sx={{ mt: 1 }}>
-            This will move the task to trash. You can restore it later if needed.
           </Typography>
         </DialogContent>
         <DialogActions>

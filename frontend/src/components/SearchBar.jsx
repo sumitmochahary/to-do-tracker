@@ -29,13 +29,14 @@ const SearchBar = ({
   tasks = [],
   onSearchResults,
   onTaskSelect,
+  onClearSearch,
   placeholder = "Search tasks...",
   showFilters = true,
   isMobile = false
 }) => {
   const theme = useTheme();
   const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   // State
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
@@ -45,40 +46,37 @@ const SearchBar = ({
     category: 'all'
   });
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const nonArchivedTasks = tasks.filter(task => task.taskStatus !== 'Archived');
 
   // Memoized filtered results
   const filteredTasks = useMemo(() => {
     if (!searchTerm.trim() && Object.values(selectedFilters).every(filter => filter === 'all')) {
-      return tasks;
+      return nonArchivedTasks;
     }
 
-    return tasks.filter(task => {
-      // Text search
-      const matchesSearch = !searchTerm.trim() || 
+    return nonArchivedTasks.filter(task => {
+      const matchesSearch = !searchTerm.trim() ||
         task.taskTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.taskDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.taskCategory?.toLowerCase().includes(searchTerm.toLowerCase());
+        task.taskDescription?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      // Status filter
-      const matchesStatus = selectedFilters.status === 'all' || 
+      const matchesStatus = selectedFilters.status === 'all' ||
         task.taskStatus === selectedFilters.status;
 
-      // Priority filter
-      const matchesPriority = selectedFilters.priority === 'all' || 
+      const matchesPriority = selectedFilters.priority === 'all' ||
         task.taskPriority === selectedFilters.priority;
 
-      // Category filter
-      const matchesCategory = selectedFilters.category === 'all' || 
+      const matchesCategory = selectedFilters.category === 'all' ||
         task.taskCategory === selectedFilters.category;
 
       return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
     });
   }, [tasks, searchTerm, selectedFilters]);
 
+
   // Get unique values for filters
-  const uniqueStatuses = [...new Set(tasks.map(task => task.taskStatus).filter(Boolean))];
-  const uniquePriorities = [...new Set(tasks.map(task => task.taskPriority).filter(Boolean))];
-  const uniqueCategories = [...new Set(tasks.map(task => task.taskCategory).filter(Boolean))];
+  const uniqueStatuses = [...new Set(nonArchivedTasks.map(task => task.taskStatus).filter(Boolean))];
+  const uniquePriorities = [...new Set(nonArchivedTasks.map(task => task.taskPriority).filter(Boolean))];
+  const uniqueCategories = [...new Set(nonArchivedTasks.map(task => task.taskCategory).filter(Boolean))];
 
   // Effects
   useEffect(() => {
@@ -89,13 +87,15 @@ const SearchBar = ({
 
   // Event handlers
   const handleSearchChange = (event, value) => {
-    const newSearchTerm = value || event?.target?.value || '';
-    setSearchTerm(newSearchTerm);
+    setSearchTerm(value || '');
   };
 
   const handleTaskSelect = (event, task) => {
-    if (task && onTaskSelect) {
-      onTaskSelect(task);
+    if (task && onSearchResults) {
+      const matchingTasks = tasks.filter(
+        t => t.taskTitle === task.taskTitle // or match by ID if needed
+      );
+      onSearchResults(matchingTasks);
       setSearchTerm('');
     }
   };
@@ -107,6 +107,7 @@ const SearchBar = ({
       priority: 'all',
       category: 'all'
     });
+    if (onClearSearch) onClearSearch();
   };
 
   const handleFilterClick = (event) => {
@@ -132,9 +133,9 @@ const SearchBar = ({
   const hasActiveFilters = Object.values(selectedFilters).some(filter => filter !== 'all');
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      alignItems: 'center', 
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
       gap: { xs: 1, sm: 2 },
       width: '100%'
     }}>
@@ -142,20 +143,14 @@ const SearchBar = ({
       <Autocomplete
         freeSolo
         fullWidth
-        options={filteredTasks}
+        clearOnEscape
+        options={[]}
+        open={false}
+        disablePortal
         getOptionLabel={getTaskOptionLabel}
         value={searchTerm}
         onInputChange={handleSearchChange}
         onChange={handleTaskSelect}
-        filterOptions={(options, { inputValue }) => {
-          if (!inputValue.trim()) return options.slice(0, 5);
-          return options
-            .filter(task => 
-              task.taskTitle?.toLowerCase().includes(inputValue.toLowerCase()) ||
-              task.taskDescription?.toLowerCase().includes(inputValue.toLowerCase())
-            )
-            .slice(0, 8);
-        }}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -168,28 +163,11 @@ const SearchBar = ({
               ...params.InputProps,
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ 
+                  <SearchIcon sx={{
                     color: isSearchFocused ? '#3b82f6' : '#64748b',
                     fontSize: { xs: '1.1rem', sm: '1.25rem' }
                   }} />
                 </InputAdornment>
-              ),
-              endAdornment: (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  {(searchTerm || hasActiveFilters) && (
-                    <IconButton
-                      size="small"
-                      onClick={handleClearSearch}
-                      sx={{ 
-                        color: '#64748b',
-                        '&:hover': { color: '#ef4444', backgroundColor: '#fef2f2' }
-                      }}
-                    >
-          
-                    </IconButton>
-                  )}
-                  {params.InputProps.endAdornment}
-                </Box>
               ),
               sx: {
                 backgroundColor: '#f8fafc',
@@ -245,10 +223,10 @@ const SearchBar = ({
                   sx={{
                     height: 20,
                     fontSize: '0.7rem',
-                    backgroundColor: task.taskStatus === 'Completed' ? '#dcfce7' : 
-                                   task.taskStatus === 'In Progress' ? '#fef3c7' : '#f1f5f9',
-                    color: task.taskStatus === 'Completed' ? '#166534' : 
-                           task.taskStatus === 'In Progress' ? '#92400e' : '#64748b'
+                    backgroundColor: task.taskStatus === 'Completed' ? '#dcfce7' :
+                      task.taskStatus === 'In Progress' ? '#fef3c7' : '#f1f5f9',
+                    color: task.taskStatus === 'Completed' ? '#166534' :
+                      task.taskStatus === 'In Progress' ? '#92400e' : '#64748b'
                   }}
                 />
                 {task.taskPriority && (
@@ -259,10 +237,10 @@ const SearchBar = ({
                     sx={{
                       height: 20,
                       fontSize: '0.7rem',
-                      backgroundColor: task.taskPriority === 'High' ? '#fecaca' : 
-                                     task.taskPriority === 'Medium' ? '#fed7aa' : '#e0e7ff',
-                      color: task.taskPriority === 'High' ? '#dc2626' : 
-                             task.taskPriority === 'Medium' ? '#ea580c' : '#4338ca'
+                      backgroundColor: task.taskPriority === 'High' ? '#fecaca' :
+                        task.taskPriority === 'Medium' ? '#fed7aa' : '#e0e7ff',
+                      color: task.taskPriority === 'High' ? '#dc2626' :
+                        task.taskPriority === 'Medium' ? '#ea580c' : '#4338ca'
                     }}
                   />
                 )}
@@ -388,11 +366,11 @@ const SearchBar = ({
           )}
 
           <Divider sx={{ my: 1 }} />
-          
+
           {/* Clear Filters */}
-          <MenuItem 
+          <MenuItem
             onClick={handleClearSearch}
-            sx={{ 
+            sx={{
               justifyContent: 'center',
               color: '#ef4444',
               '&:hover': { backgroundColor: '#fef2f2' }

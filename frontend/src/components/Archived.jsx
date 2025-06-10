@@ -100,8 +100,9 @@ const Archived = () => {
         taskDescription: taskToRestore.taskDescription,
         taskDueDate: taskToRestore.taskDueDate,
         taskCategory: taskToRestore.taskCategory,
-        taskStatus: 'To Do', // Change from archived to To Do
-        taskCreatedDate: taskToRestore.taskCreatedDate
+        taskStatus: 'Completed', // Change from archived to To Do
+        taskCreatedDate: taskToRestore.taskCreatedDate,
+        archived: false
       };
 
       // Use the existing updateTask function from TaskService
@@ -527,14 +528,11 @@ const Archived = () => {
         onClose={() => setDeleteDialogOpen(false)}
       >
         <DialogTitle sx={{ color: 'error.main' }}>
-          ⚠️ Confirm Permanent Deletion
+          ⚠️ Confirm Deletion
         </DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to permanently delete "{taskToDelete?.taskTitle}"?
-          </Typography>
-          <Typography color="error" sx={{ mt: 2, fontWeight: 'bold' }}>
-            This action cannot be undone!
+            Are you sure you want to delete "{taskToDelete?.taskTitle}"?
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -547,7 +545,7 @@ const Archived = () => {
             variant="contained"
             startIcon={<DeleteIcon />}
           >
-            Delete Permanently
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

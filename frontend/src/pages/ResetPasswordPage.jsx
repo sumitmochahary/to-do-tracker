@@ -1,7 +1,6 @@
 import { Container, Paper, Typography, Snackbar, Alert } from "@mui/material"
 import { useState } from "react"
 import LoadingEffect from "../components/LoadingEffect"
-import { Link } from "react-router"
 import { motion as Motion } from "framer-motion"
 import { formAnimationVariant } from "../animations/MotionVariants"
 import ResetPasswordForm from "../components/ResetPasswordForm"

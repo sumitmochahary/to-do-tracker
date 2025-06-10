@@ -16,6 +16,6 @@ public interface TaskRepository extends MongoRepository<Task, String> {  // Chan
         List<Task> findByTaskStatus(String taskStatus);
         List<Task> findByTaskDueDate(LocalDate taskDueDate);
         Optional<Task> findById(String id);  // Changed from findByTaskId to findById
-        List<Task> findByArchived(boolean archived);
+        List<Task> findByUserIdAndArchived(String userId, boolean archived);
 }
 

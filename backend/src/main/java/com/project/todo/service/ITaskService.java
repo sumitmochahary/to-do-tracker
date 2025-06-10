@@ -15,7 +15,7 @@ public interface ITaskService {
     List<Task> fetchByDueDate(LocalDate tDueDate);
     Task archiveTask(String taskId) throws TaskNotFoundException;  // Changed from int to String
     Task updateTask(Task updatedTask) throws TaskNotFoundException;
-    List<Task> fetchArchivedTasks();
+    List<Task> fetchArchivedTasks(String userId);
     List<Task> fetchTaskByUserId(String userId) throws TaskNotFoundException;
     void deleteTask(String taskId) throws TaskNotFoundException;  // Changed from int to String
     Task getTaskById(String taskId) throws TaskNotFoundException;

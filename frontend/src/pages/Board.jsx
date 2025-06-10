@@ -21,9 +21,9 @@ import {
   Container,
   AppBar,
   Toolbar,
-  Drawer
+  Drawer,
+  Snackbar
 } from "@mui/material";
-
 import {
   Add as AddIcon,
   Close as CloseIcon,
@@ -61,6 +61,18 @@ const Board = () => {
   const [newColumnTitle, setNewColumnTitle] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [archivedTasks, setArchivedTasks] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const clearSearch = useCallback(() => {
+    setFilteredTasks([]);
+    setIsSearching(false);
+  }, []);
+
+  const handleSearchResults = useCallback((results) => {
+    setFilteredTasks(results);
+    setIsSearching(true);
+  }, []);
 
   // Effects
   useEffect(() => {
@@ -220,11 +232,6 @@ const Board = () => {
     }
   }, []);
 
-  const handleSearchResults = useCallback((results) => {
-    // console.log("Search results:", results);
-    results
-  }, []);
-
   const handleTaskSelection = useCallback((task) => {
     // console.log("Selected task:", task);
     task
@@ -240,8 +247,9 @@ const Board = () => {
 
   // Utility Functions - Memoized to prevent unnecessary recalculations
   const getTasksByStatus = useCallback((status) => {
-    return (tasks || []).filter(task => task.taskStatus === status);
-  }, [tasks]);
+    const taskList = isSearching ? filteredTasks : tasks;
+    return (taskList || []).filter(task => task.taskStatus === status);
+  }, [tasks, filteredTasks, isSearching]);
 
   // Loading State
   if (loading) {
@@ -335,6 +343,7 @@ const Board = () => {
             tasks={tasks}
             onSearchResults={handleSearchResults}
             onTaskSelect={handleTaskSelection}
+            onClearSearch={clearSearch}
             searchPlaceholder="Search your tasks..."
             showFilters={true}
             isMobile={isMobile}

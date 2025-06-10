@@ -58,14 +58,15 @@ public class TaskServiceImpl implements ITaskService {
         existingTask.setTaskCategory(updatedTask.getTaskCategory());
         existingTask.setTaskDueDate(updatedTask.getTaskDueDate());
         existingTask.setMedia(updatedTask.getMedia());
-        existingTask.setTaskStatus(updatedTask.getTaskStatus());  // Force status
+        existingTask.setTaskStatus(updatedTask.getTaskStatus());
+        existingTask.setArchived(updatedTask.isArchived());// Force status
 
         return taskRepository.save(existingTask);
     }
 
     @Override
-    public List<Task> fetchArchivedTasks() {
-        return taskRepository.findByArchived(true);
+    public List<Task> fetchArchivedTasks(String userId) {
+        return taskRepository.findByUserIdAndArchived(userId, true);
     }
 
     @Override

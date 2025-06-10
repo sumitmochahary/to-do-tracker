@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import {
-   Box,
-   Typography,
-   Button,
-   IconButton,
-   Divider
+  Box,
+  Typography,
+  Button,
+  IconButton,
+  Divider, Tooltip
 } from "@mui/material";
 import {
-   Dashboard as DashboardIcon,
-   CalendarToday as CalendarIcon,
-   Assessment as ReportsIcon,
-   Home as HomeIcon,
-   Task as TaskIcon,
-   Settings as SettingsIcon,
-   Close as CloseIcon
+  Dashboard as DashboardIcon,
+  CalendarToday as CalendarIcon,
+  Assessment as ReportsIcon,
+  Home as HomeIcon,
+  Task as TaskIcon,
+  Settings as SettingsIcon,
+  Close as CloseIcon
 } from "@mui/icons-material";
 import { useNavigate } from 'react-router';
 import Calendar from "./Calender"; // Updated import name
@@ -91,39 +91,43 @@ const Sidebar = ({ onClose, tasks = [] }) => {
             Home
           </Button>
 
-          <Button
+          {/* <Button
             startIcon={<TaskIcon />}
             sx={buttonStyles()}
           >
             My Tasks
-          </Button>
+          </Button> */}
+
+          <Tooltip title="Coming Soon">
+            <span>
+              <Button
+                startIcon={<CalendarIcon />}
+                // onClick={() => setShowCalendar(prev => !prev)}
+                sx={buttonStyles(showCalendar)}
+              >
+                Calendar View
+              </Button>
+            </span>
+          </Tooltip>
 
           <Button
-            startIcon={<CalendarIcon />}
-            onClick={() => setShowCalendar(prev => !prev)}
-            sx={buttonStyles(showCalendar)}
+            startIcon={<ReportsIcon />}
+            onClick={() => navigate('/archived')}
+            sx={buttonStyles()}
           >
-            Calendar View
+            Archived
           </Button>
 
-          <Button
-  startIcon={<ReportsIcon />}
-  onClick={() => navigate('/archived')}
-  sx={buttonStyles()}
->
-  Archived
-</Button>
 
 
+          {/* <Divider sx={{ borderColor: '#334155', my: 2 }} /> */}
 
-          <Divider sx={{ borderColor: '#334155', my: 2 }} />
-
-          <Button
+          {/* <Button
             startIcon={<SettingsIcon />}
             sx={buttonStyles()}
           >
             Settings
-          </Button>
+          </Button> */}
         </Box>
 
         {/* Footer */}
@@ -159,7 +163,7 @@ const Sidebar = ({ onClose, tasks = [] }) => {
             }}
             onClick={() => setShowCalendar(false)}
           />
-          
+
           {/* Calendar Card */}
           <Box
             sx={{
@@ -207,7 +211,7 @@ const Sidebar = ({ onClose, tasks = [] }) => {
             >
               <CloseIcon fontSize="small" />
             </IconButton>
-            
+
             <Calendar tasks={tasks} />
           </Box>
         </>

@@ -134,7 +134,7 @@ public class TaskController {
 
         // Optional: Filter archived tasks by userId to show only user's archived tasks
         // List<Task> archivedTasks = iTaskService.fetchArchivedTasksByUserId(userId);
-        List<Task> archivedTasks = iTaskService.fetchArchivedTasks();
+        List<Task> archivedTasks = iTaskService.fetchArchivedTasks(userId);
         return new ResponseEntity<>(archivedTasks, HttpStatus.OK);
     }
 
