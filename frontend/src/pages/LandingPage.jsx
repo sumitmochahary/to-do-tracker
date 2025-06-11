@@ -542,7 +542,6 @@ const LandingPage = () => {
               </div>
 
               <div style={styles.guarantee} className="guarantee">
-                <span style={{ color: '#4CAF50', fontSize: '1.2rem' }}>✓</span>
                 <span>No credit card required • Free forever plan available</span>
               </div>
             </div>
