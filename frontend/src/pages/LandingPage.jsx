@@ -31,7 +31,7 @@ const LandingPage = () => {
     header: {
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-      padding: '1rem 2rem',
+      padding: '0.75rem 1rem',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -43,19 +43,19 @@ const LandingPage = () => {
       display: 'flex',
       alignItems: 'center',
       color: 'white',
-      fontSize: '1.5rem',
+      fontSize: '1.25rem',
       fontWeight: 'bold'
     },
     navButtons: {
       display: 'flex',
-      gap: '1rem'
+      gap: '0.5rem'
     },
     button: {
-      padding: '0.75rem 1.5rem',
+      padding: '0.5rem 1rem',
       border: 'none',
-      borderRadius: '8px',
+      borderRadius: '6px',
       cursor: 'pointer',
-      fontSize: '1rem',
+      fontSize: '0.9rem',
       fontWeight: '500',
       transition: 'all 0.3s ease',
       textDecoration: 'none'
@@ -77,7 +77,7 @@ const LandingPage = () => {
       alignItems: 'center',
       position: 'relative',
       overflow: 'hidden',
-      padding: '4rem 2rem'
+      padding: '2rem 1rem'
     },
     container: {
       maxWidth: '1200px',
@@ -309,6 +309,8 @@ const LandingPage = () => {
           .board-container:hover {
             transform: rotate(0deg);
           }
+          
+          /* Tablet breakpoint */
           @media (max-width: 768px) {
             .hero-grid {
               grid-template-columns: 1fr !important;
@@ -327,16 +329,159 @@ const LandingPage = () => {
               grid-template-columns: 1fr !important;
             }
           }
+          
+          /* Small mobile breakpoint */
+          @media (max-width: 480px) {
+            /* Header styles */
+            header {
+              padding: 0.5rem 0.75rem !important;
+              flex-wrap: wrap;
+              gap: 0.5rem;
+            }
+            
+            .logo {
+              font-size: 1.1rem !important;
+            }
+            
+            .logo span {
+              font-size: 1.3rem !important;
+              margin-right: 0.25rem !important;
+            }
+            
+            .nav-buttons {
+              gap: 0.25rem !important;
+            }
+            
+            .nav-buttons button {
+              padding: 0.4rem 0.75rem !important;
+              font-size: 0.8rem !important;
+              border-radius: 4px !important;
+            }
+            
+            /* Hero section styles */
+            .hero-section {
+              padding: 1.5rem 0.75rem !important;
+              min-height: 85vh !important;
+            }
+            
+            .hero-title {
+              font-size: 2rem !important;
+              margin-bottom: 1rem !important;
+              line-height: 1.1 !important;
+            }
+            
+            .hero-subtitle {
+              font-size: 1rem !important;
+              margin-bottom: 1.5rem !important;
+              line-height: 1.5 !important;
+            }
+            
+            .cta-button {
+              padding: 0.875rem 1.5rem !important;
+              font-size: 1rem !important;
+              width: 100%;
+              text-align: center;
+            }
+            
+            .guarantee {
+              font-size: 0.8rem !important;
+              text-align: center;
+              flex-direction: column;
+              gap: 0.25rem !important;
+            }
+            
+            .visual-section {
+              height: 300px !important;
+              margin-top: 1rem;
+            }
+            
+            .board-container {
+              gap: 0.5rem !important;
+              transform: scale(0.8) !important;
+            }
+            
+            .board-column {
+              width: 90px !important;
+              padding: 0.75rem !important;
+            }
+            
+            .column-title {
+              font-size: 0.75rem !important;
+              margin-bottom: 0.5rem !important;
+            }
+            
+            .task-card {
+              height: 16px !important;
+              margin-bottom: 6px !important;
+            }
+            
+            /* Features section */
+            .features-section {
+              padding: 3rem 1rem !important;
+            }
+            
+            .features-title {
+              font-size: 2rem !important;
+              margin-bottom: 2rem !important;
+            }
+            
+            .features-grid {
+              gap: 1.5rem !important;
+            }
+            
+            .feature-card {
+              padding: 1.5rem !important;
+            }
+            
+            /* Floating elements - hide on small mobile */
+            .floating-element {
+              display: none !important;
+            }
+          }
+          
+          /* Extra small mobile breakpoint */
+          @media (max-width: 360px) {
+            .hero-title {
+              font-size: 1.8rem !important;
+            }
+            
+            .hero-subtitle {
+              font-size: 0.95rem !important;
+            }
+            
+            .cta-button {
+              padding: 0.75rem 1.25rem !important;
+              font-size: 0.95rem !important;
+            }
+            
+            .board-container {
+              transform: scale(0.7) !important;
+            }
+            
+            .board-column {
+              width: 80px !important;
+              padding: 0.5rem !important;
+            }
+            
+            .column-title {
+              font-size: 0.7rem !important;
+            }
+            
+            .task-card {
+              height: 14px !important;
+              margin-bottom: 5px !important;
+            }
+          }
         `}
       </style>
 
       {/* Header */}
       <header style={styles.header}>
-        <div style={styles.logo}>
+        <div style={styles.logo} className="logo">
           <span style={{ marginRight: '0.5rem', fontSize: '1.8rem' }}>📋</span>
           To-Do
         </div>
-        <div style={styles.navButtons}>
+        <div style={styles.navButtons} className="nav-buttons">
           <button
             style={{ ...styles.button, ...styles.secondaryButton }}
             className="button"
@@ -355,7 +500,7 @@ const LandingPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section style={styles.heroSection}>
+      <section style={styles.heroSection} className="hero-section">
         {/* Floating elements */}
         <div style={{
           ...styles.floatingElement,
@@ -363,7 +508,7 @@ const LandingPage = () => {
           left: '10%',
           width: '100px',
           height: '100px'
-        }} />
+        }} className="floating-element" />
         <div style={{
           ...styles.floatingElement,
           top: '60%',
@@ -372,7 +517,7 @@ const LandingPage = () => {
           height: '150px',
           animationDelay: '2s',
           animationDirection: 'reverse'
-        }} />
+        }} className="floating-element" />
 
         <div style={styles.container}>
           <div style={styles.heroGrid} className="hero-grid">
@@ -381,7 +526,7 @@ const LandingPage = () => {
                 Organize Your Life
                 <span style={{ color: '#FFE066' }}> Beautifully</span>
               </h1>
-              <p style={styles.heroSubtitle}>
+              <p style={styles.heroSubtitle} className="hero-subtitle">
                 Transform chaos into clarity with our powerful, intuitive task management platform.
                 Perfect for individuals and teams who want to get things done.
               </p>
@@ -396,13 +541,13 @@ const LandingPage = () => {
                 </button>
               </div>
 
-              <div style={styles.guarantee}>
+              <div style={styles.guarantee} className="guarantee">
                 <span style={{ color: '#4CAF50', fontSize: '1.2rem' }}>✓</span>
-                No credit card required • Free forever plan available
+                <span>No credit card required • Free forever plan available</span>
               </div>
             </div>
 
-            <div style={styles.visualSection}>
+            <div style={styles.visualSection} className="visual-section">
               <div style={styles.boardContainer} className="board-container">
                 {['To Do', 'In Progress', 'Done'].map((title, index) => (
                   <div
@@ -411,10 +556,11 @@ const LandingPage = () => {
                       ...styles.boardColumn,
                       animationDelay: `${index * 0.2}s`
                     }}
+                    className="board-column"
                   >
-                    <div style={styles.columnTitle}>{title}</div>
+                    <div style={styles.columnTitle} className="column-title">{title}</div>
                     {Array.from({ length: index + 1 }, (_, i) => (
-                      <div key={i} style={styles.taskCard} />
+                      <div key={i} style={styles.taskCard} className="task-card" />
                     ))}
                   </div>
                 ))}
@@ -425,9 +571,9 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section style={styles.featuresSection}>
+      <section style={styles.featuresSection} className="features-section">
         <div style={styles.container}>
-          <h2 style={styles.featuresTitle}>Why Choose Todo?</h2>
+          <h2 style={styles.featuresTitle} className="features-title">Why Choose Todo?</h2>
           <div style={styles.featuresGrid} className="features-grid">
             {features.map((feature, index) => (
               <div
