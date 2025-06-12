@@ -261,17 +261,37 @@ const Board = () => {
         minHeight: '100vh',
         flexDirection: 'column',
         gap: 3,
-        backgroundColor: '#f8fafc',
-        px: { xs: 1, sm: 2, md: 2 }
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        px: { xs: 1, sm: 2, md: 2 },
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `
+            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.2) 0%, transparent 50%)
+          `,
+          zIndex: 1
+        },
+        '& > *': {
+          position: 'relative',
+          zIndex: 2
+        }
       }}>
         <CircularProgress
           size={isSmallMobile ? 60 : 80}
-          sx={{ color: '#3b82f6' }}
+          sx={{ color: '#ffffff' }}
         />
         <Typography
           variant={isSmallMobile ? "h6" : "h5"}
           sx={{
-            color: '#1e293b',
+            color: '#ffffff',
             fontWeight: 'bold',
             textAlign: 'center'
           }}
@@ -326,15 +346,66 @@ const Board = () => {
         </Drawer>
       )}
 
-      {/* Main Content Area */}
+      {/* Main Content Area with Enhanced Background */}
       <Box
         sx={{
           flexGrow: 1,
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: '#f8fafc',
           minHeight: '100vh',
           width: isMobile ? '100%' : `calc(100% - ${SIDEBAR_WIDTH}px)`,
+          // Enhanced background with modern design elements
+          background: `
+            linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%)
+          `,
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `
+              radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+              radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+              radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 60%),
+              linear-gradient(45deg, transparent 0%, rgba(59, 130, 246, 0.02) 25%, transparent 50%, rgba(16, 185, 129, 0.02) 75%, transparent 100%)
+            `,
+            zIndex: 1,
+            animation: 'subtleFloat 20s ease-in-out infinite'
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `
+              repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 100px,
+                rgba(59, 130, 246, 0.01) 100px,
+                rgba(59, 130, 246, 0.01) 200px
+              )
+            `,
+            zIndex: 1
+          },
+          // Add keyframe animation
+          '@keyframes subtleFloat': {
+            '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+            '25%': { transform: 'translateY(-10px) rotate(0.5deg)' },
+            '50%': { transform: 'translateY(0px) rotate(0deg)' },
+            '75%': { transform: 'translateY(-5px) rotate(-0.5deg)' }
+          },
+          // Content should be above the background
+          '& > *': {
+            position: 'relative',
+            zIndex: 2
+          }
         }}
       >
         {/* Header Component */}
@@ -356,8 +427,9 @@ const Board = () => {
           {/* Mobile Header Content */}
           {isMobile && (
             <Box sx={{
-              backgroundColor: '#ffffff',
-              borderBottom: '1px solid #e2e8f0',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(10px)',
+              borderBottom: '1px solid rgba(226, 232, 240, 0.5)',
               px: { xs: 2, sm: 3 },
               py: { xs: 1, sm: 1.5 },
             }}>
@@ -384,14 +456,14 @@ const Board = () => {
               backgroundColor: 'transparent'
             }}
           >
-            {/* Hero Section */}
+            {/* Hero Section with Enhanced Design */}
             <Box sx={{
               background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1e40af 100%)',
               borderRadius: { xs: 2, sm: 3, md: 4 },
               p: { xs: 2, sm: 3, md: 4 },
               mb: { xs: 2, sm: 3, md: 4 },
               color: 'white',
-              boxShadow: '0 10px 25px rgba(59, 130, 246, 0.3)',
+              boxShadow: '0 20px 40px rgba(59, 130, 246, 0.3), 0 10px 20px rgba(0, 0, 0, 0.1)',
               textAlign: { xs: 'center', md: 'left' },
               position: 'relative',
               overflow: 'hidden',
@@ -402,7 +474,10 @@ const Board = () => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: 'radial-gradient(circle at top right, rgba(255,255,255,0.15) 0%, transparent 60%)',
+                background: `
+                  radial-gradient(circle at top right, rgba(255,255,255,0.2) 0%, transparent 60%),
+                  radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.15) 0%, transparent 50%)
+                `,
                 zIndex: 1
               },
               '& > *': {
@@ -452,7 +527,8 @@ const Board = () => {
                 sx={{
                   mb: { xs: 2, sm: 3 },
                   borderRadius: { xs: 2, sm: 3 },
-                  backgroundColor: '#fef2f2',
+                  backgroundColor: 'rgba(254, 242, 242, 0.95)',
+                  backdropFilter: 'blur(10px)',
                   border: '1px solid #fecaca',
                   '& .MuiAlert-message': { color: '#dc2626' },
                   flexDirection: { xs: 'column', sm: 'row' },
@@ -523,10 +599,12 @@ const Board = () => {
             <Box mb={{ xs: 2, sm: 3 }}>
               <Collapse in={showTaskForm}>
                 <Box sx={{
-                  backgroundColor: '#ffffff',
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(15px)',
                   borderRadius: { xs: 2, sm: 3 },
                   p: { xs: 2, sm: 3 },
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)'
                 }}>
                   <NewTaskForm onTaskAdded={handleTaskAdded} availableStatuses={columns} />
                 </Box>
@@ -601,19 +679,21 @@ const Board = () => {
         PaperProps={{
           sx: {
             borderRadius: isSmallMobile ? 0 : { xs: 3, sm: 4 },
-            backgroundColor: '#ffffff',
+            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+            backdropFilter: 'blur(20px)',
             boxShadow: '0 20px 25px rgba(0,0,0,0.1)',
             margin: { xs: 0, sm: 2 },
-            maxHeight: { xs: '100vh', sm: '90vh' }
+            maxHeight: { xs: '100vh', sm: '90vh' },
+            border: '1px solid rgba(255, 255, 255, 0.2)'
           }
         }}
       >
         <DialogTitle sx={{
-          backgroundColor: '#f8fafc',
+          backgroundColor: 'rgba(248, 250, 252, 0.9)',
           color: '#1e293b',
           fontWeight: 'bold',
           fontSize: { xs: '1rem', sm: '1.2rem', md: '1.3rem' },
-          borderBottom: '2px solid #e2e8f0',
+          borderBottom: '2px solid rgba(226, 232, 240, 0.5)',
           textAlign: { xs: 'center', sm: 'left' },
           py: { xs: 2, sm: 2.5 }
         }}>
@@ -623,7 +703,7 @@ const Board = () => {
           pt: { xs: 2, sm: 3 },
           pb: 2,
           px: { xs: 2, sm: 3 },
-          backgroundColor: '#ffffff'
+          backgroundColor: 'transparent'
         }}>
           <TextField
             autoFocus
@@ -635,7 +715,7 @@ const Board = () => {
             variant="outlined"
             sx={{
               '& .MuiOutlinedInput-root': {
-                backgroundColor: '#f8fafc',
+                backgroundColor: 'rgba(248, 250, 252, 0.8)',
                 borderRadius: { xs: 2, sm: 3 }
               }
             }}
@@ -646,7 +726,7 @@ const Board = () => {
           p: { xs: 2, sm: 3 },
           gap: { xs: 1, sm: 2 },
           flexDirection: { xs: 'column', sm: 'row' },
-          backgroundColor: '#ffffff'
+          backgroundColor: 'transparent'
         }}>
           <Button
             onClick={() => setShowColumnDialog(false)}
@@ -656,7 +736,7 @@ const Board = () => {
               borderRadius: { xs: 2, sm: 3 },
               padding: { xs: '8px 20px', sm: '10px 24px' },
               fontSize: { xs: '0.9rem', sm: '1rem' },
-              '&:hover': { backgroundColor: '#f1f5f9' }
+              '&:hover': { backgroundColor: 'rgba(241, 245, 249, 0.8)' }
             }}
           >
             Cancel
