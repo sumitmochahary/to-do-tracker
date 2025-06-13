@@ -1,8 +1,8 @@
-package com.project.todo.controller;
+package com.project.task_service.controller;
 
-import com.project.todo.domain.Task;
-import com.project.todo.exception.TaskNotFoundException;
-import com.project.todo.service.ITaskService;
+import com.project.task_service.domain.Task;
+import com.project.task_service.exception.TaskNotFoundException;
+import com.project.task_service.service.ITaskService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/task")
+@RequestMapping("/api/v1")
 public class TaskController {
 
     private final ITaskService iTaskService;

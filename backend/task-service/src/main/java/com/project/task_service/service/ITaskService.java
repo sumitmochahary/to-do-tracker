@@ -1,7 +1,7 @@
-package com.project.todo.service;
+package com.project.task_service.service;
 
-import com.project.todo.domain.Task;
-import com.project.todo.exception.TaskNotFoundException;
+import com.project.task_service.domain.Task;
+import com.project.task_service.exception.TaskNotFoundException;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -1,8 +1,8 @@
-package com.project.todo.service;
+package com.project.task_service.service;
 
-import com.project.todo.domain.Task;
-import com.project.todo.exception.TaskNotFoundException;
-import com.project.todo.repository.TaskRepository;
+import com.project.task_service.domain.Task;
+import com.project.task_service.exception.TaskNotFoundException;
+import com.project.task_service.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

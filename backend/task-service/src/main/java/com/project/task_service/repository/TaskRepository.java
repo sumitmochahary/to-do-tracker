@@ -1,6 +1,6 @@
-package com.project.todo.repository;
+package com.project.task_service.repository;
 
-import com.project.todo.domain.Task;
+import com.project.task_service.domain.Task;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
