@@ -1,45 +1,29 @@
-import React, { useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Clock, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Typography,
+  IconButton,
+  Button,
+  Chip,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  Divider,
+  Stack
+} from '@mui/material';
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  AlertCircle,
+  CheckCircle
+} from 'lucide-react';
 
-const Calender = ({ tasks = [] }) => {
+const TaskCalendar = ({ tasks = [], onTasksUpdate }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-
-  // Sample tasks for demonstration if none provided
-  const sampleTasks = tasks.length === 0 ? [
-    {
-      id: 1,
-      title: 'Complete Project Proposal',
-      description: 'Finalize the Q4 project proposal document',
-      dueDate: new Date().toISOString().split('T')[0],
-      priority: 'high',
-      category: 'Work'
-    },
-    {
-      id: 2,
-      title: 'Team Meeting',
-      description: 'Weekly standup with development team',
-      dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-      priority: 'medium',
-      category: 'Meeting'
-    },
-    {
-      id: 3,
-      title: 'Code Review',
-      description: 'Review pull requests from team members',
-      dueDate: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0],
-      priority: 'low',
-      category: 'Development'
-    },
-    {
-      id: 4,
-      title: 'Client Presentation',
-      description: 'Present quarterly results to client',
-      dueDate: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
-      priority: 'high',
-      category: 'Client'
-    }
-  ] : tasks;
 
   // Helper functions
   const formatDate = (date) => {
@@ -72,24 +56,48 @@ const Calender = ({ tasks = [] }) => {
 
   const getTasksForDate = (date) => {
     const dateStr = date.toISOString().split('T')[0];
-    return sampleTasks.filter(task => task.dueDate === dateStr);
+    return tasks.filter(task => task.taskDueDate === dateStr);
+  };
+
+  const getPriorityFromDueDate = (dueDate) => {
+    const today = new Date();
+    const due = new Date(dueDate);
+    const diffTime = due - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return 'overdue';
+    if (diffDays <= 2) return 'high';
+    if (diffDays <= 7) return 'medium';
+    return 'low';
   };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high': return 'text-red-600 bg-red-50 border-red-200';
-      case 'medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'low': return 'text-green-600 bg-green-50 border-green-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+      case 'overdue': return { color: '#991b1b', bgcolor: '#fee2e2', borderColor: '#fca5a5' };
+      case 'high': return { color: '#dc2626', bgcolor: '#fef2f2', borderColor: '#fecaca' };
+      case 'medium': return { color: '#d97706', bgcolor: '#fffbeb', borderColor: '#fed7aa' };
+      case 'low': return { color: '#059669', bgcolor: '#f0fdf4', borderColor: '#bbf7d0' };
+      default: return { color: '#4b5563', bgcolor: '#f9fafb', borderColor: '#e5e7eb' };
     }
   };
 
   const getPriorityIcon = (priority) => {
+    const iconProps = { size: 12 };
     switch (priority) {
-      case 'high': return <AlertCircle className="w-3 h-3" />;
-      case 'medium': return <Clock className="w-3 h-3" />;
-      case 'low': return <CheckCircle className="w-3 h-3" />;
+      case 'overdue':
+      case 'high': return <AlertCircle {...iconProps} />;
+      case 'medium': return <Clock {...iconProps} />;
+      case 'low': return <CheckCircle {...iconProps} />;
       default: return null;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'To Do': return { color: '#3b82f6', bgcolor: '#dbeafe' };
+      case 'In Progress': return { color: '#f59e0b', bgcolor: '#fef3c7' };
+      case 'Done': return { color: '#10b981', bgcolor: '#d1fae5' };
+      default: return { color: '#6b7280', bgcolor: '#f3f4f6' };
     }
   };
 
@@ -104,21 +112,6 @@ const Calender = ({ tasks = [] }) => {
     const daysInMonth = getDaysInMonth(currentDate);
     const firstDay = getFirstDayOfMonth(currentDate);
     const days = [];
-    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-    // Header with weekdays
-    weekdays.forEach(day => {
-      days.push(
-        <div key={day} className="p-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
-          {day}
-        </div>
-      );
-    });
-
-    // Empty cells for days before the first day of the month
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="p-2 h-24 border border-gray-100"></div>);
-    }
 
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
@@ -127,182 +120,327 @@ const Calender = ({ tasks = [] }) => {
       const isSelected = isSameDay(date, selectedDate);
       const isToday = isSameDay(date, new Date());
 
-      const hasHighPriority = tasksForDay.some(task => task.priority === 'high');
-      const hasMediumPriority = tasksForDay.some(task => task.priority === 'medium');
-
-      let dayClass = 'p-1 h-24 border border-gray-100 cursor-pointer transition-colors duration-150 hover:bg-blue-50 relative overflow-hidden';
-      
-      if (isSelected) {
-        dayClass += ' bg-blue-50 border-blue-300 ring-1 ring-blue-200';
-      } else if (isToday) {
-        dayClass += ' bg-blue-25 border-blue-200';
-      }
-
       days.push(
-        <div
-          key={day}
-          className={dayClass}
-          onClick={() => setSelectedDate(date)}
-        >
-          <div className={`text-sm font-medium p-1 rounded-full w-6 h-6 flex items-center justify-center ${
-            isToday && !isSelected ? 'bg-blue-500 text-white' : ''
-          } ${
-            isSelected ? 'text-blue-600' : 'text-gray-700'
-          }`}>
-            {day}
-          </div>
-          
-          <div className="mt-1 space-y-1 overflow-y-auto max-h-16">
-            {tasksForDay.slice(0, 2).map((task, index) => (
-              <div 
-                key={index}
-                className={`text-xs p-1 rounded truncate ${
-                  task.priority === 'high' ? 'bg-red-50 text-red-700' :
-                  task.priority === 'medium' ? 'bg-yellow-50 text-yellow-700' :
-                  'bg-green-50 text-green-700'
-                }`}
+        <Grid item xs key={day}>
+          <Paper
+            elevation={isSelected ? 2 : 0}
+            sx={{
+              height: 80,
+              p: 1,
+              cursor: 'pointer',
+              backgroundColor: isSelected ? '#dbeafe' : isToday ? '#f0f9ff' : 'white',
+              border: isSelected ? '2px solid #3b82f6' : isToday ? '2px solid #93c5fd' : '1px solid #e5e7eb',
+              '&:hover': {
+                backgroundColor: '#f0f9ff',
+                elevation: 1
+              },
+              transition: 'all 0.2s ease',
+              overflow: 'hidden'
+            }}
+            onClick={() => setSelectedDate(date)}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: isToday || isSelected ? 'bold' : 'normal',
+                  color: isSelected ? '#3b82f6' : isToday ? 'white' : 'text.primary',
+                  bgcolor: isToday && !isSelected ? '#3b82f6' : 'transparent',
+                  borderRadius: isToday && !isSelected ? '50%' : 0,
+                  width: isToday && !isSelected ? 20 : 'auto',
+                  height: isToday && !isSelected ? 20 : 'auto',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
               >
-                {task.title}
-              </div>
-            ))}
-            {tasksForDay.length > 2 && (
-              <div className="text-xs text-gray-500 pl-1">
-                +{tasksForDay.length - 2} more
-              </div>
-            )}
-          </div>
-        </div>
+                {day}
+              </Typography>
+            </Box>
+            
+            <Box sx={{ mt: 0.5, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+              {tasksForDay.slice(0, 2).map((task, index) => {
+                const priority = getPriorityFromDueDate(task.taskDueDate);
+                const priorityColors = getPriorityColor(priority);
+                return (
+                  <Box
+                    key={index}
+                    sx={{
+                      fontSize: '0.625rem',
+                      p: 0.25,
+                      borderRadius: 0.5,
+                      backgroundColor: priorityColors.bgcolor,
+                      color: priorityColors.color,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {task.taskTitle}
+                  </Box>
+                );
+              })}
+              {tasksForDay.length > 2 && (
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.625rem' }}>
+                  +{tasksForDay.length - 2} more
+                </Typography>
+              )}
+            </Box>
+          </Paper>
+        </Grid>
       );
     }
 
-    return days;
+    // Add empty cells for days before the first day of the month
+    const emptyDays = [];
+    for (let i = 0; i < firstDay; i++) {
+      emptyDays.push(
+        <Grid item xs key={`empty-${i}`}>
+          <Box sx={{ height: 80 }} />
+        </Grid>
+      );
+    }
+
+    return [...emptyDays, ...days];
   };
 
   const selectedTasks = getTasksForDate(selectedDate);
-  const totalTasks = sampleTasks.length;
-  const upcomingTasks = sampleTasks.filter(task => new Date(task.dueDate) >= new Date()).length;
+  const totalTasks = tasks.length;
+  const upcomingTasks = tasks.filter(task => new Date(task.taskDueDate) >= new Date()).length;
+  const pendingTasks = tasks.filter(task => task.taskStatus !== 'Done').length;
 
   return (
-    <div className="max-w-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <Paper elevation={0} sx={{ maxWidth: '100%', overflow: 'hidden' }}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            <h2 className="text-lg font-semibold">Task Calendar</h2>
-          </div>
-          <div className="flex gap-2">
-            <span className="bg-white/20 px-2 py-1 rounded-full text-xs font-medium">
-              {totalTasks} Total
-            </span>
-            <span className="bg-white/20 px-2 py-1 rounded-full text-xs font-medium">
-              {upcomingTasks} Upcoming
-            </span>
-          </div>
-        </div>
-      </div>
+      <Box sx={{ 
+        background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', 
+        color: 'white', 
+        p: 2 
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Calendar size={20} />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Task Calendar
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Chip
+              label={`${totalTasks} Total`}
+              size="small"
+              sx={{ 
+                backgroundColor: 'rgba(255,255,255,0.2)', 
+                color: 'white',
+                fontSize: '0.75rem'
+              }}
+            />
+            <Chip
+              label={`${pendingTasks} Pending`}
+              size="small"
+              sx={{ 
+                backgroundColor: 'rgba(255,255,255,0.2)', 
+                color: 'white',
+                fontSize: '0.75rem'
+              }}
+            />
+            <Chip
+              label={`${upcomingTasks} Upcoming`}
+              size="small"
+              sx={{ 
+                backgroundColor: 'rgba(255,255,255,0.2)', 
+                color: 'white',
+                fontSize: '0.75rem'
+              }}
+            />
+          </Box>
+        </Box>
+      </Box>
 
       {/* Calendar Navigation */}
-      <div className="flex items-center justify-between p-4 bg-gray-50 border-b border-gray-200">
-        <button
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between', 
+        p: 2, 
+        bgcolor: '#f9fafb',
+        borderBottom: '1px solid #e5e7eb'
+      }}>
+        <IconButton
           onClick={() => navigateMonth(-1)}
-          className="p-2 rounded-lg hover:bg-gray-200 transition-colors"
+          sx={{ '&:hover': { bgcolor: '#e5e7eb' } }}
         >
-          <ChevronLeft className="w-5 h-5 text-gray-600" />
-        </button>
-        <h3 className="text-lg font-semibold text-gray-900">
+          <ChevronLeft size={20} />
+        </IconButton>
+        <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
           {getMonthYear(currentDate)}
-        </h3>
-        <button
+        </Typography>
+        <IconButton
           onClick={() => navigateMonth(1)}
-          className="p-2 rounded-lg hover:bg-gray-200 transition-colors"
+          sx={{ '&:hover': { bgcolor: '#e5e7eb' } }}
         >
-          <ChevronRight className="w-5 h-5 text-gray-600" />
-        </button>
-      </div>
+          <ChevronRight size={20} />
+        </IconButton>
+      </Box>
+
+      {/* Weekdays Header */}
+      <Grid container spacing={0} sx={{ borderBottom: '1px solid #e5e7eb' }}>
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+          <Grid item xs key={day}>
+            <Box sx={{ p: 1, textAlign: 'center', bgcolor: '#f9fafb' }}>
+              <Typography variant="caption" sx={{ 
+                fontWeight: 600, 
+                color: 'text.secondary',
+                textTransform: 'uppercase',
+                letterSpacing: 0.5
+              }}>
+                {day}
+              </Typography>
+            </Box>
+          </Grid>
+        ))}
+      </Grid>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-0 border-b border-gray-200">
+      <Grid container spacing={0} sx={{ borderBottom: '1px solid #e5e7eb' }}>
         {renderCalendarGrid()}
-      </div>
+      </Grid>
 
       {/* Selected Date Tasks */}
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-md font-semibold text-gray-900 flex items-center gap-2">
-            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+      <Box sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ width: 12, height: 12, bgcolor: '#3b82f6', borderRadius: '50%' }} />
             {formatDate(selectedDate)}
-          </h4>
-          <span className="bg-gray-100 px-2 py-1 rounded-full text-xs font-medium text-gray-600">
-            {selectedTasks.length} task{selectedTasks.length !== 1 ? 's' : ''}
-          </span>
-        </div>
+          </Typography>
+          <Chip
+            label={`${selectedTasks.length} task${selectedTasks.length !== 1 ? 's' : ''}`}
+            size="small"
+            sx={{ bgcolor: '#f3f4f6', color: 'text.secondary' }}
+          />
+        </Box>
 
         {selectedTasks.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <Calendar className="w-12 h-12 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">No tasks scheduled for this day</p>
-            <p className="text-xs mt-1 opacity-70">Enjoy your free time! 🎉</p>
-          </div>
+          <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+            <Calendar size={48} style={{ opacity: 0.3, margin: '0 auto 12px' }} />
+            <Typography variant="body2" sx={{ mb: 0.5 }}>
+              No tasks scheduled for this day
+            </Typography>
+            <Typography variant="caption" sx={{ opacity: 0.7 }}>
+              Enjoy your free time! 🎉
+            </Typography>
+          </Box>
         ) : (
-          <div className="space-y-3">
-            {selectedTasks.map((task, index) => (
-              <div
-                key={task.id || index}
-                className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-sm transition-all duration-200"
-              >
-                <div className="flex items-start gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white bg-gradient-to-br from-blue-400 to-blue-600`}>
-                    {task.title?.charAt(0) || 'T'}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h5 className="font-medium text-gray-900 mb-1 truncate">
-                      {task.title}
-                    </h5>
-                    {task.description && (
-                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                        {task.description}
-                      </p>
-                    )}
-                    <div className="flex gap-2 flex-wrap">
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-                        {getPriorityIcon(task.priority)}
-                        {task.priority || 'normal'}
-                      </span>
-                      {task.category && (
-                        <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
-                          {task.category}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <Stack spacing={2}>
+            {selectedTasks.map((task, index) => {
+              const priority = getPriorityFromDueDate(task.taskDueDate);
+              const priorityColors = getPriorityColor(priority);
+              const statusColors = getStatusColor(task.taskStatus);
+              return (
+                <Card 
+                  key={task.id || index}
+                  elevation={0}
+                  sx={{ 
+                    bgcolor: '#f9fafb', 
+                    border: '1px solid #e5e7eb',
+                    '&:hover': { boxShadow: 1 },
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                      <Box sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '0.75rem'
+                      }}>
+                        {task.taskTitle?.charAt(0) || 'T'}
+                      </Box>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          {task.taskTitle}
+                        </Typography>
+                        {task.taskDescription && (
+                          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                            {task.taskDescription}
+                          </Typography>
+                        )}
+                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                          <Chip
+                            icon={getPriorityIcon(priority)}
+                            label={priority === 'overdue' ? 'Overdue' : priority}
+                            size="small"
+                            sx={{
+                              backgroundColor: priorityColors.bgcolor,
+                              color: priorityColors.color,
+                              border: `1px solid ${priorityColors.borderColor}`,
+                              fontSize: '0.75rem',
+                              textTransform: 'capitalize'
+                            }}
+                          />
+                          <Chip
+                            label={task.taskStatus}
+                            size="small"
+                            sx={{
+                              backgroundColor: statusColors.bgcolor,
+                              color: statusColors.color,
+                              fontSize: '0.75rem'
+                            }}
+                          />
+                          {task.taskCategory && (
+                            <Chip
+                              label={task.taskCategory}
+                              size="small"
+                              sx={{
+                                backgroundColor: '#dbeafe',
+                                color: '#1d4ed8',
+                                fontSize: '0.75rem'
+                              }}
+                            />
+                          )}
+                        </Box>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1, display: 'block' }}>
+                          Created: {new Date(task.taskCreatedDate).toLocaleDateString()}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </Stack>
         )}
-      </div>
+      </Box>
 
       {/* Legend */}
-      <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
-        <p className="text-xs font-medium text-gray-600 mb-2">Priority Legend:</p>
-        <div className="flex gap-4 text-xs">
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-            <span className="text-gray-600">High</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-            <span className="text-gray-600">Medium</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-            <span className="text-gray-600">Low</span>
-          </div>
-        </div>
-      </div>
-    </div>
+      <Box sx={{ bgcolor: '#f9fafb', px: 2, py: 1.5, borderTop: '1px solid #e5e7eb' }}>
+        <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', mb: 1, display: 'block' }}>
+          Priority Legend (based on due date):
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          {[
+            { priority: 'overdue', color: '#991b1b', label: 'Overdue' },
+            { priority: 'high', color: '#dc2626', label: 'High (≤2 days)' },
+            { priority: 'medium', color: '#d97706', label: 'Medium (≤7 days)' },
+            { priority: 'low', color: '#059669', label: 'Low (>7 days)' }
+          ].map(({ priority, color, label }) => (
+            <Box key={priority} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Box sx={{ width: 12, height: 12, bgcolor: color, borderRadius: '50%' }} />
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                {label}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    </Paper>
   );
 };
 
-export default Calender;
+export default TaskCalendar;
