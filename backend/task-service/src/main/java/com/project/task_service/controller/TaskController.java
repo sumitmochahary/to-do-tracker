@@ -27,10 +27,13 @@ public class TaskController {
     // Helper method to validate userId from request
     private String validateAndGetUserId(HttpServletRequest request) {
         String userId = (String) request.getAttribute("userId");
-        if (userId == null || userId.trim().isEmpty()) {
-            return null;
+
+        // Fallback to header (primary method from API Gateway)
+        if (userId == null || userId.isBlank()) {
+            userId = request.getHeader("X-User-Id");
         }
-        return userId;
+
+        return (userId == null || userId.isBlank()) ? null : userId;
     }
 
     @PostMapping("/save")

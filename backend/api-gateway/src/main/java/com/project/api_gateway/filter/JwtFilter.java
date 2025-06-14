@@ -1,5 +1,6 @@
 package com.project.api_gateway.filter;
 
+import com.project.api_gateway.util.AddHeaderRequestWrapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -60,8 +61,9 @@ public class JwtFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                request.setAttribute("userId", userId);
-                filterChain.doFilter(request, response);
+                AddHeaderRequestWrapper wrappedRequest = new AddHeaderRequestWrapper(request, userId);
+
+                filterChain.doFilter(wrappedRequest, response);
             } catch (ExpiredJwtException ex) {
                 logger.warn("Expired JWT token");
                 sendError(response, "Authentication failed");

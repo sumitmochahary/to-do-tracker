@@ -27,7 +27,7 @@ public class GatewayConfig {
         Filter filter = (request, response, chain) -> {
             HttpServletResponse res = (HttpServletResponse) response;
             res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-            res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
             res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
             res.setHeader("Access-Control-Allow-Credentials", "true");
             chain.doFilter(request, response);
