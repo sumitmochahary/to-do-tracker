@@ -322,7 +322,12 @@ const Board = () => {
             },
           }}
         >
-          <SideBar />
+          
+           <SideBar 
+            tasks={tasks}
+            archivedTasks={archivedTasks}
+            onTasksUpdate={setTasks}
+          />
         </Drawer>
       )}
 
@@ -342,7 +347,12 @@ const Board = () => {
             },
           }}
         >
-          <SideBar onClose={handleSidebarClose} />
+          <SideBar 
+            onClose={handleSidebarClose} 
+            tasks={tasks}
+            archivedTasks={archivedTasks}
+            onTasksUpdate={setTasks}
+          />
         </Drawer>
       )}
 

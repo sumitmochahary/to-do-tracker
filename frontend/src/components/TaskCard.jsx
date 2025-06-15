@@ -176,6 +176,10 @@ const TaskCard = ({
     return diffDays;
   };
 
+  const getTodayDate = () => {
+    return new Date().toISOString().split('T')[0];
+  };
+
   const statusInfo = getStatusInfo(task.taskStatus);
   const categoryInfo = getCategoryInfo(task.taskCategory);
   const overdue = isOverdue();
@@ -297,6 +301,9 @@ const TaskCard = ({
               type="date"
               value={editedTask.taskDueDate}
               onChange={(e) => setEditedTask({ ...editedTask, taskDueDate: e.target.value })}
+              inputProps={{
+              min: getTodayDate()
+            }}
               InputLabelProps={{ shrink: true }}
               sx={{ mb: 2 }}
             />
