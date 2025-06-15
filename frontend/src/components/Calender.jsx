@@ -207,7 +207,7 @@ const TaskCalendar = ({ tasks = [], onTasksUpdate }) => {
   const selectedTasks = getTasksForDate(selectedDate);
   const totalTasks = tasks.length;
   const upcomingTasks = tasks.filter(task => new Date(task.taskDueDate) >= new Date()).length;
-  const pendingTasks = tasks.filter(task => task.taskStatus !== 'Done').length;
+  // const pendingTasks = tasks.filter(task => task.taskStatus !== 'Done').length;
 
   return (
     <Paper elevation={0} sx={{ maxWidth: '100%', overflow: 'hidden' }}>
@@ -234,7 +234,7 @@ const TaskCalendar = ({ tasks = [], onTasksUpdate }) => {
                 fontSize: '0.75rem'
               }}
             />
-            <Chip
+            {/* <Chip
               label={`${pendingTasks} Pending`}
               size="small"
               sx={{ 
@@ -242,7 +242,7 @@ const TaskCalendar = ({ tasks = [], onTasksUpdate }) => {
                 color: 'white',
                 fontSize: '0.75rem'
               }}
-            />
+            /> */}
             <Chip
               label={`${upcomingTasks} Upcoming`}
               size="small"

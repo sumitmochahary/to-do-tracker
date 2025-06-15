@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { TextField, Button, MenuItem, Card, CardContent, Typography, Alert } from '@mui/material';
 import { saveTask } from '../services/TaskService';
 
-const NewTaskForm = ({ onTaskAdded, availableCategories = ["Personal", "Work"] }) => {
+const NewTaskForm = ({ 
+  onTaskAdded, 
+  availableCategories = ["Personal", "Work"],
+  availableStatuses = ["To Do", "In Progress", "Completed"] // Add this prop
+}) => {
   const [taskTitle, setTaskTitle] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [taskCategory, setTaskCategory] = useState('Personal');
@@ -13,7 +17,7 @@ const NewTaskForm = ({ onTaskAdded, availableCategories = ["Personal", "Work"] }
   const resetForm = () => {
     setTaskTitle('');
     setTaskDescription('');
-    setTaskCategory(availableCategories[0] || 'Personal'); // Set to first available category
+    setTaskCategory(availableCategories[0] || 'Personal');
     setTaskDueDate('');
     setError('');
   };
@@ -47,8 +51,12 @@ const NewTaskForm = ({ onTaskAdded, availableCategories = ["Personal", "Work"] }
         taskStatus: 'To Do', // Always set to "To Do" by default
         taskCreatedDate: new Date().toISOString().split('T')[0],
         taskDueDate,
-        userId: 'defaultUser', // or get it dynamically if needed
-        taskCategory, // Use the selected category
+        userId: 'defaultUser',
+        taskCategory,
+        // Add additional fields that might be needed for calendar
+        createdAt: new Date().toISOString(),
+        lastModified: new Date().toISOString(),
+        id: Date.now().toString(), // Temporary ID, will be replaced by backend
       };
 
       const newTask = await saveTask(taskData);
@@ -59,10 +67,7 @@ const NewTaskForm = ({ onTaskAdded, availableCategories = ["Personal", "Work"] }
       // Reset the form
       resetForm();
 
-      // console.log('Task added successfully:', newTask);
     } catch (error) {
-      // console.error('Error adding task:', error);
-
       if (error.response) {
         if (error.response.status === 401) {
           setError('Unauthorized: Please log in again');
@@ -79,7 +84,8 @@ const NewTaskForm = ({ onTaskAdded, availableCategories = ["Personal", "Work"] }
     } finally {
       setLoading(false);
     }
-  }
+  };
+
   return (
     <Card
       sx={{
@@ -203,4 +209,5 @@ const NewTaskForm = ({ onTaskAdded, availableCategories = ["Personal", "Work"] }
     </Card>
   );
 };
+
 export default NewTaskForm;
