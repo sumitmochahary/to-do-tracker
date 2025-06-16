@@ -11,8 +11,8 @@ import java.util.Map;
 @FeignClient(name = "auth-service", url = "${auth.service.url}")
 public interface AuthClient {
 
-    @GetMapping("/api/auth/check-email")
-    void validateUserEmail(@RequestParam String email);
+    @GetMapping("/api/auth/check-emailId")
+    void validateUserEmail(@RequestParam("emailId") String emailId);
 
     @PostMapping("/api/auth/update-password")
     void updatePassword(@RequestBody Map<String, String> data);

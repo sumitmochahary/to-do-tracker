@@ -24,15 +24,15 @@ public class PasswordResetServiceImpl implements PasswordResetService{
     private EmailService emailService;
 
     @Override
-    public void createPasswordResetToken(String email) {
-        authClient.validateUserEmail(email); // Feign call
+    public void createPasswordResetToken(String emailId) {
+        authClient.validateUserEmail(emailId); // Feign call
 
         String token = UUID.randomUUID().toString();
-        LocalDateTime expiry = LocalDateTime.now().plusMinutes(15);
-        PasswordResetToken resetToken = new PasswordResetToken(token, expiry, email);
+        LocalDateTime expiry = LocalDateTime.now().plusMinutes(5);
+        PasswordResetToken resetToken = new PasswordResetToken(token, expiry, emailId);
         tokenRepo.save(resetToken);
 
-        emailService.sendResetLink(email, token);
+        emailService.sendResetLink(emailId, token);
     }
 
     @Override

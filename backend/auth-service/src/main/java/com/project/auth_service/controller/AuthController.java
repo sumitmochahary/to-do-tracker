@@ -68,9 +68,9 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/check-email")
-    public ResponseEntity<Void> checkEmailExists(@RequestParam String email) {
-        Optional<Users> user = userRepository.findByEmailId(email);
+    @GetMapping("/check-emailId")
+    public ResponseEntity<Void> checkEmailExists(@RequestParam String emailId) {
+        Optional<Users> user = userRepository.findByEmailId(emailId);
         if (user.isEmpty()) throw new UserNotFoundException("User not found");
         return ResponseEntity.ok().build();
     }

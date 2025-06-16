@@ -12,7 +12,7 @@ public class EmailService {
     private JavaMailSender mailSender;
 
     public void sendResetLink(String toEmail, String token){
-        String resetUrl = "http://localhost:5713/reset-password?token=" + token;
+        String resetUrl = "http://localhost:5173/reset-password?token=" + token;
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
