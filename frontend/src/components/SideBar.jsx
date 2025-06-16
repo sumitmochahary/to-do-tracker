@@ -17,7 +17,7 @@ import {
   Close as CloseIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
-import Calendar from './Calender'; // Your existing TaskCalendar component
+import Calender from './Calender'; // Your existing TaskCalendar component
 
 const SideBar = ({ 
   onClose, 
@@ -25,13 +25,13 @@ const SideBar = ({
   archivedTasks = [], 
   onTasksUpdate 
 }) => {
-  const [showCalendar, setShowCalendar] = useState(false);
+  const [showCalender, setShowCalender] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const navigate = useNavigate();
 
   // Handler to toggle calendar visibility
-  const handleCalendarToggle = () => {
-    setShowCalendar(prev => !prev);
+  const handleCalenderToggle = () => {
+    setShowCalender(prev => !prev);
     // Close archived if it's open
     if (showArchived) {
       setShowArchived(false);
@@ -39,16 +39,16 @@ const SideBar = ({
   };
 
   // Handler to close calendar
-  const handleCloseCalendar = () => {
-    setShowCalendar(false);
+  const handleCloseCalender = () => {
+    setShowCalender(false);
   };
 
   // Handler for archived toggle
   const handleArchivedToggle = () => {
     setShowArchived(prev => !prev);
     // Close calendar if it's open
-    if (showCalendar) {
-      setShowCalendar(false);
+    if (showCalender) {
+      setShowCalender(false);
     }
   };
 
@@ -216,8 +216,8 @@ const SideBar = ({
 
           <Button
             startIcon={<CalendarIcon />}
-            onClick={handleCalendarToggle}
-            sx={buttonStyles(showCalendar)}
+            onClick={handleCalenderToggle}
+            sx={buttonStyles(showCalender)}
           >
             Calendar View
             {tasks.length > 0 && (
@@ -237,7 +237,10 @@ const SideBar = ({
                   fontWeight: 'bold'
                 }}
               >
-                {tasks.length}
+                {tasks.filter(task =>
+                  task.taskStatus !== 'Deleted' && 
+                  task.taskStatus !== 'Archived'
+                ).length}
               </Box>
             )}
           </Button>
@@ -248,7 +251,7 @@ const SideBar = ({
             sx={buttonStyles(showArchived)}
           >
             Archived
-            {archivedTasks.length > 0 && (
+            {/* {archivedTasks.length > 0 && (
               <Box
                 component="span"
                 sx={{
@@ -265,9 +268,8 @@ const SideBar = ({
                   fontWeight: 'bold'
                 }}
               >
-                {archivedTasks.length}
               </Box>
-            )}
+            )} */}
           </Button>
         </Box>
 
@@ -288,7 +290,7 @@ const SideBar = ({
       </Box>
 
       {/* Calendar Modal */}
-      {showCalendar && (
+      {showCalender && (
         <>
           {/* Enhanced Backdrop */}
           <Box
@@ -303,7 +305,7 @@ const SideBar = ({
               backdropFilter: 'blur(3px)',
               transition: 'all 0.3s ease-in-out',
             }}
-            onClick={handleCloseCalendar}
+            onClick={handleCloseCalender}
           />
 
           {/* Calendar Card - Responsive positioning */}
@@ -346,7 +348,7 @@ const SideBar = ({
           >
             {/* Enhanced Close button */}
             <IconButton
-              onClick={handleCloseCalendar}
+              onClick={handleCloseCalender}
               sx={{
                 position: 'absolute',
                 right: 12,
@@ -398,7 +400,7 @@ const SideBar = ({
                 },
               }}
             >
-              <Calendar 
+              <Calender 
                 tasks={tasks} 
                 onTasksUpdate={onTasksUpdate}
               />

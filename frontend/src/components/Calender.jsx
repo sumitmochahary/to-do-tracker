@@ -21,9 +21,12 @@ import {
   CheckCircle
 } from 'lucide-react';
 
-const TaskCalendar = ({ tasks = [], onTasksUpdate }) => {
+const Calender = ({ tasks = [], onTasksUpdate }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Filter out archived tasks at the beginning
+  const activeTasks = tasks.filter(task => task.taskStatus !== 'Archived');
 
   // Helper functions
   const formatDate = (date) => {
@@ -56,7 +59,8 @@ const TaskCalendar = ({ tasks = [], onTasksUpdate }) => {
 
   const getTasksForDate = (date) => {
     const dateStr = date.toISOString().split('T')[0];
-    return tasks.filter(task => task.taskDueDate === dateStr);
+    // Use activeTasks instead of tasks to exclude archived tasks
+    return activeTasks.filter(task => task.taskDueDate === dateStr);
   };
 
   const getPriorityFromDueDate = (dueDate) => {
@@ -205,9 +209,10 @@ const TaskCalendar = ({ tasks = [], onTasksUpdate }) => {
   };
 
   const selectedTasks = getTasksForDate(selectedDate);
-  const totalTasks = tasks.length;
-  const upcomingTasks = tasks.filter(task => new Date(task.taskDueDate) >= new Date()).length;
-  // const pendingTasks = tasks.filter(task => task.taskStatus !== 'Done').length;
+  // Use activeTasks for all calculations instead of tasks
+  const totalTasks = activeTasks.length;
+  const upcomingTasks = activeTasks.filter(task => new Date(task.taskDueDate) >= new Date()).length;
+  // const pendingTasks = activeTasks.filter(task => task.taskStatus !== 'Done').length;
 
   return (
     <Paper elevation={0} sx={{ maxWidth: '100%', overflow: 'hidden' }}>
@@ -443,4 +448,4 @@ const TaskCalendar = ({ tasks = [], onTasksUpdate }) => {
   );
 };
 
-export default TaskCalendar;
+export default Calender;
