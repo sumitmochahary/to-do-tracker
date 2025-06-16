@@ -1,4 +1,4 @@
 package com.project.password_reset.service;
 
-public interface PasswordResetService {
+public class AuthClient {
 }
