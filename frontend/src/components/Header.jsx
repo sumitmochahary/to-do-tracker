@@ -6,6 +6,7 @@ import {
   Box,
   IconButton,
   useTheme,
+  Divider,
   // useMediaQuery,
   Container,
   Menu,
@@ -15,6 +16,11 @@ import {
   Menu as MenuIcon,
   Notifications as NotificationsIcon,
   AccountCircle as AccountCircleIcon
+} from '@mui/icons-material';
+import {
+  Settings as SettingsIcon,
+  HelpOutline as HelpOutlineIcon,
+  Logout as LogoutIcon
 } from '@mui/icons-material';
 import SearchBar from './SearchBar';
 // import Sidebar from './SideBar';
@@ -182,22 +188,149 @@ export const Header = ({
                 <AccountCircleIcon />
               </IconButton>
 
-              {/* Profile Dropdown Menu */}
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-              >
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
-              </Menu>
+             {/* Enhanced Profile Dropdown Menu */}
+<Menu
+  anchorEl={anchorEl}
+  open={Boolean(anchorEl)}
+  onClose={handleMenuClose}
+  anchorOrigin={{
+    vertical: 'bottom',
+    horizontal: 'right',
+  }}
+  transformOrigin={{
+    vertical: 'top',
+    horizontal: 'right',
+  }}
+  PaperProps={{
+    sx: {
+      mt: 1.5,
+      minWidth: 200,
+      borderRadius: 2,
+      boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+      border: '1px solid rgba(0,0,0,0.08)',
+      '& .MuiMenuItem-root': {
+        px: 3,
+        py: 1.5,
+        borderRadius: 1,
+        mx: 1,
+        my: 0.5,
+        '&:hover': {
+          backgroundColor: '#f1f5f9',
+        },
+        '&.Mui-disabled': {
+          opacity: 1,
+          backgroundColor: 'transparent',
+        }
+      }
+    }
+  }}
+>
+  {/* User Profile Section
+  {currentUser?.userName && (
+    <>
+      <MenuItem disabled sx={{ 
+        flexDirection: 'column', 
+        alignItems: 'flex-start !important',
+        '&:hover': { backgroundColor: 'transparent !important' }
+      }}>
+        <Typography 
+          variant="subtitle2" 
+          sx={{ 
+            fontWeight: 'bold',
+            color: '#1e293b',
+            lineHeight: 1.2
+          }}
+        >
+          {currentUser.userName}
+        </Typography>
+        {currentUser.email && (
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              color: '#64748b',
+              mt: 0.5,
+              fontSize: '0.75rem'
+            }}
+          >
+            {currentUser.email}
+          </Typography>
+        )}
+      </MenuItem>
+      <Divider sx={{ my: 1 }} />
+    </>
+  )} */}
+
+  {/* Profile Menu Item */}
+  <MenuItem 
+    onClick={() => {
+      handleMenuClose();
+      // Navigate to profile page
+      // navigate('/profile');
+    }}
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 1.5
+    }}
+  >
+    <AccountCircleIcon sx={{ fontSize: 20, color: '#64748b' }} />
+    <Typography variant="body2">My Profile</Typography>
+  </MenuItem>
+
+  {/* Settings Menu Item
+  <MenuItem 
+    onClick={() => {
+      handleMenuClose();
+      // Navigate to settings page
+      // navigate('/settings');
+    }}
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 1.5
+    }}
+  >
+    <SettingsIcon sx={{ fontSize: 20, color: '#64748b' }} />
+    <Typography variant="body2">Settings</Typography>
+  </MenuItem>
+
+  {/* Help & Support Menu Item 
+  <MenuItem 
+    onClick={() => {
+      handleMenuClose();
+      // Navigate to help page or open help modal
+      // navigate('/help');
+    }}
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 1.5
+    }}
+  >
+    <HelpOutlineIcon sx={{ fontSize: 20, color: '#64748b' }} />
+    <Typography variant="body2">Help & Support</Typography>
+  </MenuItem>
+
+  <Divider sx={{ my: 1 }} /> */}
+
+  {/* Logout Menu Item */}
+  <MenuItem 
+    onClick={handleLogout}
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 1.5,
+      color: '#dc2626',
+      '&:hover': {
+        backgroundColor: '#fef2f2 !important',
+        color: '#dc2626'
+      }
+    }}
+  >
+    <LogoutIcon sx={{ fontSize: 20 }} />
+    <Typography variant="body2">Logout</Typography>
+  </MenuItem>
+</Menu>
             </>
           </Box>
         </Toolbar>
