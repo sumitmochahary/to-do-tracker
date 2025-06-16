@@ -4,7 +4,7 @@ const BASE_URL = "http://localhost:8080/api/password-reset";
 
 export const forgotPassword = async (data) => {
   try {
-    const response = await axios.post(`${BASE_URL}/forgot`, data);
+    const response = await axios.post(`${BASE_URL}/request`, data);
     return response.data;
   } catch (error) {
     let message = "Failed to send password reset email.";
@@ -34,7 +34,7 @@ export const forgotPassword = async (data) => {
 
 export const resetPassword = async (token, newPassword) => {
   try {
-    const response = await axios.post(`${BASE_URL}/reset`, {
+    const response = await axios.post(`${BASE_URL}/confirm`, {
       token,
       newPassword,
     });
