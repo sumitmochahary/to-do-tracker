@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8080/api/password";
+const BASE_URL = "http://localhost:8080/api/password-reset";
 
 export const forgotPassword = async (data) => {
   try {

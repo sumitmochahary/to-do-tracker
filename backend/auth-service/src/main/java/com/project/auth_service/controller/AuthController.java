@@ -4,15 +4,14 @@ import com.project.auth_service.domain.Users;
 import com.project.auth_service.exception.InvalidCredentialsException;
 import com.project.auth_service.exception.UserAlreadyExistException;
 import com.project.auth_service.exception.UserNotFoundException;
+import com.project.auth_service.repository.UserRepository;
 import com.project.auth_service.security.SecurityTokenGenerator;
 import com.project.auth_service.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,11 +22,15 @@ import java.util.Optional;
 public class AuthController {
     private final AuthService authService;
     private final SecurityTokenGenerator securityToken;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthController(AuthService authService, SecurityTokenGenerator securityToken) {
+    public AuthController(AuthService authService, SecurityTokenGenerator securityToken, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.authService = authService;
         this.securityToken = securityToken;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/register")
@@ -63,5 +66,22 @@ public class AuthController {
             error.put("message", "An unexpected error occurred during login.");
             return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<Void> checkEmailExists(@RequestParam String email) {
+        Optional<Users> user = userRepository.findByEmailId(email);
+        if (user.isEmpty()) throw new UserNotFoundException("User not found");
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/update-password")
+    public ResponseEntity<Void> updatePassword(@RequestBody Map<String, String> data) {
+        Users user = userRepository.findByEmailId(data.get("email"))
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(data.get("password")));
+        userRepository.save(user);
+        return ResponseEntity.ok().build();
     }
 }
